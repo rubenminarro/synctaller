@@ -1,0 +1,36 @@
+<?php
+
+return [
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cross-Origin Resource Sharing (CORS) Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Here you may configure your settings for cross-origin resource sharing
+    | or "CORS". This determines what cross-origin operations may execute
+    | in web browsers. You are free to adjust these settings as needed.
+    |
+    | To learn more: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
+    |
+    */
+
+    'paths' => ['api/*', 'login', 'logout', 'sanctum/csrf-cookie'],
+
+    'allowed_methods' => ['*'],
+
+    // Origen de la SPA (frontend/), por defecto el servidor de Vite.
+    'allowed_origins' => [env('FRONTEND_URL', 'http://localhost:5173')],
+
+    'allowed_origins_patterns' => [],
+
+    'allowed_headers' => ['*'],
+
+    // El frontend lee el nombre de los PDF/CSV descargados (FASE 24) desde este header.
+    'exposed_headers' => ['Content-Disposition'],
+
+    'max_age' => 0,
+
+    'supports_credentials' => true,
+
+];

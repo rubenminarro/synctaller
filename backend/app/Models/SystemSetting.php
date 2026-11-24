@@ -1,0 +1,33 @@
+<?php
+
+namespace App\Models;
+
+use App\Traits\Auditable;
+use Illuminate\Database\Eloquent\Model;
+
+/**
+ * Configuración general del sistema por clave. Se audita: la cambia solo el
+ * administrador y afecta a toda la aplicación (p. ej. el logo).
+ */
+class SystemSetting extends Model
+{
+    use Auditable;
+
+    public const LOGO_PATH = 'logo_path';
+
+    /** Versión negra del logo (fondos claros, PDF y emails), generada al subirlo. */
+    public const LOGO_BLACK_PATH = 'logo_black_path';
+
+    /** Ícono de la pestaña del navegador, independiente del logo. */
+    public const FAVICON_PATH = 'favicon_path';
+
+    protected $fillable = [
+        'key',
+        'value',
+    ];
+
+    public static function get(string $key): ?string
+    {
+        return static::where('key', $key)->value('value');
+    }
+}

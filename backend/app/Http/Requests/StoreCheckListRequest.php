@@ -1,0 +1,67 @@
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
+use App\Enums\CheckListType;
+
+class StoreCheckListRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    public function rules(): array
+    {
+        return [
+            'name' => [
+                'required',
+                'string', 
+                'min:2',
+                'max:100',
+                'regex:/^[a-zA-Z\sñÑáéíóúÁÉÍÓÚ]+$/u',
+                Rule::unique('check_list_items', 'name'),
+            ],
+            'type' => [
+                'required',
+                'string',
+                Rule::enum(CheckListType::class),
+            ],
+            'required' => [
+                'required',
+                'boolean',
+            ],
+            'is_active' => [
+                'sometimes',
+                'boolean',
+            ],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name' => [
+                'required' => 'El nombre del checklist es obligatorio.',
+                'string'   => 'El nombre del checklist debe tener el formato correcto.',
+                'min'      => 'El nombre del checklist debe tener al menos 2 caracteres.',
+                'max'      => 'El nombre del checklist no debe tener más de 100 caracteres.',
+                'regex'    => 'El nombre del checklist solo puede contener letras y espacios.',
+                'unique'   => 'Este checklist ya existe en el sistema.',
+            ],
+            'type' => [
+                'required' => 'El tipo del checklist es obligatorio.',
+                'string'   => 'El tipo del checklist debe tener el formato correcto.',
+                Enum::class => 'El tipo del checklist seleccionado no es válido.',
+            ],
+            // Claves con punto: un bloque 'required' => [...] choca con la regla
+            // "required" y Laravel devolvería un array como mensaje (error 500).
+            'required.required' => 'El campo required es obligatorio.',
+            'required.boolean' => 'El campo required debe ser un valor booleano.',
+            'is_active.boolean' => 'El campo activo debe ser verdadero o falso.',
+        ];
+    }
+}

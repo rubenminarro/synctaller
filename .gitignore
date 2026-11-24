@@ -1,0 +1,23 @@
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Editores
+/.idea
+/.vscode
+/.fleet
+/.nova
+/.zed
+*.sw?
+
+# Entorno y secretos (cada app tiene su .env.example)
+.env
+.env.*
+!.env.example
+
+# Claude Code: ajustes personales
+.claude/settings.local.json
+
+# Dependencias de la raíz
+/node_modules
+*.log
