@@ -23,7 +23,7 @@ class ClaimDocumentSeeder extends Seeder
         $scenario = collect(ExampleScenarios::all())->firstWhere('key', 'C07');
         $claim = Claim::where('reception_id', ExampleScenarios::reception($scenario)?->id)->first();
 
-        if (!$claim || $claim->documents()->withTrashed()->exists()) {
+        if (! $claim || $claim->documents()->withTrashed()->exists()) {
             return;
         }
 

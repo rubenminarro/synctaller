@@ -8,8 +8,9 @@ enum InvoiceStatus: string
     case ISSUED = 'issued';
     case CANCELLED = 'cancelled';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::DRAFT => 'Borrador',
             self::ISSUED => 'Emitida',
             self::CANCELLED => 'Anulada',

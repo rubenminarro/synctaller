@@ -20,10 +20,10 @@ class PaymentSeeder extends Seeder
     public function run(PaymentService $paymentService): void
     {
         foreach (ExampleScenarios::chronological() as $index => $scenario) {
-            $invoice = !empty($scenario['billing']['payments']) ? InvoiceSeeder::of($scenario) : null;
+            $invoice = ! empty($scenario['billing']['payments']) ? InvoiceSeeder::of($scenario) : null;
 
             // Idempotente: una factura que ya tiene cobros (aun anulados) no se vuelve a cobrar.
-            if (!$invoice || $invoice->payments()->exists()) {
+            if (! $invoice || $invoice->payments()->exists()) {
                 continue;
             }
 

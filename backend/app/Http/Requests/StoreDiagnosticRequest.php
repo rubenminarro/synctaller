@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\Priority;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Enums\Priority;
 use Illuminate\Validation\Rules\Enum;
 
 class StoreDiagnosticRequest extends FormRequest
@@ -19,29 +19,29 @@ class StoreDiagnosticRequest extends FormRequest
         return [
             'reception_id' => [
                 'required',
-                Rule::exists('receptions', 'id')
+                Rule::exists('receptions', 'id'),
             ],
             'mechanic_id' => [
                 'nullable',
-                Rule::exists('mechanics', 'id')->withoutTrashed()
+                Rule::exists('mechanics', 'id')->withoutTrashed(),
             ],
             'customer_complaint' => [
                 'nullable',
                 'string',
                 'max:1000',
-                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u'
+                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u',
             ],
             'diagnosis' => [
                 'nullable',
                 'string',
                 'max:1000',
-                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u'
+                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u',
             ],
             'recommendation' => [
                 'nullable',
                 'string',
                 'max:1000',
-                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u'
+                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u',
             ],
             // Opcional pero no vacío: la columna es NOT NULL DEFAULT medium (sin enviar, queda en medium).
             'priority' => [
@@ -51,11 +51,11 @@ class StoreDiagnosticRequest extends FormRequest
             ],
             'requires_parts' => [
                 'required',
-                'boolean'
+                'boolean',
             ],
             'requires_repair' => [
                 'required',
-                'boolean'
+                'boolean',
             ],
         ];
     }

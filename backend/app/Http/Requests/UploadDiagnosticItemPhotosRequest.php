@@ -15,22 +15,22 @@ class UploadDiagnosticItemPhotosRequest extends FormRequest
     {
         return [
             'photos' => [
-                'required', 
+                'required',
                 'array',
                 'min:1',
-                'max:10'
+                'max:10',
             ],
             'photos.*.file' => [
-                'required', 
+                'required',
                 'image',
                 'mimes:jpg,jpeg,png,webp',
-                'max:5120'
+                'max:5120',
             ],
             'photos.*.description' => [
-                'nullable', 
+                'nullable',
                 'string',
                 'regex:/^[\pL\pN\s.,!?-]*$/u',
-                'max:255'
+                'max:255',
             ],
         ];
     }

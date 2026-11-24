@@ -25,8 +25,8 @@ class StoreInternalExceptionRequest extends FormRequest
             'type' => ['required', Rule::enum(InternalExceptionType::class)],
             'subject_id' => ['required', 'integer', 'min:1'],
             'amount' => [
-                'prohibited_unless:type,' . InternalExceptionType::WORKSHOP_ABSORPTION->value,
-                'required_if:type,' . InternalExceptionType::WORKSHOP_ABSORPTION->value,
+                'prohibited_unless:type,'.InternalExceptionType::WORKSHOP_ABSORPTION->value,
+                'required_if:type,'.InternalExceptionType::WORKSHOP_ABSORPTION->value,
                 'nullable',
                 'numeric',
                 'decimal:0,2',
@@ -41,7 +41,7 @@ class StoreInternalExceptionRequest extends FormRequest
     {
         return [
             'type.required' => 'El tipo de excepción es obligatorio.',
-            'type.' . Enum::class => 'El tipo debe ser start_without_authorization o workshop_absorption.',
+            'type.'.Enum::class => 'El tipo debe ser start_without_authorization o workshop_absorption.',
             'subject_id.required' => 'Indique el presupuesto o la orden de trabajo de la excepción.',
             'subject_id.integer' => 'El documento de la excepción no es válido.',
             'subject_id.min' => 'El documento de la excepción no es válido.',

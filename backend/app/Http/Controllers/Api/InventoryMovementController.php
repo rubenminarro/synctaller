@@ -80,11 +80,11 @@ class InventoryMovementController extends Controller implements HasMiddleware
             200,
             [
                 'pagination' => [
-                    'total'       => $movements->total(),
-                    'perPage'     => $movements->perPage(),
+                    'total' => $movements->total(),
+                    'perPage' => $movements->perPage(),
                     'currentPage' => $movements->currentPage(),
-                    'lastPage'    => $movements->lastPage(),
-                ]
+                    'lastPage' => $movements->lastPage(),
+                ],
             ]
         );
     }

@@ -9,9 +9,9 @@ enum WorkOrderItemStatus: string
     case COMPLETED = 'completed';
     case CANCELLED = 'cancelled';
 
-
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::PENDING => 'Pendiente',
             self::IN_PROGRESS => 'En reparación',
             self::COMPLETED => 'Terminado',

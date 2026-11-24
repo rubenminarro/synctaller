@@ -24,8 +24,7 @@ class SupplierPaymentController extends Controller implements HasMiddleware
 
     public function __construct(
         protected SupplierPaymentService $supplierPaymentService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {
@@ -69,11 +68,11 @@ class SupplierPaymentController extends Controller implements HasMiddleware
             200,
             [
                 'pagination' => [
-                    'total'       => $payments->total(),
-                    'perPage'     => $payments->perPage(),
+                    'total' => $payments->total(),
+                    'perPage' => $payments->perPage(),
                     'currentPage' => $payments->currentPage(),
-                    'lastPage'    => $payments->lastPage(),
-                ]
+                    'lastPage' => $payments->lastPage(),
+                ],
             ]
         );
     }

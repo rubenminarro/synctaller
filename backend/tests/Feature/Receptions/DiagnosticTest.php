@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Receptions;
 
+use App\Models\Diagnostic;
 use App\Models\DiagnosticItemPhoto;
 use App\Models\DiagnosticItemTemplate;
 use App\Models\User;
@@ -47,7 +48,7 @@ class DiagnosticTest extends ReceptionTestCase
 
         $template = DiagnosticItemTemplate::firstOrCreate(
             ['title' => $title],
-            ['code' => 'DIA-' . Str::upper(Str::random(6)), 'severity' => 'medium']
+            ['code' => 'DIA-'.Str::upper(Str::random(6)), 'severity' => 'medium']
         );
 
         return [
@@ -296,8 +297,8 @@ class DiagnosticTest extends ReceptionTestCase
         $newer = $this->postJson('/api/diagnostics', $this->diagnosticPayload())->json('data.id');
 
         // Cargados en otro orden que el de diagnóstico.
-        \App\Models\Diagnostic::whereKey($older)->update(['diagnosed_at' => now()->subDays(5)]);
-        \App\Models\Diagnostic::whereKey($newer)->update(['diagnosed_at' => now()->subDays(10)]);
+        Diagnostic::whereKey($older)->update(['diagnosed_at' => now()->subDays(5)]);
+        Diagnostic::whereKey($newer)->update(['diagnosed_at' => now()->subDays(10)]);
 
         $ids = collect($this->getJson("/api/diagnostics?reception_id={$this->reception['id']}")->assertOk()->json('data'))->pluck('id')->all();
 

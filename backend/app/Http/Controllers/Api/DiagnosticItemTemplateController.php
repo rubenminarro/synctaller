@@ -19,8 +19,7 @@ class DiagnosticItemTemplateController extends Controller implements HasMiddlewa
 
     public function __construct(
         protected DiagnosticItemTemplateService $templateService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {
@@ -65,11 +64,11 @@ class DiagnosticItemTemplateController extends Controller implements HasMiddlewa
             200,
             [
                 'pagination' => [
-                    'total'       => $templates->total(),
-                    'perPage'     => $templates->perPage(),
+                    'total' => $templates->total(),
+                    'perPage' => $templates->perPage(),
                     'currentPage' => $templates->currentPage(),
-                    'lastPage'    => $templates->lastPage(),
-                ]
+                    'lastPage' => $templates->lastPage(),
+                ],
             ]
         );
     }

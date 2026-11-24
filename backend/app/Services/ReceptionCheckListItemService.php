@@ -11,11 +11,13 @@ class ReceptionCheckListItemService
         $items = $checkList->items;
         $total = $items->count();
 
-        if ($total === 0) return 'pending';
+        if ($total === 0) {
+            return 'pending';
+        }
 
         $completed = $items->whereNotNull('value')->count();
-        
-        $requiredItems = $items->filter(fn($item) => $item->checkListItem->required);
+
+        $requiredItems = $items->filter(fn ($item) => $item->checkListItem->required);
         $requiredTotal = $requiredItems->count();
         $requiredCompleted = $requiredItems->whereNotNull('value')->count();
 

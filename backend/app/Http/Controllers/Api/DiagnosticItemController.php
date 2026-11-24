@@ -13,9 +13,9 @@ use App\Services\DiagnosticItemTemplateService;
 use App\Services\DiagnosticService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\Storage;
 
 class DiagnosticItemController extends Controller implements HasMiddleware
 {
@@ -41,20 +41,20 @@ class DiagnosticItemController extends Controller implements HasMiddleware
                 'photos',
                 'template',
             ]);
-        
+
         $query->when($request->filled('search'), function ($query) use ($search) {
             $query->where(function ($q) use ($search) {
 
                 if (is_numeric($search)) {
                     $q->orWhere('id', $search)
-                    ->orWhere('diagnostic_id', $search);
+                        ->orWhere('diagnostic_id', $search);
                 }
 
-                 $q->orWhere('title', 'like', "%{$search}%")
-                ->orWhere('description', 'like', "%{$search}%")
-                ->orWhere('severity', 'like', "%{$search}%")
-                ->orWhere('status', 'like', "%{$search}%")
-                ->orWhere('recommendation', 'like', "%{$search}%");
+                $q->orWhere('title', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('severity', 'like', "%{$search}%")
+                    ->orWhere('status', 'like', "%{$search}%")
+                    ->orWhere('recommendation', 'like', "%{$search}%");
             });
         });
 
@@ -94,11 +94,11 @@ class DiagnosticItemController extends Controller implements HasMiddleware
             200,
             [
                 'pagination' => [
-                    'total'       => $diagnosticsItems->total(),
-                    'perPage'     => $diagnosticsItems->perPage(),
+                    'total' => $diagnosticsItems->total(),
+                    'perPage' => $diagnosticsItems->perPage(),
                     'currentPage' => $diagnosticsItems->currentPage(),
-                    'lastPage'    => $diagnosticsItems->lastPage(),
-                ]
+                    'lastPage' => $diagnosticsItems->lastPage(),
+                ],
             ]
         );
     }
@@ -181,5 +181,4 @@ class DiagnosticItemController extends Controller implements HasMiddleware
             null
         );
     }
-    
 }

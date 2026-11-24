@@ -31,7 +31,7 @@ class UploadClaimDocumentRequest extends FormRequest
                 'file',
                 'extensions:pdf,jpg,jpeg,png,webp',
                 'mimetypes:application/pdf,image/jpeg,image/png,image/webp',
-                'max:' . self::MAX_KB,
+                'max:'.self::MAX_KB,
             ],
             'type' => ['required', Rule::enum(ClaimDocumentType::class)],
             'notes' => ['nullable', 'string', 'max:500', 'regex:/^[\pL\pN\s.,;:()\-#@!?%\/°º&\'"]*$/u'],
@@ -47,7 +47,7 @@ class UploadClaimDocumentRequest extends FormRequest
             function (Validator $validator) {
                 $file = $this->file('file');
 
-                if ($validator->errors()->has('file') || !$file) {
+                if ($validator->errors()->has('file') || ! $file) {
                     return;
                 }
 

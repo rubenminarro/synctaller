@@ -2,10 +2,10 @@
 
 namespace App\Http\Resources;
 
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
 use App\Enums\ReceptionStatus;
 use App\Enums\VehicleColor;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class ReceptionResource extends JsonResource
 {
@@ -45,14 +45,14 @@ class ReceptionResource extends JsonResource
                     'model' => $this->vehicle->relationLoaded('vehicleModel') ? $this->vehicle->vehicleModel?->name : null,
                     'color' => [
                         'value' => $colorEnum?->value,
-                        'label' => $colorEnum?->label()
+                        'label' => $colorEnum?->label(),
                     ],
                 ];
             }),
             'problem_description' => $this->problem_description,
             'status' => [
                 'value' => $statusEnum?->value,
-                'label' => $statusEnum?->label()
+                'label' => $statusEnum?->label(),
             ],
         ];
     }

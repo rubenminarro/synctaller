@@ -19,8 +19,7 @@ class VehicleMaintenanceController extends Controller implements HasMiddleware
 
     public function __construct(
         protected MaintenanceService $maintenanceService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {
@@ -95,10 +94,10 @@ class VehicleMaintenanceController extends Controller implements HasMiddleware
             200,
             [
                 'pagination' => [
-                    'total'       => $alerts->count(),
-                    'perPage'     => $perPage,
+                    'total' => $alerts->count(),
+                    'perPage' => $perPage,
                     'currentPage' => $page,
-                    'lastPage'    => max(1, (int) ceil($alerts->count() / $perPage)),
+                    'lastPage' => max(1, (int) ceil($alerts->count() / $perPage)),
                 ],
                 'counts' => [
                     'overdue' => $alerts->where('status.value', 'overdue')->count(),

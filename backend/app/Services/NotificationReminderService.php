@@ -21,8 +21,7 @@ class NotificationReminderService
         protected InternalNotificationService $internalNotifications,
         protected MaintenanceService $maintenanceService,
         protected SupplierPaymentService $supplierPaymentService
-    ) {
-    }
+    ) {}
 
     /**
      * @return array{invoices: int, maintenances: int, accounts_payable: int}
@@ -63,7 +62,7 @@ class NotificationReminderService
 
                 [$type, $key] = $days >= 0
                     ? [ClientNotificationType::INVOICE_DUE_SOON, "invoice_due_soon:{$invoice->id}"]
-                    : [ClientNotificationType::INVOICE_OVERDUE, "invoice_overdue:{$invoice->id}:" . intdiv(-$days - 1, $repeat)];
+                    : [ClientNotificationType::INVOICE_OVERDUE, "invoice_overdue:{$invoice->id}:".intdiv(-$days - 1, $repeat)];
 
                 $skipReason = $this->isAddressedToClient($invoice) ? null : 'La factura está a nombre de otro destinatario.';
 

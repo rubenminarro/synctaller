@@ -18,10 +18,10 @@ abstract class PartsTestCase extends TestCase
     protected function actingAsRole(string $role): User
     {
         $user = User::create([
-            'name' => $role . '_' . Str::random(6),
+            'name' => $role.'_'.Str::random(6),
             'first_name' => 'Test',
             'last_name' => ucfirst($role),
-            'email' => Str::random(10) . '@test.local',
+            'email' => Str::random(10).'@test.local',
             'password' => bcrypt('password'),
         ]);
 
@@ -45,7 +45,7 @@ abstract class PartsTestCase extends TestCase
     protected function createCategory(array $attributes = []): PartCategory
     {
         return PartCategory::create([
-            'name' => 'Categoría ' . Str::random(6),
+            'name' => 'Categoría '.Str::random(6),
             'is_active' => true,
             ...$attributes,
         ]);
@@ -54,7 +54,7 @@ abstract class PartsTestCase extends TestCase
     protected function createSupplier(array $attributes = []): Supplier
     {
         return Supplier::create([
-            'name' => 'Proveedor ' . Str::random(6),
+            'name' => 'Proveedor '.Str::random(6),
             'is_active' => true,
             ...$attributes,
         ]);
@@ -63,7 +63,7 @@ abstract class PartsTestCase extends TestCase
     protected function partPayload(PartCategory $category, array $overrides = []): array
     {
         return [
-            'sku' => 'SKU-' . Str::upper(Str::random(6)),
+            'sku' => 'SKU-'.Str::upper(Str::random(6)),
             'name' => 'Filtro de aceite',
             'brand' => 'Mann',
             'part_category_id' => $category->id,

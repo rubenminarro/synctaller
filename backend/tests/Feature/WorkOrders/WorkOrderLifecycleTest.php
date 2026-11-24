@@ -3,7 +3,9 @@
 namespace Tests\Feature\WorkOrders;
 
 use App\Models\Mechanic;
+use App\Models\User;
 use App\Models\WorkOrder;
+use Laravel\Sanctum\Sanctum;
 use Tests\Feature\WorkOrderParts\WorkOrderPartsTestCase;
 
 class WorkOrderLifecycleTest extends WorkOrderPartsTestCase
@@ -227,7 +229,7 @@ class WorkOrderLifecycleTest extends WorkOrderPartsTestCase
             'permissions' => ['work-order-items.start', 'work-order-items.complete'],
         ])->assertCreated();
 
-        $user = \App\Models\User::create([
+        $user = User::create([
             'name' => 'ayudante_qa',
             'first_name' => 'Hugo',
             'last_name' => 'Paez',
@@ -235,7 +237,7 @@ class WorkOrderLifecycleTest extends WorkOrderPartsTestCase
             'password' => bcrypt('password'),
         ]);
         $user->assignRole('ayudante');
-        \Laravel\Sanctum\Sanctum::actingAs($user);
+        Sanctum::actingAs($user);
 
         $this->itemAction($workOrder, 0, 'start')->assertOk();
         $this->itemAction($workOrder, 0, 'complete')->assertOk();

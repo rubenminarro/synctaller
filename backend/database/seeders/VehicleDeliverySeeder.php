@@ -20,7 +20,7 @@ class VehicleDeliverySeeder extends Seeder
             $reception = isset($scenario['billing']['delivery']) ? ExampleScenarios::reception($scenario) : null;
 
             // Idempotente: una recepción con entregas (aun anuladas) no se vuelve a entregar.
-            if (!$reception || VehicleDelivery::where('reception_id', $reception->id)->exists()) {
+            if (! $reception || VehicleDelivery::where('reception_id', $reception->id)->exists()) {
                 continue;
             }
 

@@ -8,8 +8,9 @@ enum CheckListType: string
     case TEXT = 'text';
     case NUMBER = 'number';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::BOOLEAN => 'Booleano',
             self::TEXT => 'Texto',
             self::NUMBER => 'Número',

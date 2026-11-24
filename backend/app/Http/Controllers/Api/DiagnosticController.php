@@ -2,24 +2,23 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\DiagnosticStatus;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Http\Resources\DiagnosticResource;
 use App\Http\Requests\StoreDiagnosticRequest;
 use App\Http\Requests\UpdateDiagnosticRequest;
+use App\Http\Resources\DiagnosticResource;
 use App\Http\Resources\ShowDiagnosticResource;
 use App\Models\Diagnostic;
-use App\Traits\ApiResponse;
-use App\Enums\DiagnosticStatus;
-use Illuminate\Support\Facades\DB;
 use App\Services\DiagnosticService;
 use App\Services\ReceptionStatusService;
+use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\DB;
 
 class DiagnosticController extends Controller implements HasMiddleware
 {
-    
     use ApiResponse;
 
     public static function middleware(): array
@@ -51,12 +50,12 @@ class DiagnosticController extends Controller implements HasMiddleware
 
                 if (is_numeric($search)) {
                     $q->orWhere('id', (int) $search)
-                    ->orWhere('reception_id', (int) $search);
+                        ->orWhere('reception_id', (int) $search);
                 }
 
                 $q->orWhere('customer_complaint', 'like', "%{$search}%")
-                ->orWhere('diagnosis', 'like', "%{$search}%")
-                ->orWhere('recommendation', 'like', "%{$search}%");
+                    ->orWhere('diagnosis', 'like', "%{$search}%")
+                    ->orWhere('recommendation', 'like', "%{$search}%");
 
                 $q->orWhereHas('reception.client', function ($client) use ($search) {
 
@@ -213,11 +212,11 @@ class DiagnosticController extends Controller implements HasMiddleware
             200,
             [
                 'pagination' => [
-                    'total'       => $diagnostics->total(),
-                    'perPage'     => $diagnostics->perPage(),
+                    'total' => $diagnostics->total(),
+                    'perPage' => $diagnostics->perPage(),
                     'currentPage' => $diagnostics->currentPage(),
-                    'lastPage'    => $diagnostics->lastPage(),
-                ]
+                    'lastPage' => $diagnostics->lastPage(),
+                ],
             ]
         );
     }
@@ -242,7 +241,7 @@ class DiagnosticController extends Controller implements HasMiddleware
             // refresh: los defaults de la base (p. ej. priority = medium) no quedan en el modelo recién creado.
             $diagnostic->refresh()->load([
                 'reception',
-                'mechanic'
+                'mechanic',
             ]);
 
             return $this->successResponse(
@@ -286,7 +285,7 @@ class DiagnosticController extends Controller implements HasMiddleware
 
         $diagnostic->load([
             'reception',
-            'mechanic'
+            'mechanic',
         ]);
 
         return $this->successResponse(
@@ -295,7 +294,7 @@ class DiagnosticController extends Controller implements HasMiddleware
         );
     }
 
-     public function destroy(Diagnostic $diagnostic, DiagnosticService $diagnosticService)
+    public function destroy(Diagnostic $diagnostic, DiagnosticService $diagnosticService)
     {
         $diagnosticService->ensureEditable($diagnostic);
 
@@ -306,5 +305,4 @@ class DiagnosticController extends Controller implements HasMiddleware
             null
         );
     }
-
 }

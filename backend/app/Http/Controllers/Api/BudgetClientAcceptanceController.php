@@ -22,8 +22,7 @@ class BudgetClientAcceptanceController extends Controller implements HasMiddlewa
 
     public function __construct(
         protected BudgetService $budgetService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {

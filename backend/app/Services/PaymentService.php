@@ -202,7 +202,7 @@ class PaymentService
 
         return [
             'receipt_sequence' => $next,
-            'receipt_number' => 'REC-' . str_pad((string) $next, 6, '0', STR_PAD_LEFT),
+            'receipt_number' => 'REC-'.str_pad((string) $next, 6, '0', STR_PAD_LEFT),
         ];
     }
 }

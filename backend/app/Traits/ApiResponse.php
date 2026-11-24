@@ -13,12 +13,12 @@ trait ApiResponse
         mixed $meta = null
     ): JsonResponse {
         return response()->json([
-            'success'   => true,
-            'status'    => $status,
-            'message'   => $message,
-            'data'      => $data,
-            'errors'    => null,
-            'meta'      => $meta,
+            'success' => true,
+            'status' => $status,
+            'message' => $message,
+            'data' => $data,
+            'errors' => null,
+            'meta' => $meta,
             'timestamp' => now()->toISOString(),
         ], $status);
     }
@@ -30,11 +30,11 @@ trait ApiResponse
         ?array $errors = null
     ): JsonResponse {
         return response()->json([
-            'success'   => false,
-            'status'    => $status,
-            'message'   => $message,
-            'data'      => null,
-            'errors'    => $errors,
+            'success' => false,
+            'status' => $status,
+            'message' => $message,
+            'data' => null,
+            'errors' => $errors,
             'error_code' => $errorCode,
         ], $status);
     }

@@ -2,6 +2,4 @@
 
 namespace App\Exceptions;
 
-class PaymentException extends AppException
-{
-}
+class PaymentException extends AppException {}

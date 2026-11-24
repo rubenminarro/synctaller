@@ -3,6 +3,7 @@
 namespace Tests\Feature\Seeders;
 
 use App\Models\Client;
+use App\Models\Insurer;
 use App\Models\Invoice;
 use App\Models\Mechanic;
 use App\Models\Purchase;
@@ -11,6 +12,7 @@ use App\Models\Vehicle;
 use App\Services\MaintenanceService;
 use Database\Seeders\ClientsSeeder;
 use Database\Seeders\DatabaseSeeder;
+use Database\Seeders\InsurerSeeder;
 use Database\Seeders\VehiclesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -97,7 +99,7 @@ class DatabaseSeederTest extends TestCase
 
         // Aseguradoras (M2): una activa y una inactiva, con su cliente empresa sin avisos y con contacto principal.
         $this->assertSame(['active' => 1, 'inactive' => 1], $this->statusCounts('insurers'));
-        $insurer = \App\Models\Insurer::whereHas('client', fn ($q) => $q->where('document_number', \Database\Seeders\InsurerSeeder::ACTIVE))->sole();
+        $insurer = Insurer::whereHas('client', fn ($q) => $q->where('document_number', InsurerSeeder::ACTIVE))->sole();
         $this->assertSame('company', $insurer->client->kind->value);
         $this->assertFalse($insurer->client->notifications_enabled);
         $this->assertSame(1, $insurer->contacts()->where('is_primary', true)->count());

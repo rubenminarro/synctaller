@@ -22,8 +22,7 @@ class InternalExceptionController extends Controller implements HasMiddleware
 
     public function __construct(
         protected InternalExceptionService $exceptionService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {
@@ -51,11 +50,11 @@ class InternalExceptionController extends Controller implements HasMiddleware
             200,
             [
                 'pagination' => [
-                    'total'       => $exceptions->total(),
-                    'perPage'     => $exceptions->perPage(),
+                    'total' => $exceptions->total(),
+                    'perPage' => $exceptions->perPage(),
                     'currentPage' => $exceptions->currentPage(),
-                    'lastPage'    => $exceptions->lastPage(),
-                ]
+                    'lastPage' => $exceptions->lastPage(),
+                ],
             ]
         );
     }

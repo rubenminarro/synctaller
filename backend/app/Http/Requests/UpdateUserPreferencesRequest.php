@@ -70,7 +70,7 @@ class UpdateUserPreferencesRequest extends FormRequest
         $messages = [];
 
         foreach (UserPreferences::OPTIONS as $key => $values) {
-            $message = self::LABELS[$key] . ' debe ser ' . implode(', ', $values) . '.';
+            $message = self::LABELS[$key].' debe ser '.implode(', ', $values).'.';
 
             foreach (['required', 'string', 'in'] as $rule) {
                 $messages["{$key}.{$rule}"] = $message;

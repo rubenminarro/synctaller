@@ -2,6 +2,4 @@
 
 namespace App\Exceptions;
 
-class ReceptionException extends AppException
-{
-}
+class ReceptionException extends AppException {}

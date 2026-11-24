@@ -2,11 +2,11 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\DiagnosticItemStatus;
+use App\Enums\Severity;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
-use App\Enums\Severity;
-use App\Enums\DiagnosticItemStatus;
 
 class StoreDiagnosticItemRequest extends FormRequest
 {
@@ -21,7 +21,7 @@ class StoreDiagnosticItemRequest extends FormRequest
             'diagnostic_id' => [
                 'integer',
                 'required',
-                Rule::exists('diagnostics', 'id')
+                Rule::exists('diagnostics', 'id'),
             ],
             // El ítem se elige siempre del catálogo (como el repuesto en una línea de compra): el título sale de él y
             // los campos que no se envían se completan con los suyos (DiagnosticItemTemplateService).
@@ -36,7 +36,7 @@ class StoreDiagnosticItemRequest extends FormRequest
             'description' => [
                 'nullable',
                 'string',
-                'regex:/^[\pL\pN\s.,;:()\-#@!?%]*$/u'
+                'regex:/^[\pL\pN\s.,;:()\-#@!?%]*$/u',
             ],
             'severity' => [
                 'nullable',
@@ -44,30 +44,30 @@ class StoreDiagnosticItemRequest extends FormRequest
             ],
             'status' => [
                 'nullable',
-                Rule::enum(DiagnosticItemStatus::class)
+                Rule::enum(DiagnosticItemStatus::class),
             ],
             'requires_repair' => [
                 'nullable',
-                'boolean'
+                'boolean',
             ],
             'requires_replacement' => [
                 'nullable',
-                'boolean'
+                'boolean',
             ],
             'estimated_cost' => [
                 'nullable',
                 'numeric',
-                'min:0'
+                'min:0',
             ],
             'estimated_time' => [
                 'nullable',
                 'integer',
-                'min:0'
+                'min:0',
             ],
             'recommendation' => [
                 'nullable',
                 'string',
-                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u'
+                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u',
             ],
         ];
     }
@@ -118,5 +118,4 @@ class StoreDiagnosticItemRequest extends FormRequest
             ],
         ];
     }
-
 }

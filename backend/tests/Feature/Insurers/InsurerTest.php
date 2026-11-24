@@ -17,10 +17,10 @@ class InsurerTest extends PartsTestCase
     private function newClientData(array $overrides = []): array
     {
         return [
-            'document_number' => '8001' . random_int(1000, 9999) . '-' . random_int(1, 9),
+            'document_number' => '8001'.random_int(1000, 9999).'-'.random_int(1, 9),
             'business_name' => 'Seguros del Sur S.A.',
-            'email' => Str::lower(Str::random(8)) . '@example.com',
-            'phone' => '+595211' . random_int(100000, 999999),
+            'email' => Str::lower(Str::random(8)).'@example.com',
+            'phone' => '+595211'.random_int(100000, 999999),
             ...$overrides,
         ];
     }

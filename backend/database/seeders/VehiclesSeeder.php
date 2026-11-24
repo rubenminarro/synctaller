@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Brand;
 use App\Models\Client;
 use App\Models\Vehicle;
 use App\Models\VehicleModel;
+use Illuminate\Database\Seeder;
 
 /**
  * Vehículos de ejemplo de los clientes de ClientsSeeder. Uno no tiene placa
@@ -73,7 +73,7 @@ class VehiclesSeeder extends Seeder
             $brandId = Brand::where('name', $brandName)->value('id');
             $modelId = VehicleModel::where('brand_id', $brandId)->where('name', $modelName)->value('id');
 
-            if (!$clientId || !$brandId || !$modelId) {
+            if (! $clientId || ! $brandId || ! $modelId) {
                 continue;
             }
 

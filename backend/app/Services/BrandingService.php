@@ -155,7 +155,7 @@ class BrandingService
     {
         $logo = $this->documentLogo();
 
-        return $logo ? "data:{$logo['mime']};base64," . base64_encode($logo['content']) : null;
+        return $logo ? "data:{$logo['mime']};base64,".base64_encode($logo['content']) : null;
     }
 
     public function hasLogo(): bool
@@ -199,7 +199,7 @@ class BrandingService
 
     private function put(string $content, string $extension): string
     {
-        $path = 'branding/' . Str::random(40) . '.' . $extension;
+        $path = 'branding/'.Str::random(40).'.'.$extension;
         Storage::disk(self::DISK)->put($path, $content);
 
         return $path;

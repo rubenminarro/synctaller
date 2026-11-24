@@ -2,6 +2,4 @@
 
 namespace App\Exceptions;
 
-class BudgetException extends AppException
-{
-}
+class BudgetException extends AppException {}

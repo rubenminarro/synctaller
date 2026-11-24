@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Budget;
 use App\Services\BudgetService;
+use Illuminate\Database\Seeder;
 
 /**
  * Un presupuesto por escenario que lo tiene (ExampleScenarios), creado por su
@@ -19,7 +19,7 @@ class BudgetSeeder extends Seeder
             $reception = ExampleScenarios::reception($scenario);
 
             // Idempotente: una recepción que ya tiene presupuestos (incluso eliminados) se omite.
-            if (!isset($scenario['budget']) || !$reception || Budget::withTrashed()->where('reception_id', $reception->id)->exists()) {
+            if (! isset($scenario['budget']) || ! $reception || Budget::withTrashed()->where('reception_id', $reception->id)->exists()) {
                 continue;
             }
 

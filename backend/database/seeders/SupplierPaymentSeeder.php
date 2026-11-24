@@ -32,7 +32,7 @@ class SupplierPaymentSeeder extends Seeder
             $purchase = PurchaseSeeder::received($key);
 
             // Idempotente: una compra que ya tiene pagos (aun anulados) no se vuelve a pagar.
-            if (!$purchase || $purchase->payments()->exists()) {
+            if (! $purchase || $purchase->payments()->exists()) {
                 continue;
             }
 

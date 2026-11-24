@@ -12,6 +12,7 @@ use Tests\Feature\Parts\PartsTestCase;
 class ClientVehicleTest extends PartsTestCase
 {
     private Brand $brand;
+
     private VehicleModel $model;
 
     protected function setUp(): void
@@ -25,11 +26,11 @@ class ClientVehicleTest extends PartsTestCase
     private function createClient(): Client
     {
         return Client::create([
-            'document_number' => 'DOC-' . Str::random(6),
+            'document_number' => 'DOC-'.Str::random(6),
             'first_name' => 'Ana',
             'last_name' => 'Gomez',
-            'phone' => '+595981' . random_int(100000, 999999),
-            'email' => Str::lower(Str::random(10)) . '@example.com',
+            'phone' => '+595981'.random_int(100000, 999999),
+            'email' => Str::lower(Str::random(10)).'@example.com',
         ]);
     }
 

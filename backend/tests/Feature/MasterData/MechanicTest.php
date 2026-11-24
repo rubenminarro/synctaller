@@ -18,10 +18,10 @@ class MechanicTest extends PartsTestCase
     private function user(): User
     {
         return User::create([
-            'name' => 'mec_' . Str::random(6),
+            'name' => 'mec_'.Str::random(6),
             'first_name' => 'Pedro',
             'last_name' => 'Benitez',
-            'email' => Str::random(8) . '@test.local',
+            'email' => Str::random(8).'@test.local',
             'password' => bcrypt('password'),
         ]);
     }

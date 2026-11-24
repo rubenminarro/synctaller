@@ -24,8 +24,7 @@ class PurchaseController extends Controller implements HasMiddleware
 
     public function __construct(
         protected PurchaseService $purchaseService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {
@@ -66,11 +65,11 @@ class PurchaseController extends Controller implements HasMiddleware
             200,
             [
                 'pagination' => [
-                    'total'       => $purchases->total(),
-                    'perPage'     => $purchases->perPage(),
+                    'total' => $purchases->total(),
+                    'perPage' => $purchases->perPage(),
                     'currentPage' => $purchases->currentPage(),
-                    'lastPage'    => $purchases->lastPage(),
-                ]
+                    'lastPage' => $purchases->lastPage(),
+                ],
             ]
         );
     }

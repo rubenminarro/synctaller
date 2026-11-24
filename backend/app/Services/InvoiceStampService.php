@@ -55,7 +55,7 @@ class InvoiceStampService
 
     private function ensureSingleActive(InvoiceStamp $stamp): void
     {
-        if (!$stamp->is_active) {
+        if (! $stamp->is_active) {
             return;
         }
 

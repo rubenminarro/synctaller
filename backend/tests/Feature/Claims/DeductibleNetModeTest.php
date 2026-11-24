@@ -38,7 +38,7 @@ class DeductibleNetModeTest extends ClaimTestCase
     private function amounts(array $allocation): array
     {
         return collect($allocation['lines'])
-            ->mapWithKeys(fn (array $line) => [$line['description'] . '|' . $line['portion_type']['value'] => $line['amount']])
+            ->mapWithKeys(fn (array $line) => [$line['description'].'|'.$line['portion_type']['value'] => $line['amount']])
             ->sortKeys()
             ->all();
     }
@@ -181,7 +181,7 @@ class DeductibleNetModeTest extends ClaimTestCase
         [$workOrder] = $this->netClaimWorkOrder(deductible: 2000000, includesTax: false);
 
         $draft = $this->postJson($this->url($workOrder))->assertCreated()->json('data');
-        $this->assertSame('1800000.00', collect($draft['lines'])->where('portion_type.value', 'owner_deductible')->sum('amount') . '.00');
+        $this->assertSame('1800000.00', collect($draft['lines'])->where('portion_type.value', 'owner_deductible')->sum('amount').'.00');
         $this->postJson($this->url($workOrder, $draft['id'], 'confirm'))
             ->assertStatus(422)->assertJsonPath('error_code', 'ALLOCATION_DEDUCTIBLE_EXCEEDS_COVERED');
     }

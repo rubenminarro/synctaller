@@ -2,9 +2,9 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\FuelLevel;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Enums\FuelLevel;
 
 class DiagnosticResource extends JsonResource
 {
@@ -59,7 +59,7 @@ class DiagnosticResource extends JsonResource
                     'name' => $this->mechanic->user->name,
                     'first_name' => $this->mechanic->user->first_name,
                     'last_name' => $this->mechanic->user->last_name,
-                    ];
+                ];
             }),
         ];
     }

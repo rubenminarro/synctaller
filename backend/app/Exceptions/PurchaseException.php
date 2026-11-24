@@ -2,6 +2,4 @@
 
 namespace App\Exceptions;
 
-class PurchaseException extends AppException
-{
-}
+class PurchaseException extends AppException {}

@@ -2,11 +2,12 @@
 
 namespace Tests\Feature\Claims;
 
+use App\Models\Claim;
 use App\Models\Insurer;
 use App\Models\InvoiceStamp;
 use App\Models\Reception;
-use App\Services\BudgetService;
 use App\Models\User;
+use App\Services\BudgetService;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 
@@ -20,10 +21,10 @@ use Spatie\Permission\Models\Role;
  */
 class InsurerReportsTest extends ClaimTestCase
 {
-    /** @return array{0: array, 1: \App\Models\Claim, 2: array, 3: array} OT, siniestro, factura de la aseguradora y del dueño (emitidas) */
+    /** @return array{0: array, 1: Claim, 2: array, 3: array} OT, siniestro, factura de la aseguradora y del dueño (emitidas) */
     private function invoicedExample(): array
     {
-        if (!InvoiceStamp::exists()) {
+        if (! InvoiceStamp::exists()) {
             $this->createStamp()->assertCreated();
         }
         [$workOrder, , $claim] = $this->completedClaimWorkOrder();
@@ -41,7 +42,7 @@ class InsurerReportsTest extends ClaimTestCase
 
     private function period(): string
     {
-        return 'date_from=' . now()->subMonth()->toDateString() . '&date_to=' . now()->toDateString();
+        return 'date_from='.now()->subMonth()->toDateString().'&date_to='.now()->toDateString();
     }
 
     public function test_receivables_are_split_by_recipient_with_aging(): void
@@ -112,7 +113,7 @@ class InsurerReportsTest extends ClaimTestCase
     public function test_the_claim_summary_goes_from_budgeted_to_collected(): void
     {
         $this->actingAsAdmin();
-        if (!InvoiceStamp::exists()) {
+        if (! InvoiceStamp::exists()) {
             $this->createStamp()->assertCreated();
         }
         [$workOrder, , $claim] = $this->completedClaimWorkOrder();
@@ -219,7 +220,7 @@ class InsurerReportsTest extends ClaimTestCase
         $cancelled = $this->postJson('/api/claims', $this->claimBody($this->openReception()->id, $this->insurer()))->json('data.id');
         $this->postJson("/api/claims/{$cancelled}/cancel", ['reason' => 'Error de carga.'])->assertOk();
 
-        $data = $this->getJson('/api/reports/claims?' . $this->period())->assertOk()->json('data');
+        $data = $this->getJson('/api/reports/claims?'.$this->period())->assertOk()->json('data');
         $this->assertSame(2, $data['totals']['claims_count']);
         $this->assertSame('1800000.00', $data['totals']['authorized_total']);
         $this->assertSame('1980000.00', $data['totals']['balance_insurer']);
@@ -234,15 +235,15 @@ class InsurerReportsTest extends ClaimTestCase
         $this->assertSame(0, $row['alerts_count']);
 
         // Filtros: estado y aseguradora; fuera del período no aparece.
-        $this->getJson('/api/reports/claims?status=cancelled&' . $this->period())->assertOk()->assertJsonPath('data.totals.claims_count', 1)
+        $this->getJson('/api/reports/claims?status=cancelled&'.$this->period())->assertOk()->assertJsonPath('data.totals.claims_count', 1)
             ->assertJsonPath('data.claims.0.claim_id', $cancelled);
-        $this->getJson("/api/reports/claims?insurer_id={$claim->insurer_id}&" . $this->period())->assertOk()->assertJsonPath('data.totals.claims_count', 1);
+        $this->getJson("/api/reports/claims?insurer_id={$claim->insurer_id}&".$this->period())->assertOk()->assertJsonPath('data.totals.claims_count', 1);
         $this->getJson('/api/reports/claims?date_from=2020-01-01&date_to=2020-01-31')->assertOk()->assertJsonPath('data.totals.claims_count', 0);
         $this->getJson('/api/reports/claims?status=todo')->assertStatus(422)->assertJsonValidationErrors('status');
 
-        $csv = $this->get('/api/reports/claims?format=csv&' . $this->period())->assertOk()->getContent();
+        $csv = $this->get('/api/reports/claims?format=csv&'.$this->period())->assertOk()->getContent();
         $this->assertStringContainsString('Reporte de siniestros', $csv);
         $this->assertStringContainsString('Facturado neto a la aseguradora', $csv);
-        $this->get('/api/reports/claims?format=pdf&' . $this->period())->assertOk()->assertHeader('Content-Type', 'application/pdf');
+        $this->get('/api/reports/claims?format=pdf&'.$this->period())->assertOk()->assertHeader('Content-Type', 'application/pdf');
     }
 }

@@ -10,8 +10,9 @@ enum ClientKind: string
     case PERSON = 'person';
     case COMPANY = 'company';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::PERSON => 'Persona',
             self::COMPANY => 'Empresa',
         };

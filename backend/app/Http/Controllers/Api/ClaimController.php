@@ -23,8 +23,7 @@ class ClaimController extends Controller implements HasMiddleware
 
     public function __construct(
         protected ClaimService $claimService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {
@@ -63,11 +62,11 @@ class ClaimController extends Controller implements HasMiddleware
             200,
             [
                 'pagination' => [
-                    'total'       => $claims->total(),
-                    'perPage'     => $claims->perPage(),
+                    'total' => $claims->total(),
+                    'perPage' => $claims->perPage(),
                     'currentPage' => $claims->currentPage(),
-                    'lastPage'    => $claims->lastPage(),
-                ]
+                    'lastPage' => $claims->lastPage(),
+                ],
             ]
         );
     }

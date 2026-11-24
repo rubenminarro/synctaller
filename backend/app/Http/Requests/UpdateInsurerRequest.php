@@ -21,7 +21,7 @@ class UpdateInsurerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'deductible_billing_mode' => ['sometimes', 'nullable', Rule::prohibitedIf(fn () => !config('insurer.deductible_net_mode')), Rule::enum(DeductibleBillingMode::class)],
+            'deductible_billing_mode' => ['sometimes', 'nullable', Rule::prohibitedIf(fn () => ! config('insurer.deductible_net_mode')), Rule::enum(DeductibleBillingMode::class)],
             'payment_term_days' => [
                 'sometimes',
                 'nullable',

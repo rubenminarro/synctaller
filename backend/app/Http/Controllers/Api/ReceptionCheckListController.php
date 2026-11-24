@@ -3,18 +3,17 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\ReceptionCheckList;
 use App\Http\Requests\UpdateReceptionCheckListRequest;
 use App\Http\Resources\ReceptionCheckListResource;
+use App\Models\ReceptionCheckList;
 use App\Services\ReceptionCheckListItemService;
 use App\Traits\ApiResponse;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\DB;
 
 class ReceptionCheckListController extends Controller implements HasMiddleware
 {
-   
     use ApiResponse;
 
     public static function middleware(): array
@@ -63,7 +62,7 @@ class ReceptionCheckListController extends Controller implements HasMiddleware
                     ->items()
                     ->where('id', $item['id'])
                     ->update([
-                        'value'       => $item['value'] ?? null,
+                        'value' => $item['value'] ?? null,
                         'observation' => $item['observation'] ?? null,
                     ]);
             }

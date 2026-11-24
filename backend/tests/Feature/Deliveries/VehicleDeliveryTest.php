@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Deliveries;
 
+use App\Models\Budget;
 use App\Models\Reception;
 use App\Models\Vehicle;
 use App\Models\VehicleDelivery;
@@ -122,7 +123,7 @@ class VehicleDeliveryTest extends InvoiceTestCase
     {
         // Sin OT.
         $budgetId = $this->createBudgetWithItems([['type' => 'labor', 'description' => 'Trabajo', 'quantity' => 1, 'unit_price' => 1000]]);
-        $receptionId = \App\Models\Budget::findOrFail($budgetId)->reception_id;
+        $receptionId = Budget::findOrFail($budgetId)->reception_id;
         $this->deliver($receptionId)->assertStatus(422)->assertJsonPath('error_code', 'DELIVERY_WITHOUT_COMPLETED_WORK_ORDER');
 
         // OT abierta.

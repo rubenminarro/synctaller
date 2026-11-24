@@ -19,7 +19,9 @@ use Illuminate\Support\Facades\DB;
 class InventoryService
 {
     private const QUANTITY_SCALE = 3;
+
     private const COST_SCALE = 4;
+
     private const WORK_SCALE = 8;
 
     public function registerEntry(array $data, User $user): InventoryMovement
@@ -28,7 +30,7 @@ class InventoryService
 
             $type = InventoryMovementType::from($data['type']);
 
-            if (!$type->isManualEntry()) {
+            if (! $type->isManualEntry()) {
                 throw $this->invalidType($type);
             }
 
@@ -146,7 +148,7 @@ class InventoryService
 
             $type = InventoryMovementType::from($data['type']);
 
-            if (!$type->isManualExit()) {
+            if (! $type->isManualExit()) {
                 throw $this->invalidType($type);
             }
 
@@ -438,7 +440,7 @@ class InventoryService
 
         $comparison = bccomp($quantity, '0', self::QUANTITY_SCALE);
 
-        if ($comparison < 0 || (!$allowZero && $comparison === 0)) {
+        if ($comparison < 0 || (! $allowZero && $comparison === 0)) {
             throw new InventoryException(
                 'La cantidad debe ser mayor a cero.',
                 422,
@@ -446,7 +448,7 @@ class InventoryService
             );
         }
 
-        if (!$part->unit->allowsFractions() && Decimal::hasFraction($quantity)) {
+        if (! $part->unit->allowsFractions() && Decimal::hasFraction($quantity)) {
             throw new InventoryException(
                 "El repuesto se mide en {$part->unit->label()} y no admite cantidades fraccionadas.",
                 422,
@@ -479,7 +481,7 @@ class InventoryService
 
         $supplier = Supplier::findOrFail($supplierId);
 
-        if (!$supplier->is_active) {
+        if (! $supplier->is_active) {
             throw new SupplierException(
                 'El proveedor seleccionado está inactivo.',
                 422,

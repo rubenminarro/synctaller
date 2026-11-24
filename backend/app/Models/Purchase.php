@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-use App\Traits\Auditable;
 use App\Enums\InvoiceCondition;
 use App\Enums\InvoicePaymentStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\PurchaseStatus;
 use App\Exceptions\PurchaseException;
+use App\Traits\Auditable;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;

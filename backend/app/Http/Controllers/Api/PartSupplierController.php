@@ -19,8 +19,7 @@ class PartSupplierController extends Controller implements HasMiddleware
 
     public function __construct(
         protected PartService $partService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {

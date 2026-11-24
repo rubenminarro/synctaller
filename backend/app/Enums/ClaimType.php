@@ -11,8 +11,9 @@ enum ClaimType: string
     case OWN = 'own';
     case THIRD_PARTY = 'third_party';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::OWN => 'Propio',
             self::THIRD_PARTY => 'De tercero',
         };

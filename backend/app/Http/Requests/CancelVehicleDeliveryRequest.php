@@ -5,6 +5,4 @@ namespace App\Http\Requests;
 /**
  * Mismas reglas que la anulación de factura: motivo obligatorio.
  */
-class CancelVehicleDeliveryRequest extends CancelInvoiceRequest
-{
-}
+class CancelVehicleDeliveryRequest extends CancelInvoiceRequest {}

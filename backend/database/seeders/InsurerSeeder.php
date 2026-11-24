@@ -54,7 +54,7 @@ class InsurerSeeder extends Seeder
                 $insurerService->addContact($insurer, $contact);
             }
 
-            if (!$active) {
+            if (! $active) {
                 $insurerService->deactivate($insurer);
             }
         }

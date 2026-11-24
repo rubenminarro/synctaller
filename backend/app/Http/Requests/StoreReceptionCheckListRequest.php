@@ -37,16 +37,16 @@ class StoreReceptionCheckListRequest extends FormRequest
                 'min:1',
             ],
             'items.*.check_list_item_id' => [
-                'required', 
-                Rule::exists('check_list_items', 'id')
+                'required',
+                Rule::exists('check_list_items', 'id'),
             ],
             'items.*.value' => [
-                'nullable', 
-                'string'
+                'nullable',
+                'string',
             ],
             'items.*.observation' => [
-                'nullable', 
-                'string', 
+                'nullable',
+                'string',
                 'max:500',
                 'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u',
             ],

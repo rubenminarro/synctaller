@@ -2,18 +2,18 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\MechanicStatus;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Enums\MechanicStatus;
 
 class ShowMechanicResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $statusEnum = $this->status instanceof MechanicStatus 
-            ? $this->status 
+        $statusEnum = $this->status instanceof MechanicStatus
+            ? $this->status
             : MechanicStatus::tryFrom($this->status);
-    
+
         return [
             'id' => $this->id,
             'employee_code' => $this->employee_code,
@@ -21,7 +21,7 @@ class ShowMechanicResource extends JsonResource
                 return [
                     'name' => $this->user->name,
                     'full_name' => trim(
-                        $this->user->first_name . ' ' . $this->user->last_name
+                        $this->user->first_name.' '.$this->user->last_name
                     ),
                     'email' => $this->user->email,
                 ];
@@ -32,7 +32,7 @@ class ShowMechanicResource extends JsonResource
             'commission_percentage' => $this->commission_percentage,
             'status' => [
                 'value' => $statusEnum?->value,
-                'label' => $statusEnum?->label()
+                'label' => $statusEnum?->label(),
             ],
             'notes' => $this->notes,
             'updated_at' => optional($this->updated_at)->format('Y-m-d H:i:s'),

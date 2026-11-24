@@ -28,7 +28,7 @@ class WorkOrderAllocationTest extends ClaimTestCase
                 'amount' => $line['amount'],
                 'description' => $line['description'],
             ])
-            ->flatMap(fn (array $line) => $replace[$line['description'] . '|' . $line['portion_type']] ?? [$line])
+            ->flatMap(fn (array $line) => $replace[$line['description'].'|'.$line['portion_type']] ?? [$line])
             ->map(fn (array $line) => collect($line)->except('description')->all())
             ->values()
             ->all();
@@ -37,7 +37,7 @@ class WorkOrderAllocationTest extends ClaimTestCase
     private function amounts(array $allocation): array
     {
         return collect($allocation['lines'])
-            ->mapWithKeys(fn (array $line) => [$line['description'] . '|' . $line['portion_type']['value'] => $line['amount']])
+            ->mapWithKeys(fn (array $line) => [$line['description'].'|'.$line['portion_type']['value'] => $line['amount']])
             ->sortKeys()
             ->all();
     }
@@ -357,6 +357,6 @@ class WorkOrderAllocationTest extends ClaimTestCase
     private function extraName(array $allocation): string
     {
         return collect($allocation['lines'])->pluck('description')
-            ->first(fn (string $name) => !in_array($name, ['Alineación', 'Chapería de puerta', 'Paragolpes', 'Pintura'], true));
+            ->first(fn (string $name) => ! in_array($name, ['Alineación', 'Chapería de puerta', 'Paragolpes', 'Pintura'], true));
     }
 }

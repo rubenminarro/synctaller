@@ -108,7 +108,7 @@ class AllocationBillingService
 
         $amount = Decimal::of($informed, 2);
 
-        if (!$claim->deductible_includes_tax) {
+        if (! $claim->deductible_includes_tax) {
             return $amount;
         }
 
@@ -125,7 +125,7 @@ class AllocationBillingService
     {
         $claim = $allocation->claim;
 
-        if (!$this->netMode($claim) || $allocation->deductible_amount === null || bccomp((string) $allocation->deductible_amount, '0', 2) <= 0) {
+        if (! $this->netMode($claim) || $allocation->deductible_amount === null || bccomp((string) $allocation->deductible_amount, '0', 2) <= 0) {
             return '0.00';
         }
 
@@ -146,7 +146,7 @@ class AllocationBillingService
             return;
         }
 
-        if (!$this->netMode($claim)) {
+        if (! $this->netMode($claim)) {
             throw new AllocationException(
                 'El siniestro tiene deducible: su facturación espera la definición de la modalidad del deducible.',
                 422,
@@ -216,7 +216,7 @@ class AllocationBillingService
      */
     public function isFullyInvoiced(?WorkOrderAllocation $allocation): bool
     {
-        if (!$allocation) {
+        if (! $allocation) {
             return false;
         }
 
@@ -235,7 +235,7 @@ class AllocationBillingService
     {
         $claim = Claim::where('reception_id', $receptionId)->where('status', ClaimStatus::OPEN)->first();
 
-        if (!$claim) {
+        if (! $claim) {
             return null;
         }
 
@@ -245,7 +245,7 @@ class AllocationBillingService
 
         $positive = bccomp((string) $claim->deductible_amount, '0', 2) > 0;
 
-        return $positive && (!$this->netMode($claim) || $claim->deductible_includes_tax === null) ? $claim : null;
+        return $positive && (! $this->netMode($claim) || $claim->deductible_includes_tax === null) ? $claim : null;
     }
 
     /**

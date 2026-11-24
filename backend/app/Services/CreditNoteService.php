@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\DB;
 class CreditNoteService
 {
     /**
-     * @param array{number: string, stamp_number?: string|null, issue_date: string, reason: string, items: array<int, array{invoice_item_id: int, amount: int|string}>} $data
+     * @param  array{number: string, stamp_number?: string|null, issue_date: string, reason: string, items: array<int, array{invoice_item_id: int, amount: int|string}>}  $data
      */
     public function register(Invoice $invoice, array $data, User $user): InvoiceCreditNote
     {
@@ -51,7 +51,7 @@ class CreditNoteService
 
             if (bccomp($total, $balance, 2) > 0) {
                 throw new InvoiceException(
-                    'La nota de crédito (' . Format::money($total) . ') supera el saldo de la factura (' . Format::money($balance) . '): para acreditar lo cobrado, anule antes el pago.',
+                    'La nota de crédito ('.Format::money($total).') supera el saldo de la factura ('.Format::money($balance).'): para acreditar lo cobrado, anule antes el pago.',
                     422,
                     'CREDIT_NOTE_EXCEEDS_BALANCE'
                 );
@@ -132,7 +132,7 @@ class CreditNoteService
             /** @var InvoiceItem|null $item */
             $item = $items[$line['invoice_item_id']] ?? null;
 
-            if (!$item) {
+            if (! $item) {
                 throw new InvoiceException('Alguna línea no es de esta factura.', 422, 'CREDIT_NOTE_ITEM_MISMATCH');
             }
 
@@ -142,7 +142,7 @@ class CreditNoteService
 
             if (bccomp($amount, $remaining, 2) > 0) {
                 throw new InvoiceException(
-                    "Lo acreditado de «{$item->description}» supera lo que le queda a la línea (" . Format::money($remaining) . ').',
+                    "Lo acreditado de «{$item->description}» supera lo que le queda a la línea (".Format::money($remaining).').',
                     422,
                     'CREDIT_NOTE_EXCEEDS_LINE'
                 );

@@ -13,8 +13,9 @@ enum InvoicePaymentStatus: string
     case PAID = 'paid';
     case CREDITED = 'credited';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::UNPAID => 'Pendiente',
             self::PARTIAL => 'Pago parcial',
             self::PAID => 'Pagada',

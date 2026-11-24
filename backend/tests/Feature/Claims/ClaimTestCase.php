@@ -32,28 +32,28 @@ abstract class ClaimTestCase extends InvoiceTestCase
     protected function insurer(): int
     {
         return $this->postJson('/api/insurers', ['client' => [
-            'document_number' => '8009' . random_int(1000, 9999) . '-' . random_int(1, 9),
+            'document_number' => '8009'.random_int(1000, 9999).'-'.random_int(1, 9),
             'business_name' => 'Seguros del Sur S.A.',
-            'email' => Str::lower(Str::random(8)) . '@example.com',
-            'phone' => '+595211' . random_int(100000, 999999),
+            'email' => Str::lower(Str::random(8)).'@example.com',
+            'phone' => '+595211'.random_int(100000, 999999),
         ]])->assertCreated()->json('data.id');
     }
 
     protected function openReception(): Reception
     {
-        $brand = Brand::create(['name' => 'Marca ' . Str::random(6)]);
+        $brand = Brand::create(['name' => 'Marca '.Str::random(6)]);
         $client = Client::create([
-            'document_number' => '4' . random_int(100000, 999999),
+            'document_number' => '4'.random_int(100000, 999999),
             'first_name' => 'Ana',
             'last_name' => 'Gomez',
-            'phone' => '0981' . random_int(100000, 999999),
+            'phone' => '0981'.random_int(100000, 999999),
             // El email es único (D7): el primer cliente del test es "ana@example.com", los demás, otro.
-            'email' => Client::where('email', 'ana@example.com')->exists() ? Str::lower(Str::random(10)) . '@example.com' : 'ana@example.com',
+            'email' => Client::where('email', 'ana@example.com')->exists() ? Str::lower(Str::random(10)).'@example.com' : 'ana@example.com',
         ]);
         $vehicle = Vehicle::create([
             'client_id' => $client->id,
             'brand_id' => $brand->id,
-            'vehicle_model_id' => VehicleModel::create(['brand_id' => $brand->id, 'name' => 'Modelo ' . Str::random(6)])->id,
+            'vehicle_model_id' => VehicleModel::create(['brand_id' => $brand->id, 'name' => 'Modelo '.Str::random(6)])->id,
             'plate' => Str::upper(Str::random(7)),
         ]);
 
@@ -67,7 +67,7 @@ abstract class ClaimTestCase extends InvoiceTestCase
             'insurer_id' => $insurerId,
             'claim_type' => 'own',
             'loss_date' => now()->subDays(3)->toDateString(),
-            'claim_number' => 'S-' . random_int(10000, 99999),
+            'claim_number' => 'S-'.random_int(10000, 99999),
             ...$overrides,
         ];
     }
@@ -79,7 +79,7 @@ abstract class ClaimTestCase extends InvoiceTestCase
      *
      * @return array{0: array, 1: Budget, 2: Claim}
      */
-    protected function completedClaimWorkOrder(int $bumpers = 2, bool $authorize = true, int|null $deductible = 0, ?Reception $reception = null): array
+    protected function completedClaimWorkOrder(int $bumpers = 2, bool $authorize = true, ?int $deductible = 0, ?Reception $reception = null): array
     {
         $reception ??= $this->openReception();
         $claim = Claim::where('reception_id', $reception->id)->where('status', 'open')->first()
@@ -116,7 +116,7 @@ abstract class ClaimTestCase extends InvoiceTestCase
 
         $this->postJson("/api/budgets/{$budgetId}/approve", ['channel' => 'whatsapp'])->assertOk();
 
-        if (!$authorize) {
+        if (! $authorize) {
             $this->actingAsRole('jefe-taller');
             $exception = $this->postJson('/api/internal-exceptions', ['type' => 'start_without_authorization', 'subject_id' => $budgetId, 'reason' => 'El perito confirma por teléfono.'])->assertCreated()->json('data.id');
             $workOrder = $this->postJson('/api/work-orders', ['budget_id' => $budgetId, 'mechanic_id' => $this->createMechanic()->id, 'internal_exception_id' => $exception])->assertCreated()->json('data');
@@ -138,6 +138,6 @@ abstract class ClaimTestCase extends InvoiceTestCase
 
     protected function url(array $workOrder, ?int $allocationId = null, string $action = ''): string
     {
-        return "/api/work-orders/{$workOrder['id']}/allocations" . ($allocationId ? "/{$allocationId}" : '') . ($action ? "/{$action}" : '');
+        return "/api/work-orders/{$workOrder['id']}/allocations".($allocationId ? "/{$allocationId}" : '').($action ? "/{$action}" : '');
     }
 }

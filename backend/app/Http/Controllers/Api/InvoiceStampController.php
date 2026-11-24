@@ -18,8 +18,7 @@ class InvoiceStampController extends Controller implements HasMiddleware
 
     public function __construct(
         protected InvoiceStampService $stampService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {

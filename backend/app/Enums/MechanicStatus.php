@@ -8,8 +8,9 @@ enum MechanicStatus: string
     case INACTIVE = 'inactive';
     case ON_LEAVE = 'on_leave';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::ACTIVE => 'Activo',
             self::INACTIVE => 'Inactivo',
             self::ON_LEAVE => 'En licencia',

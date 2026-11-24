@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Brand;
+use Illuminate\Database\Seeder;
 
 class BrandSeeder extends Seeder
 {
@@ -14,7 +14,7 @@ class BrandSeeder extends Seeder
             'BYD', 'Changan', 'Isuzu', 'Nissan', 'Mitsubishi',
             'Ford', 'Mercedes-Benz', 'BMW', 'GWM', 'Chery',
             'Jeep', 'JAC Motors', 'Audi', 'Fiat', 'Honda',
-            'Suzuki', 'Mazda', 'Geely', 'Land Rover', 'Renault'
+            'Suzuki', 'Mazda', 'Geely', 'Land Rover', 'Renault',
         ];
 
         // Idempotente: omite las marcas que ya existen.

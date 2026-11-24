@@ -20,7 +20,7 @@ class ReceptionCancellationSeeder extends Seeder
             $reception = isset($scenario['cancel']) ? ExampleScenarios::reception($scenario) : null;
 
             // Idempotente: una recepción ya cancelada no se toca.
-            if (!$reception || $reception->status === ReceptionStatus::CANCELLED) {
+            if (! $reception || $reception->status === ReceptionStatus::CANCELLED) {
                 continue;
             }
 

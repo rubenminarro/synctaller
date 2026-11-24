@@ -35,8 +35,7 @@ class ClaimService
     public function __construct(
         protected ReceptionStatusService $receptionStatusService,
         protected DocumentSequenceService $documentSequences
-    ) {
-    }
+    ) {}
 
     public function create(array $data, User $user): Claim
     {
@@ -95,7 +94,7 @@ class ClaimService
                 $this->ensureUniqueClaimNumber($claim->insurer_id, $data['claim_number'], $claim->id);
             }
 
-            if (array_key_exists('deductible_amount', $data) && !$this->sameAmount($claim->deductible_amount, $data['deductible_amount'])) {
+            if (array_key_exists('deductible_amount', $data) && ! $this->sameAmount($claim->deductible_amount, $data['deductible_amount'])) {
                 $this->ensureDeductibleNotInvoiced($claim);
                 $this->ensureDeductibleCoversAllocations($claim, $data['deductible_amount']);
             }
@@ -172,7 +171,7 @@ class ClaimService
 
         if (bccomp($allocated, '0', 2) > 0 && ($deductible === null || bccomp((string) $deductible, $allocated, 2) < 0)) {
             throw new ClaimException(
-                'El deducible no puede quedar por debajo de lo ya asignado en los repartos confirmados (' . Format::money($allocated) . '): corrija primero el reparto.',
+                'El deducible no puede quedar por debajo de lo ya asignado en los repartos confirmados ('.Format::money($allocated).'): corrija primero el reparto.',
                 422,
                 'CLAIM_DEDUCTIBLE_BELOW_ALLOCATED'
             );
@@ -261,7 +260,7 @@ class ClaimService
     {
         if ($claim->status !== ClaimStatus::OPEN) {
             throw new ClaimException(
-                'El siniestro está ' . mb_strtolower($claim->status->label()) . " y no puede {$action}.",
+                'El siniestro está '.mb_strtolower($claim->status->label())." y no puede {$action}.",
                 422,
                 $errorCode
             );

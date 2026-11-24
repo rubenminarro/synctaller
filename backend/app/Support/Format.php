@@ -13,7 +13,7 @@ class Format
      */
     public static function money(int|float|string|null $amount): string
     {
-        return 'Gs. ' . self::integer($amount);
+        return 'Gs. '.self::integer($amount);
     }
 
     /**

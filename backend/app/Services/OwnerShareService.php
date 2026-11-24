@@ -85,7 +85,7 @@ class OwnerShareService
      */
     public function currentAuthorization(Budget $budget, ?Claim $claim): ?InsurerAuthorization
     {
-        if (!$claim) {
+        if (! $claim) {
             return null;
         }
 
@@ -110,7 +110,7 @@ class OwnerShareService
      */
     public function budgetOwnerAmount(Budget $budget): string
     {
-        if (!$this->hasInsurerItems($budget)) {
+        if (! $this->hasInsurerItems($budget)) {
             return Decimal::of($budget->subtotal, 2);
         }
 
@@ -134,7 +134,7 @@ class OwnerShareService
         $authorized = $this->hasInsurerItems($workOrder->budget) ? $this->authorizedByItem($workOrder->budget, $claim) : null;
 
         return $workOrder->items->reduce(function (string $sum, WorkOrderItem $item) use ($workOrder, $claim, $authorized) {
-            if (!$item->budgetItem) {
+            if (! $item->budgetItem) {
                 return $sum;
             }
 
@@ -153,7 +153,7 @@ class OwnerShareService
     {
         $workOrder->loadMissing(['budget', 'parts']);
 
-        if (!$workOrder->budget || !$this->hasInsurerItems($workOrder->budget)) {
+        if (! $workOrder->budget || ! $this->hasInsurerItems($workOrder->budget)) {
             return null;
         }
 
@@ -168,7 +168,7 @@ class OwnerShareService
         $acceptedDeductible = $acceptance?->deductible_amount;
         $deductibleIncreased = $currentDeductible !== null && bccomp((string) $currentDeductible, (string) ($acceptedDeductible ?? '0'), 2) > 0;
 
-        if (!$exceeded && !$deductibleIncreased) {
+        if (! $exceeded && ! $deductibleIncreased) {
             return null;
         }
 
@@ -200,11 +200,11 @@ class OwnerShareService
     }
 
     /**
-     * @param Collection<int, string>|null $authorized
+     * @param  Collection<int, string>|null  $authorized
      */
     private function ownerShare(BudgetItem $item, string $amount, bool $hasOpenClaim, ?Collection $authorized): string
     {
-        if ($item->responsibility !== BudgetItemResponsibility::INSURER || !$hasOpenClaim) {
+        if ($item->responsibility !== BudgetItemResponsibility::INSURER || ! $hasOpenClaim) {
             return $amount;
         }
 
@@ -221,7 +221,7 @@ class OwnerShareService
     /**
      * Venta potencial de un ítem de la OT (como el cierre, pero lo pendiente por lo previsto).
      *
-     * @param Collection<int, WorkOrderPart> $lines
+     * @param  Collection<int, WorkOrderPart>  $lines
      */
     private function potentialSale(WorkOrderItem $item, Collection $lines): string
     {
@@ -249,7 +249,7 @@ class OwnerShareService
     /**
      * Extras aprobados por el cliente: [importe aprobado (cantidad × precio), importe potencial].
      *
-     * @param Collection<int, WorkOrderPart> $parts
+     * @param  Collection<int, WorkOrderPart>  $parts
      * @return array{0: string, 1: string}
      */
     private function extras(Collection $parts): array

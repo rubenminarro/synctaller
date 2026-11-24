@@ -22,8 +22,7 @@ class MechanicCommissionController extends Controller implements HasMiddleware
 
     public function __construct(
         protected WorkOrderCommissionService $commissionService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {
@@ -37,7 +36,7 @@ class MechanicCommissionController extends Controller implements HasMiddleware
     {
         // Sin permiso para ver todas, cada mecánico ve solo las propias.
         if (
-            !$request->user()->can('mechanic-commissions.view-all') &&
+            ! $request->user()->can('mechanic-commissions.view-all') &&
             (int) $mechanic->user_id !== (int) $request->user()->id
         ) {
             return $this->errorResponse(

@@ -36,7 +36,7 @@ class SystemFaviconTest extends PartsTestCase
     {
         $png = $this->pngContent($size, $size);
         $dimension = $size >= 256 ? 0 : $size;
-        $content = pack('vvv', 0, 1, 1) . pack('CCCCvvVV', $dimension, $dimension, 0, 0, 1, 32, strlen($png), 22) . $png;
+        $content = pack('vvv', 0, 1, 1).pack('CCCCvvVV', $dimension, $dimension, 0, 0, 1, 32, strlen($png), 22).$png;
 
         return UploadedFile::fake()->createWithContent('favicon.ico', $content);
     }
@@ -45,7 +45,7 @@ class SystemFaviconTest extends PartsTestCase
     {
         return UploadedFile::fake()->createWithContent(
             'favicon.svg',
-            '<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">' . $body . '</svg>'
+            '<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">'.$body.'</svg>'
         );
     }
 

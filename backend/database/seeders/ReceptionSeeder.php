@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Reception;
+use App\Models\ReceptionCheckList;
 use App\Models\ServiceCategory;
 use App\Models\Vehicle;
-use App\Models\ReceptionCheckList;
 use App\Services\ReceptionChecklistService;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -23,7 +23,7 @@ class ReceptionSeeder extends Seeder
             $vehicle = Vehicle::where('plate', $scenario['plate'])->first();
 
             // Idempotente: la visita del escenario ya existe (aunque esté eliminada).
-            if (!$vehicle || ExampleScenarios::reception($scenario)) {
+            if (! $vehicle || ExampleScenarios::reception($scenario)) {
                 continue;
             }
 

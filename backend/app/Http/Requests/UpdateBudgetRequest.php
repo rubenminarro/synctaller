@@ -19,7 +19,7 @@ class UpdateBudgetRequest extends FormRequest
                 'nullable',
                 'string',
                 'max:500',
-                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u'
+                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u',
             ],
 
         ];
@@ -35,5 +35,4 @@ class UpdateBudgetRequest extends FormRequest
             ],
         ];
     }
-
 }

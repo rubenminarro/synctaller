@@ -14,8 +14,9 @@ enum ClaimDocumentType: string
     case PHOTO = 'photo';
     case OTHER = 'other';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::LOSS_REPORT => 'Denuncia',
             self::POLICY => 'Póliza',
             self::ADJUSTER_REPORT => 'Informe del perito',

@@ -29,7 +29,7 @@ class MechanicSeeder extends Seeder
         foreach ($mechanics as [$email, $code, $specialty, $years, $hourCost, $commission, $status, $notes]) {
             $userId = User::where('email', $email)->value('id');
 
-            if (!$userId) {
+            if (! $userId) {
                 continue;
             }
 

@@ -9,8 +9,9 @@ enum PaymentMethod: string
     case TRANSFER = 'transfer';
     case CHECK = 'check';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::CASH => 'Efectivo',
             self::CARD => 'Tarjeta',
             self::TRANSFER => 'Transferencia',

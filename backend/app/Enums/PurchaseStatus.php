@@ -8,8 +8,9 @@ enum PurchaseStatus: string
     case RECEIVED = 'received';
     case CANCELLED = 'cancelled';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::DRAFT => 'Borrador',
             self::RECEIVED => 'Recibida',
             self::CANCELLED => 'Anulada',

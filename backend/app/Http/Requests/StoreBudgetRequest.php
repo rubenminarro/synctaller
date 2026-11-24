@@ -15,15 +15,15 @@ class StoreBudgetRequest extends FormRequest
     public function rules(): array
     {
         return [
-           'reception_id' => [
+            'reception_id' => [
                 'required',
-                Rule::exists('receptions', 'id')
+                Rule::exists('receptions', 'id'),
             ],
             'notes' => [
-                'nullable', 
-                'string', 
-                'max:500', 
-                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u'
+                'nullable',
+                'string',
+                'max:500',
+                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u',
             ],
         ];
     }

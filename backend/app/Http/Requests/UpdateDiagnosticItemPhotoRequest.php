@@ -27,7 +27,7 @@ class UpdateDiagnosticItemPhotoRequest extends FormRequest
                 'nullable',
                 'string',
                 'regex:/^[\pL\pN\s.,!?-]*$/u',
-                'max:255'
+                'max:255',
             ],
         ];
     }

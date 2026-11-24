@@ -18,9 +18,9 @@ class UpdateRoleRequest extends FormRequest
 
         return [
             'name' => [
-                'required', 
+                'required',
                 'string',
-                'alpha_dash', 
+                'alpha_dash',
                 'lowercase',
                 'min:4',
                 'max:200',
@@ -28,10 +28,10 @@ class UpdateRoleRequest extends FormRequest
             ],
             'description' => [
                 'required',
-                'string', 
-                'min:10', 
-                'max:100', 
-                'regex:/^[a-zA-Z\sñÑáéíóúÁÉÍÓÚ]+$/u'
+                'string',
+                'min:10',
+                'max:100',
+                'regex:/^[a-zA-Z\sñÑáéíóúÁÉÍÓÚ]+$/u',
             ],
             'guard_name' => [
                 'required',
@@ -40,7 +40,7 @@ class UpdateRoleRequest extends FormRequest
             ],
             'permissions' => [
                 'sometimes',
-                'array'
+                'array',
             ],
             'permissions.*' => [
                 Rule::exists('permissions', 'name'),

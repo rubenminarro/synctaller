@@ -26,7 +26,7 @@ class ClaimsReportRequest extends ReportRequest
         return [
             ...parent::messages(),
             'insurer_id.integer' => 'La aseguradora no es válida.',
-            'status.' . Enum::class => 'El estado debe ser open, closed o cancelled.',
+            'status.'.Enum::class => 'El estado debe ser open, closed o cancelled.',
         ];
     }
 

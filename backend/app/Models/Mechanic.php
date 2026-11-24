@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
+use App\Enums\MechanicStatus;
 use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Enums\MechanicStatus;
 
 class Mechanic extends Model
 {
@@ -53,6 +53,6 @@ class Mechanic extends Model
 
     public function fullName(): string
     {
-        return trim(($this->user?->first_name ?? '') . ' ' . ($this->user?->last_name ?? ''));
+        return trim(($this->user?->first_name ?? '').' '.($this->user?->last_name ?? ''));
     }
 }

@@ -17,12 +17,11 @@ use Symfony\Component\Mime\Email;
 class ClientNotificationMail extends Mailable
 {
     /**
-     * @param array{subject: string, greeting: string, lines: string[], rows: array<int, array<string, string>>, attachments?: array<int, array{filename: string, content: string}>} $content
+     * @param  array{subject: string, greeting: string, lines: string[], rows: array<int, array<string, string>>, attachments?: array<int, array{filename: string, content: string}>}  $content
      */
     public function __construct(
         public readonly array $content
-    ) {
-    }
+    ) {}
 
     public function envelope(): Envelope
     {

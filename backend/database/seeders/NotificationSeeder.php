@@ -83,7 +83,7 @@ class NotificationSeeder extends Seeder
             ->latest('id')
             ->first();
 
-        if (!$notification) {
+        if (! $notification) {
             return;
         }
 

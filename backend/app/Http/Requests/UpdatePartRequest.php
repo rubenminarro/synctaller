@@ -2,10 +2,9 @@
 
 namespace App\Http\Requests;
 
-
+use App\Enums\PartUnit;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Enums\PartUnit;
 use Illuminate\Validation\Rules\Enum;
 
 class UpdatePartRequest extends FormRequest
@@ -144,5 +143,4 @@ class UpdatePartRequest extends FormRequest
             ],
         ];
     }
-    
 }

@@ -25,7 +25,7 @@ final class LogoImage
     {
         $image = @imagecreatefromstring($content);
 
-        if (!$image instanceof GdImage || !self::hasTransparency($image)) {
+        if (! $image instanceof GdImage || ! self::hasTransparency($image)) {
             return ['logo' => $content, 'black' => null];
         }
 

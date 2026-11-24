@@ -11,8 +11,9 @@ enum WorkOrderPartStatus: string
     case RETURNED = 'returned';
     case CANCELLED = 'cancelled';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::AWAITING_APPROVAL => 'Pendiente de aprobación',
             self::PENDING => 'Pendiente de stock',
             self::RESERVED => 'Reservado',

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Http\Requests\DecideBudgetRequest;
 use App\Http\Requests\StoreBudgetRequest;
 use App\Http\Requests\UpdateBudgetRequest;
@@ -14,9 +13,10 @@ use App\Services\BudgetService;
 use App\Services\DocumentPdfService;
 use App\Traits\ApiResponse;
 use App\Traits\FileResponse;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\Auth;
 
 class BudgetController extends Controller implements HasMiddleware
 {
@@ -24,8 +24,7 @@ class BudgetController extends Controller implements HasMiddleware
 
     public function __construct(
         protected BudgetService $budgetService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {
@@ -45,7 +44,7 @@ class BudgetController extends Controller implements HasMiddleware
 
     public function index(Request $request)
     {
-        
+
         $search = trim($request->input('search', ''));
 
         $query = Budget::query()
@@ -59,7 +58,6 @@ class BudgetController extends Controller implements HasMiddleware
 
         $query->when($request->filled('search'), function ($query) use ($search) {
 
-    
             $query->where(function ($q) use ($search) {
 
                 if (is_numeric($search)) {
@@ -69,8 +67,8 @@ class BudgetController extends Controller implements HasMiddleware
                 }
 
                 $q->orWhere('code', 'like', "%{$search}%")
-                ->orWhere('status', 'like', "%{$search}%")
-                ->orWhere('notes', 'like', "%{$search}%");
+                    ->orWhere('status', 'like', "%{$search}%")
+                    ->orWhere('notes', 'like', "%{$search}%");
 
                 $q->orWhereHas('reception.client', function ($clientQuery) use ($search) {
 
@@ -86,21 +84,21 @@ class BudgetController extends Controller implements HasMiddleware
                         );
 
                 })
-                ->orWhereHas('reception.vehicle', function ($vehicleQuery) use ($search) {
+                    ->orWhereHas('reception.vehicle', function ($vehicleQuery) use ($search) {
 
-                    $vehicleQuery->where('plate', 'like', "%{$search}%")
-                        ->orWhere('chassis', 'like', "%{$search}%")
-                        ->orWhere('engine_number', 'like', "%{$search}%")
-                        ->orWhere('color', 'like', "%{$search}%");
-                    
-                    if (is_numeric($search)) {
-                        $vehicleQuery->orWhere('year', (int) $search);
-                    }
+                        $vehicleQuery->where('plate', 'like', "%{$search}%")
+                            ->orWhere('chassis', 'like', "%{$search}%")
+                            ->orWhere('engine_number', 'like', "%{$search}%")
+                            ->orWhere('color', 'like', "%{$search}%");
 
-                });
+                        if (is_numeric($search)) {
+                            $vehicleQuery->orWhere('year', (int) $search);
+                        }
+
+                    });
 
             });
-        
+
         });
 
         $query->when($request->filled('reception_id'), function ($q) use ($request) {
@@ -141,14 +139,14 @@ class BudgetController extends Controller implements HasMiddleware
             200,
             [
                 'pagination' => [
-                    'total'       => $budgets->total(),
-                    'perPage'     => $budgets->perPage(),
+                    'total' => $budgets->total(),
+                    'perPage' => $budgets->perPage(),
                     'currentPage' => $budgets->currentPage(),
-                    'lastPage'    => $budgets->lastPage(),
-                ]
+                    'lastPage' => $budgets->lastPage(),
+                ],
             ]
         );
-        
+
     }
 
     public function store(StoreBudgetRequest $request)
@@ -168,7 +166,7 @@ class BudgetController extends Controller implements HasMiddleware
             201
         );
     }
-    
+
     public function show(Budget $budget)
     {
         $this->loadShowRelations($budget);
@@ -183,7 +181,7 @@ class BudgetController extends Controller implements HasMiddleware
     {
         return $this->fileResponse($documentPdfService->budget($budget), 'application/pdf');
     }
-    
+
     public function update(UpdateBudgetRequest $request, Budget $budget)
     {
         $budget = $this->budgetService->update(
@@ -281,5 +279,4 @@ class BudgetController extends Controller implements HasMiddleware
             'clientAcceptances.decidedBy',
         ]);
     }
-    
 }

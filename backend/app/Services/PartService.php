@@ -17,8 +17,7 @@ class PartService
 {
     public function __construct(
         protected DocumentSequenceService $documentSequences
-    ) {
-    }
+    ) {}
 
     public function create(array $data): Part
     {
@@ -104,7 +103,7 @@ class PartService
 
             $this->ensureNotDiscontinued($part);
 
-            if (!$supplier->is_active) {
+            if (! $supplier->is_active) {
                 throw new SupplierException(
                     'El proveedor seleccionado está inactivo.',
                     422,
@@ -120,7 +119,7 @@ class PartService
                 );
             }
 
-            if (!empty($data['is_preferred'])) {
+            if (! empty($data['is_preferred'])) {
                 $this->clearPreferredSupplier($part);
             }
 
@@ -142,7 +141,7 @@ class PartService
 
             $this->ensureNotDiscontinued($part);
 
-            if (!empty($data['is_preferred'])) {
+            if (! empty($data['is_preferred'])) {
                 $this->clearPreferredSupplier($part);
             }
 
@@ -186,7 +185,7 @@ class PartService
 
             $this->ensureNotDiscontinued($part);
 
-            if (!$part->status->canTransitionTo($status)) {
+            if (! $part->status->canTransitionTo($status)) {
                 throw new PartException(
                     "El repuesto no puede pasar de {$part->status->label()} a {$status->label()}.",
                     422,
@@ -206,7 +205,7 @@ class PartService
     {
         $category = PartCategory::findOrFail($categoryId);
 
-        if (!$category->is_active) {
+        if (! $category->is_active) {
             throw new PartException(
                 'La categoría seleccionada está inactiva.',
                 422,

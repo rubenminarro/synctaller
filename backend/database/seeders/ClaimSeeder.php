@@ -39,7 +39,7 @@ class ClaimSeeder extends Seeder
             $data = self::CLAIMS[$scenario['key']] ?? null;
             $reception = $data ? ExampleScenarios::reception($scenario) : null;
 
-            if (!$reception || $reception->claims()->exists()) {
+            if (! $reception || $reception->claims()->exists()) {
                 continue;
             }
 

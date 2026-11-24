@@ -13,8 +13,9 @@ enum InternalExceptionType: string
     // Sobre la OT: el taller absorbe una parte del dueño (se usa en el reparto, M8).
     case WORKSHOP_ABSORPTION = 'workshop_absorption';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::START_WITHOUT_AUTHORIZATION => 'Iniciar sin autorización',
             self::WORKSHOP_ABSORPTION => 'Absorción del taller',
         };
@@ -25,7 +26,7 @@ enum InternalExceptionType: string
      */
     public function subjectType(): string
     {
-        return match($this) {
+        return match ($this) {
             self::START_WITHOUT_AUTHORIZATION => 'budget',
             self::WORKSHOP_ABSORPTION => 'work_order',
         };

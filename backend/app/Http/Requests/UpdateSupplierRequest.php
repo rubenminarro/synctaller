@@ -7,7 +7,6 @@ use Illuminate\Validation\Rule;
 
 class UpdateSupplierRequest extends FormRequest
 {
-    
     public function authorize(): bool
     {
         return true;
@@ -15,9 +14,9 @@ class UpdateSupplierRequest extends FormRequest
 
     public function rules(): array
     {
-        
+
         $supplierId = $this->route('supplier')?->id ?? $this->route('supplier');
-    
+
         return [
             'name' => [
                 'sometimes',
@@ -121,5 +120,4 @@ class UpdateSupplierRequest extends FormRequest
             ],
         ];
     }
-
 }

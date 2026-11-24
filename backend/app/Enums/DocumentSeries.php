@@ -19,7 +19,7 @@ enum DocumentSeries: string
 
     public function prefix(): string
     {
-        return match($this) {
+        return match ($this) {
             self::BUDGET => 'BUD-',
             self::WORK_ORDER => 'OT-',
             self::PURCHASE => 'COM-',
@@ -36,7 +36,7 @@ enum DocumentSeries: string
      */
     public function table(): string
     {
-        return match($this) {
+        return match ($this) {
             self::BUDGET => 'budgets',
             self::WORK_ORDER => 'work_orders',
             self::PURCHASE => 'purchases',

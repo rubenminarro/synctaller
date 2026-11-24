@@ -18,8 +18,9 @@ push ni merge.**
 Antes de editar, confirmar cada punto. Si alguno falta, **detenerse e informar qué falta**.
 
 * Se está en una rama de trabajo, no en `main`.
-* Las suites de lo que cambió (`backend/`, `frontend/` o las dos) pasaron sobre el código actual, en esta sesión o según un resultado
-  que el usuario haya indicado. No suponerlo ni deducirlo de los commits.
+* Los tests puntuales de lo que cambió pasaron sobre el código actual, en esta sesión o según un resultado que el usuario
+  haya indicado (la suite completa solo si el usuario la pidió; la CI la corre en el pull request). No suponerlo ni
+  deducirlo de los commits.
 * El usuario confirmó que la entrega está validada, si requiere revisión manual.
 
 Sin entrega indicada en los argumentos, preguntar cuál es.

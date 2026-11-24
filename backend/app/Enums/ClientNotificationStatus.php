@@ -9,8 +9,9 @@ enum ClientNotificationStatus: string
     case FAILED = 'failed';
     case SKIPPED = 'skipped';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::PENDING => 'Pendiente',
             self::SENT => 'Enviado',
             self::FAILED => 'Fallido',

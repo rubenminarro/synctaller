@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('reception_check_list_id')->constrained()->cascadeOnDelete();
             $table->foreignId('check_list_item_id')->constrained()->restrictOnDelete();
-            $table->string('value')->nullable(); 
+            $table->string('value')->nullable();
             $table->text('observation')->nullable();
             $table->timestamps();
         });

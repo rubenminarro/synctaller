@@ -25,7 +25,7 @@ class WorkshopSettingService
 
         foreach (WorkshopSettings::FIELDS as $field => $key) {
             if ($stored->has($key)) {
-                if (!array_key_exists($key, $this->originals)) {
+                if (! array_key_exists($key, $this->originals)) {
                     $this->originals[$key] = config($key);
                 }
 
@@ -72,7 +72,7 @@ class WorkshopSettingService
 
         $warnings = (int) config('invoice.default_tax_rate') === $previousRate ? [] : [
             'La tasa de IVA nueva se aplica a los cálculos desde ahora, también en los documentos en curso: un presupuesto '
-            . 'ya aprobado se facturará con esta tasa. Lo ya emitido no cambia.',
+            .'ya aprobado se facturará con esta tasa. Lo ya emitido no cambia.',
         ];
 
         return ['settings' => $this->all(), 'warnings' => $warnings];

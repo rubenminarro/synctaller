@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -16,16 +17,16 @@ class StoreUserRequest extends FormRequest
     {
         return [
             'name' => [
-                'required', 
-                'string', 
-                'alpha_dash', 
+                'required',
+                'string',
+                'alpha_dash',
                 'lowercase',
                 'min:4',
                 'max:20',
                 Rule::unique('users', 'name'),
             ],
             'email' => [
-                'required', 
+                'required',
                 config('validation.email_dns') ? 'email:rfc,dns' : 'email:rfc',
                 'max:50',
                 'lowercase',
@@ -43,25 +44,25 @@ class StoreUserRequest extends FormRequest
             ],
             'password_confirmation' => [
                 'required',
-                'same:password'
+                'same:password',
             ],
             'role' => [
                 'required',
-                Rule::exists('roles', 'name')
+                Rule::exists('roles', 'name'),
             ],
             'first_name' => [
                 'required',
-                'string', 
-                'min:2', 
-                'max:100', 
-                'regex:/^[a-zA-Z\sñÑáéíóúÁÉÍÓÚ]+$/u'
+                'string',
+                'min:2',
+                'max:100',
+                'regex:/^[a-zA-Z\sñÑáéíóúÁÉÍÓÚ]+$/u',
             ],
             'last_name' => [
                 'required',
-                'string', 
-                'min:2', 
-                'max:100', 
-                'regex:/^[a-zA-Z\sñÑáéíóúÁÉÍÓÚ]+$/u'
+                'string',
+                'min:2',
+                'max:100',
+                'regex:/^[a-zA-Z\sñÑáéíóúÁÉÍÓÚ]+$/u',
             ],
         ];
     }
@@ -91,7 +92,7 @@ class StoreUserRequest extends FormRequest
                 'min' => 'La contraseña debe tener mínimo de 12 caracteres.',
                 'password.mixed' => 'La contraseña debe contener al menos una letra mayúscula y una letra minúscula.',
                 'password.numbers' => 'La contraseña debe contener al menos un número.',
-                'password.symbols' => 'La contraseña debe contener al menos un símbolo.',       
+                'password.symbols' => 'La contraseña debe contener al menos un símbolo.',
                 'password.letters' => 'La contraseña debe contener al menos una letra.',
                 'password.uncompromised' => 'La contraseña ha sido expuesta en una filtración de datos. Por favor, elige una contraseña diferente.',
             ],

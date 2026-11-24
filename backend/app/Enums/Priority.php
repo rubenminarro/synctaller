@@ -9,8 +9,9 @@ enum Priority: string
     case HIGH = 'high';
     case CRITICAL = 'critical';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::LOW => 'Baja',
             self::MEDIUM => 'Media',
             self::HIGH => 'Alta',

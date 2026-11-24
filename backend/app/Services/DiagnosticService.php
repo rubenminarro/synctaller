@@ -14,8 +14,7 @@ class DiagnosticService
 {
     public function __construct(
         protected ReceptionStatusService $receptionStatusService
-    ) {
-    }
+    ) {}
 
     /**
      * Editar o eliminar el diagnóstico: solo con la recepción abierta.

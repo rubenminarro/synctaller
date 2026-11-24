@@ -24,7 +24,8 @@ class DocumentSequenceService
      * por la serie) responde 409 DOCUMENT_CODE_CONFLICT, nunca 500.
      *
      * @template T of Model
-     * @param Closure(string): T $create
+     *
+     * @param  Closure(string): T  $create
      * @return T
      */
     public function create(DocumentSeries $series, Closure $create): Model
@@ -56,7 +57,7 @@ class DocumentSequenceService
         $value = (int) $sequence->next_value;
 
         do {
-            $code = $series->prefix() . str_pad((string) $value, 6, '0', STR_PAD_LEFT);
+            $code = $series->prefix().str_pad((string) $value, 6, '0', STR_PAD_LEFT);
             $value++;
         } while (DB::table($series->table())->where('code', $code)->exists());
 

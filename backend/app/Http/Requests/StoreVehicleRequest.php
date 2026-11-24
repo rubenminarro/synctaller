@@ -5,9 +5,9 @@ namespace App\Http\Requests;
 use App\Enums\FuelType;
 use App\Enums\TransmissionType;
 use App\Enums\VehicleColor;
+use App\Models\VehicleModel;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Models\VehicleModel;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Validation\Validator;
 
@@ -41,15 +41,15 @@ class StoreVehicleRequest extends FormRequest
                 Rule::requiredIf(function () {
                     return $this->boolean('no_plate');
                 }),
-                'string', 
+                'string',
                 'max:50',
-                Rule::unique('vehicles', 'chassis')
+                Rule::unique('vehicles', 'chassis'),
             ],
             'plate' => [
                 'nullable',
                 'required_if:no_plate,false,0',
-                'string', 
-                'max:20', 
+                'string',
+                'max:20',
                 'regex:/^[A-Z0-9-]+$/i',
                 Rule::unique('vehicles', 'plate'),
             ],
@@ -92,10 +92,10 @@ class StoreVehicleRequest extends FormRequest
                 'max:50',
             ],
             'notes' => [
-                'nullable', 
-                'string', 
-                'max:500', 
-                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u'
+                'nullable',
+                'string',
+                'max:500',
+                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u',
             ],
         ];
     }
@@ -106,17 +106,17 @@ class StoreVehicleRequest extends FormRequest
             'client_id' => [
                 'required' => 'El cliente es obligatorio.',
                 'integer' => 'El ID del cliente debe ser un número entero.',
-                'exists' => 'El cliente seleccionado no existe.'
+                'exists' => 'El cliente seleccionado no existe.',
             ],
             'brand_id' => [
                 'required' => 'La marca es obligatoria.',
                 'integer' => 'El ID de la marca debe ser un número entero.',
-                'exists' => 'La marca seleccionada no existe.'
+                'exists' => 'La marca seleccionada no existe.',
             ],
             'vehicle_model_id' => [
                 'required' => 'El modelo es obligatorio.',
                 'integer' => 'El ID del modelo debe ser un número entero.',
-                'exists' => 'El modelo seleccionado no existe.'
+                'exists' => 'El modelo seleccionado no existe.',
             ],
             'chassis' => [
                 'required_if' => 'El chasis es obligatorio si el vehículo no tiene chapa.',
@@ -133,7 +133,7 @@ class StoreVehicleRequest extends FormRequest
             ],
             'no_plate' => [
                 'required' => 'Debe indicar si el vehículo tiene chapa.',
-                'boolean' => 'El campo sin chapa debe ser verdadero o falso.'
+                'boolean' => 'El campo sin chapa debe ser verdadero o falso.',
             ],
             'year' => [
                 'integer' => 'El año debe ser un número entero.',
@@ -144,7 +144,7 @@ class StoreVehicleRequest extends FormRequest
             'color' => [
                 'string' => 'El color debe ser una cadena de texto.',
                 Enum::class => 'El color seleccionado no es válido.',
-                'max' => 'El color no debe tener más de 30 caracteres.',  
+                'max' => 'El color no debe tener más de 30 caracteres.',
             ],
             'engine_number' => [
                 'string' => 'El número de motor debe ser una cadena de texto.',
@@ -175,7 +175,7 @@ class StoreVehicleRequest extends FormRequest
     public function withValidator(Validator $validator)
     {
         $validator->after(function (Validator $validator) {
-            
+
             $brandId = $this->brand_id;
             $vehicleModelId = $this->vehicle_model_id;
 
@@ -184,7 +184,7 @@ class StoreVehicleRequest extends FormRequest
                     ->where('brand_id', $brandId)
                     ->exists();
 
-                if (!$exists) {
+                if (! $exists) {
                     $validator->errors()->add(
                         'vehicle_model_id',
                         'El modelo seleccionado no pertenece a la marca indicada.'

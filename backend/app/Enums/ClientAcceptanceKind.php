@@ -13,8 +13,9 @@ enum ClientAcceptanceKind: string
     case REJECTION = 'rejection';
     case RE_ACCEPTANCE = 're_acceptance';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::APPROVAL => 'Aprobación',
             self::REJECTION => 'Rechazo',
             self::RE_ACCEPTANCE => 'Re-aceptación',

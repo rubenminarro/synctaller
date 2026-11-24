@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Enums\DiagnosticItemTemplateStatus;
 use App\Enums\Severity;
 use App\Models\DiagnosticItemTemplate;
 use App\Models\ServiceCategory;

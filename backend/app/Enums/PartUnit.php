@@ -11,8 +11,9 @@ enum PartUnit: string
     case SET = 'set';
     case KIT = 'kit';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::UNIT => 'Unidad',
             self::LITER => 'Litro',
             self::KILOGRAM => 'Kilogramo',

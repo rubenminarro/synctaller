@@ -19,8 +19,7 @@ class MaintenancePlanController extends Controller implements HasMiddleware
 
     public function __construct(
         protected MaintenanceService $maintenanceService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {
@@ -37,7 +36,7 @@ class MaintenancePlanController extends Controller implements HasMiddleware
     {
         $plans = MaintenancePlan::query()
             ->with('service')
-            ->when($request->filled('search'), fn ($q) => $q->where('name', 'like', '%' . trim($request->search) . '%'))
+            ->when($request->filled('search'), fn ($q) => $q->where('name', 'like', '%'.trim($request->search).'%'))
             ->when($request->has('is_active'), fn ($q) => $q->where('is_active', $request->boolean('is_active')))
             ->orderBy('name')
             ->get();

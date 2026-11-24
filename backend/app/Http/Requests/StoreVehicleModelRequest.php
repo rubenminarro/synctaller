@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreVehicleModelRequest extends FormRequest
 {
@@ -19,7 +19,7 @@ class StoreVehicleModelRequest extends FormRequest
                 'required',
                 'min:2',
                 'max:100',
-                'string', 
+                'string',
                 'regex:/^[\pL\pN\s-]+$/u',
                 Rule::unique('vehicle_models', 'name'),
             ],
@@ -36,16 +36,16 @@ class StoreVehicleModelRequest extends FormRequest
         return [
             'name' => [
                 'required' => 'El nombre del modelo de vehículo es obligatorio.',
-                'string'   => 'El nombre del modelo de vehículo debe tener el formato correcto.',
-                'min'      => 'El nombre del modelo de vehículo debe tener al menos 2 caracteres.',
-                'max'      => 'El nombre del modelo de vehículo no debe tener más de 100 caracteres.',
-                'regex'    => 'El nombre del modelo de vehículo solo puede contener letras, números y guiones.',
-                'unique'   => 'Este modelo de vehículo ya existe en el sistema.',
+                'string' => 'El nombre del modelo de vehículo debe tener el formato correcto.',
+                'min' => 'El nombre del modelo de vehículo debe tener al menos 2 caracteres.',
+                'max' => 'El nombre del modelo de vehículo no debe tener más de 100 caracteres.',
+                'regex' => 'El nombre del modelo de vehículo solo puede contener letras, números y guiones.',
+                'unique' => 'Este modelo de vehículo ya existe en el sistema.',
             ],
             'brand_id' => [
                 'required' => 'El ID de la marca es obligatorio.',
-                'integer'  => 'El ID de la marca debe ser un número entero.',
-                'exists'   => 'La marca seleccionada no existe.',
+                'integer' => 'El ID de la marca debe ser un número entero.',
+                'exists' => 'La marca seleccionada no existe.',
             ],
         ];
     }

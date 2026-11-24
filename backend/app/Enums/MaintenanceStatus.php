@@ -12,8 +12,9 @@ enum MaintenanceStatus: string
     case DUE_SOON = 'due_soon';
     case OVERDUE = 'overdue';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::UNKNOWN => 'Sin registro',
             self::OK => 'Al día',
             self::DUE_SOON => 'Por vencer',
@@ -26,7 +27,7 @@ enum MaintenanceStatus: string
      */
     public function severity(): int
     {
-        return match($this) {
+        return match ($this) {
             self::UNKNOWN => 0,
             self::OK => 1,
             self::DUE_SOON => 2,

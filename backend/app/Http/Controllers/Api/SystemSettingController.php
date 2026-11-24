@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\UploadSystemFaviconRequest;
 use App\Http\Requests\UpdateWorkshopSettingsRequest;
+use App\Http\Requests\UploadSystemFaviconRequest;
 use App\Http\Requests\UploadSystemLogoRequest;
 use App\Services\BrandingService;
 use App\Services\WorkshopSettingService;
@@ -23,8 +23,7 @@ class SystemSettingController extends Controller implements HasMiddleware
     public function __construct(
         private readonly BrandingService $brandingService,
         private readonly WorkshopSettingService $workshopSettingService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {

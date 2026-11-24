@@ -35,7 +35,7 @@ class UpdateWorkOrderRequest extends FormRequest
         return [
             'mechanic_id' => [
                 'integer' => 'El ID del mecánico debe ser un número entero.',
-                'exists' => 'El mecánico seleccionado no existe.'
+                'exists' => 'El mecánico seleccionado no existe.',
             ],
             'notes' => [
                 'string' => 'Las notas deben ser un texto válido.',

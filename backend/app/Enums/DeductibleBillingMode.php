@@ -13,8 +13,9 @@ enum DeductibleBillingMode: string
 {
     case NET_OF_DEDUCTIBLE = 'net_of_deductible';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::NET_OF_DEDUCTIBLE => 'Neta del deducible',
         };
     }

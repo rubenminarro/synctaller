@@ -65,14 +65,14 @@ class ClientService
         }
 
         DB::transaction(function () use ($client) {
-            $suffix = '//deleted_' . now()->timestamp;
+            $suffix = '//deleted_'.now()->timestamp;
 
             if ($client->document_number) {
-                $client->document_number = substr($client->document_number . $suffix, 0, 30);
+                $client->document_number = substr($client->document_number.$suffix, 0, 30);
             }
 
             if ($client->email) {
-                $client->email = $client->email . $suffix;
+                $client->email = $client->email.$suffix;
             }
 
             $client->save();

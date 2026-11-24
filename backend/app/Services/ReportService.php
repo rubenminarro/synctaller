@@ -12,8 +12,8 @@ use App\Enums\ReceptionStatus;
 use App\Enums\WorkOrderStatus;
 use App\Models\Budget;
 use App\Models\Client;
-use App\Models\InventoryMovement;
 use App\Models\Insurer;
+use App\Models\InventoryMovement;
 use App\Models\Invoice;
 use App\Models\InvoiceCreditNote;
 use App\Models\Mechanic;
@@ -45,11 +45,10 @@ class ReportService
     public function __construct(
         protected PaymentService $paymentService,
         protected MaintenanceService $maintenanceService
-    ) {
-    }
+    ) {}
 
     /**
-     * @param string[] $allowed bloques que el usuario puede ver
+     * @param  string[]  $allowed  bloques que el usuario puede ver
      */
     public function dashboard(array $allowed): array
     {
@@ -475,7 +474,7 @@ class ReportService
                 ];
             })
             ->filter(fn (array $row) => bccomp($row['balance'], '0', 2) > 0)
-            ->filter(fn (array $row) => !$recipientType || $row['type'] === $recipientType)
+            ->filter(fn (array $row) => ! $recipientType || $row['type'] === $recipientType)
             ->values();
 
         $types = $recipientType ? [$recipientType] : InvoiceRecipientType::cases();

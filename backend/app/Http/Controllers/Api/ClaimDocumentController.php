@@ -25,8 +25,7 @@ class ClaimDocumentController extends Controller implements HasMiddleware
 
     public function __construct(
         protected ClaimDocumentService $documentService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {

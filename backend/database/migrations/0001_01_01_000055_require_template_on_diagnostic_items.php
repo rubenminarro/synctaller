@@ -25,11 +25,11 @@ return new class extends Migration
                     ->where('title', $item->title)
                     ->value('id');
 
-                if (!$templateId) {
+                if (! $templateId) {
                     $nextId = (DB::table('diagnostic_item_templates')->max('id') ?? 0) + 1;
 
                     $templateId = DB::table('diagnostic_item_templates')->insertGetId([
-                        'code' => 'DIA-' . str_pad($nextId, 6, '0', STR_PAD_LEFT),
+                        'code' => 'DIA-'.str_pad($nextId, 6, '0', STR_PAD_LEFT),
                         'title' => $item->title,
                         'severity' => $item->severity,
                         'requires_repair' => $item->requires_repair,

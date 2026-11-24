@@ -2,6 +2,4 @@
 
 namespace App\Exceptions;
 
-class WorkOrderException extends AppException
-{
-}
+class WorkOrderException extends AppException {}

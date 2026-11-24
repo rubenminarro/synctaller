@@ -12,8 +12,9 @@ enum FuelType: string
     case GLP = 'glp';
     case GNV = 'gnv';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::GASOLINE => 'Gasolina',
             self::DIESEL => 'Diésel',
             self::ELECTRIC => 'Eléctrico',

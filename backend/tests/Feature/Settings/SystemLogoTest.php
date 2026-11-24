@@ -225,12 +225,12 @@ class SystemLogoTest extends PartsTestCase
             'rows' => [],
         ]);
 
-        $this->assertStringNotContainsString('cid:' . BrandingService::MAIL_LOGO_CID, $mail->render());
+        $this->assertStringNotContainsString('cid:'.BrandingService::MAIL_LOGO_CID, $mail->render());
 
         $this->actingAsAdmin();
         $this->uploadLogo()->assertOk();
 
-        $this->assertStringContainsString('cid:' . BrandingService::MAIL_LOGO_CID, $mail->render());
+        $this->assertStringContainsString('cid:'.BrandingService::MAIL_LOGO_CID, $mail->render());
 
         // La imagen viaja como parte inline del mensaje (el mailer de los tests es "array").
         $sent = null;

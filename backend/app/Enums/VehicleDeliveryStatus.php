@@ -7,8 +7,9 @@ enum VehicleDeliveryStatus: string
     case DELIVERED = 'delivered';
     case CANCELLED = 'cancelled';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::DELIVERED => 'Entregado',
             self::CANCELLED => 'Anulado',
         };

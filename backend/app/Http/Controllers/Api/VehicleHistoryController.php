@@ -21,8 +21,7 @@ class VehicleHistoryController extends Controller implements HasMiddleware
 
     public function __construct(
         protected VehicleHistoryService $historyService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {
@@ -62,11 +61,11 @@ class VehicleHistoryController extends Controller implements HasMiddleware
             200,
             [
                 'pagination' => [
-                    'total'       => $timeline->total(),
-                    'perPage'     => $timeline->perPage(),
+                    'total' => $timeline->total(),
+                    'perPage' => $timeline->perPage(),
                     'currentPage' => $timeline->currentPage(),
-                    'lastPage'    => $timeline->lastPage(),
-                ]
+                    'lastPage' => $timeline->lastPage(),
+                ],
             ]
         );
     }
@@ -81,11 +80,11 @@ class VehicleHistoryController extends Controller implements HasMiddleware
             200,
             [
                 'pagination' => [
-                    'total'       => $parts->total(),
-                    'perPage'     => $parts->perPage(),
+                    'total' => $parts->total(),
+                    'perPage' => $parts->perPage(),
                     'currentPage' => $parts->currentPage(),
-                    'lastPage'    => $parts->lastPage(),
-                ]
+                    'lastPage' => $parts->lastPage(),
+                ],
             ]
         );
     }

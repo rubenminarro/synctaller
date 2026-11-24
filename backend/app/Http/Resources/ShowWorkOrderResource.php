@@ -2,14 +2,14 @@
 
 namespace App\Http\Resources;
 
-use App\Services\WorkOrderClosingService;
 use App\Models\Invoice;
 use App\Services\AllocationService;
-use Illuminate\Support\Collection;
 use App\Services\OwnerShareService;
+use App\Services\WorkOrderClosingService;
 use App\Services\WorkOrderCommissionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Collection;
 
 class ShowWorkOrderResource extends JsonResource
 {

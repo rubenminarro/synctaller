@@ -4,15 +4,15 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\AuditEvent;
 use App\Http\Controllers\Controller;
-use App\Services\AuditLogger;
-use Illuminate\Http\Request;
 use App\Http\Requests\StoreRoleRequest;
 use App\Http\Requests\UpdateRoleRequest;
-use App\Http\Resources\ShowRoleResource;
 use App\Http\Resources\RolesResource;
-use App\Models\Role;
+use App\Http\Resources\ShowRoleResource;
 use App\Models\Permission;
+use App\Models\Role;
+use App\Services\AuditLogger;
 use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
@@ -39,10 +39,10 @@ class RoleController extends Controller implements HasMiddleware
             $query->where('name', 'like', "%{$search}%")
                 ->orWhere('description', 'like', "%{$search}%");
         })
-        ->latest()
-        ->paginate(
-            $request->per_page ?? 10
-        );
+            ->latest()
+            ->paginate(
+                $request->per_page ?? 10
+            );
 
         return $this->successResponse(
             'Roles obtenidos correctamente.',
@@ -50,11 +50,11 @@ class RoleController extends Controller implements HasMiddleware
             200,
             [
                 'pagination' => [
-                    'total'       => $roles->total(),
-                    'perPage'     => $roles->perPage(),
+                    'total' => $roles->total(),
+                    'perPage' => $roles->perPage(),
                     'currentPage' => $roles->currentPage(),
-                    'lastPage'    => $roles->lastPage(),
-                ]
+                    'lastPage' => $roles->lastPage(),
+                ],
             ]
         );
     }
@@ -77,7 +77,7 @@ class RoleController extends Controller implements HasMiddleware
     public function show(Role $role)
     {
         return $this->successResponse(
-            'Rol encontrado.', 
+            'Rol encontrado.',
             new ShowRoleResource($role),
             200
         );
@@ -149,10 +149,10 @@ class RoleController extends Controller implements HasMiddleware
         }
 
         $role->delete();
-        
+
         return $this->successResponse(
-            'Rol eliminado correctamente.', 
-            null, 
+            'Rol eliminado correctamente.',
+            null,
             200
         );
     }

@@ -3,19 +3,18 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Http\Resources\CheckListResource;
 use App\Http\Requests\StoreCheckListRequest;
 use App\Http\Requests\UpdateChecklistRequest;
+use App\Http\Resources\CheckListResource;
 use App\Http\Resources\ShowCheckListResource;
 use App\Models\CheckListItem;
 use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
 class CheckListController extends Controller implements HasMiddleware
 {
-    
     use ApiResponse;
 
     public static function middleware(): array
@@ -31,7 +30,7 @@ class CheckListController extends Controller implements HasMiddleware
 
     public function index(Request $request)
     {
-        
+
         $checklists = CheckListItem::when($request->filled('search'), function ($query) use ($request) {
             $search = $request->search;
             // Agrupado: el OR no debe saltarse el filtro por estado.
@@ -39,11 +38,11 @@ class CheckListController extends Controller implements HasMiddleware
                 ->orWhere('type', 'like', "%{$search}%")
                 ->orWhere('required', 'like', "%{$search}%"));
         })
-        ->when($request->has('is_active'), fn ($query) => $query->where('is_active', $request->boolean('is_active')))
-        ->latest()
-        ->paginate(
-            $request->per_page ?? 10
-        );
+            ->when($request->has('is_active'), fn ($query) => $query->where('is_active', $request->boolean('is_active')))
+            ->latest()
+            ->paginate(
+                $request->per_page ?? 10
+            );
 
         return $this->successResponse(
             'Checklist obtenidos correctamente.',
@@ -51,11 +50,11 @@ class CheckListController extends Controller implements HasMiddleware
             200,
             [
                 'pagination' => [
-                    'total'       => $checklists->total(),
-                    'perPage'     => $checklists->perPage(),
+                    'total' => $checklists->total(),
+                    'perPage' => $checklists->perPage(),
                     'currentPage' => $checklists->currentPage(),
-                    'lastPage'    => $checklists->lastPage(),
-                ]
+                    'lastPage' => $checklists->lastPage(),
+                ],
             ]
         );
     }
@@ -82,8 +81,9 @@ class CheckListController extends Controller implements HasMiddleware
         );
     }
 
-    public function update(UpdateChecklistRequest $request, CheckListItem $checklist) {
-        
+    public function update(UpdateChecklistRequest $request, CheckListItem $checklist)
+    {
+
         $data = $request->validated();
 
         $checklist->update($data);
@@ -92,9 +92,9 @@ class CheckListController extends Controller implements HasMiddleware
             'Checklist actualizado correctamente.',
             new ShowCheckListResource($checklist),
             200
-        );   
+        );
     }
-    
+
     public function destroy(CheckListItem $checklist)
     {
         // Usado en recepciones: el checklist viejo debe seguir mostrando su nombre (sin el sufijo de baja).
@@ -106,10 +106,10 @@ class CheckListController extends Controller implements HasMiddleware
             );
         }
 
-        $suffix = '//deleted_' . now()->timestamp;
+        $suffix = '//deleted_'.now()->timestamp;
 
         if ($checklist->name) {
-            $checklist->name = $checklist->name . $suffix;
+            $checklist->name = $checklist->name.$suffix;
         }
 
         $checklist->save();

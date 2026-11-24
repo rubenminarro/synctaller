@@ -36,14 +36,14 @@ class DiagnosticItemPhotoSeeder extends Seeder
 
         foreach ($images as $image) {
 
-            $sourcePath = $assetsPath . DIRECTORY_SEPARATOR . $image['file'];
+            $sourcePath = $assetsPath.DIRECTORY_SEPARATOR.$image['file'];
 
             foreach ($items as $item) {
 
                 $destinationPath = 'diagnostic-items/'
-                    . $item->id
-                    . '/'
-                    . $image['file'];
+                    .$item->id
+                    .'/'
+                    .$image['file'];
 
                 Storage::disk('public')->put(
                     $destinationPath,

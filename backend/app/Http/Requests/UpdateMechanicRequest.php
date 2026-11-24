@@ -2,10 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\MechanicStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
-use App\Enums\MechanicStatus;
 
 class UpdateMechanicRequest extends FormRequest
 {
@@ -16,7 +16,7 @@ class UpdateMechanicRequest extends FormRequest
 
     public function rules(): array
     {
-        
+
         $Idmechanic = $this->route('mechanic');
 
         return [
@@ -59,7 +59,7 @@ class UpdateMechanicRequest extends FormRequest
             ],
             'status' => [
                 'sometimes',
-                Rule::enum(MechanicStatus::class)
+                Rule::enum(MechanicStatus::class),
             ],
             'notes' => [
                 'sometimes',

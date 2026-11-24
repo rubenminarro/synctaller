@@ -16,8 +16,9 @@ enum AllocationPortionType: string
     /** Modalidad neta del deducible (M10): el deducible, sin IVA, descontado de lo cubierto y a cargo del dueño. */
     case OWNER_DEDUCTIBLE = 'owner_deductible';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::INSURER_COVERED => 'Cubierto por la aseguradora',
             self::OWNER_RESPONSIBILITY => 'A cargo del dueño',
             self::OWNER_UNCOVERED => 'No cubierto (a cargo del dueño)',

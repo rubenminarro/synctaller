@@ -2,11 +2,11 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\DiagnosticItemStatus;
+use App\Enums\Severity;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
-use App\Enums\Severity;
-use App\Enums\DiagnosticItemStatus;
 
 class UpdateDiagnosticItemRequest extends FormRequest
 {
@@ -29,7 +29,7 @@ class UpdateDiagnosticItemRequest extends FormRequest
                 'sometimes',
                 'nullable',
                 'string',
-                'regex:/^[\pL\pN\s.,;:()\-#@!?%]*$/u'
+                'regex:/^[\pL\pN\s.,;:()\-#@!?%]*$/u',
             ],
             // severity y status no admiten null en la base (columnas NOT NULL con default).
             'severity' => [
@@ -40,33 +40,33 @@ class UpdateDiagnosticItemRequest extends FormRequest
             'status' => [
                 'sometimes',
                 'required',
-                Rule::enum(DiagnosticItemStatus::class)
+                Rule::enum(DiagnosticItemStatus::class),
             ],
             'requires_repair' => [
                 'sometimes',
-                'boolean'
+                'boolean',
             ],
             'requires_replacement' => [
                 'sometimes',
-                'boolean'
+                'boolean',
             ],
             'estimated_cost' => [
                 'sometimes',
                 'nullable',
                 'numeric',
-                'min:0'
+                'min:0',
             ],
             'estimated_time' => [
                 'sometimes',
                 'nullable',
                 'integer',
-                'min:0'
+                'min:0',
             ],
             'recommendation' => [
                 'sometimes',
                 'nullable',
                 'string',
-                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u'
+                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u',
             ],
         ];
     }

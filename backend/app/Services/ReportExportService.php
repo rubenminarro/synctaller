@@ -142,8 +142,7 @@ class ReportExportService
 
     public function __construct(
         protected DocumentPdfService $documentPdfService
-    ) {
-    }
+    ) {}
 
     /**
      * Secciones del reporte: [{title, columns, rows}]. La primera es el
@@ -192,7 +191,7 @@ class ReportExportService
         }
 
         rewind($handle);
-        $content = "\xEF\xBB\xBF" . stream_get_contents($handle);
+        $content = "\xEF\xBB\xBF".stream_get_contents($handle);
         fclose($handle);
 
         return ['filename' => $this->filename($name, $report, 'csv'), 'content' => $content];
@@ -242,7 +241,7 @@ class ReportExportService
 
     private function table(string $title, array $rows): array
     {
-        $keys = array_keys(array_filter($rows[0], fn ($value) => !is_array($value)));
+        $keys = array_keys(array_filter($rows[0], fn ($value) => ! is_array($value)));
 
         return [
             'title' => $title,

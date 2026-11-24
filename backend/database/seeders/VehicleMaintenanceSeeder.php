@@ -33,7 +33,7 @@ class VehicleMaintenanceSeeder extends Seeder
             $plan = MaintenancePlan::where('name', $planName)->first();
 
             // Idempotente: un vehículo con ese plan ya registrado se omite.
-            if (!$vehicle || !$plan || VehicleMaintenance::where('vehicle_id', $vehicle->id)->where('maintenance_plan_id', $plan->id)->exists()) {
+            if (! $vehicle || ! $plan || VehicleMaintenance::where('vehicle_id', $vehicle->id)->where('maintenance_plan_id', $plan->id)->exists()) {
                 continue;
             }
 

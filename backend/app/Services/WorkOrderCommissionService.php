@@ -27,7 +27,7 @@ class WorkOrderCommissionService
      */
     public function assignResponsible(WorkOrder $workOrder, WorkOrderItem $item): void
     {
-        if (!$item->isCommissionable()) {
+        if (! $item->isCommissionable()) {
             return;
         }
 
@@ -43,7 +43,7 @@ class WorkOrderCommissionService
     /**
      * Reemplaza la asignación completa de un trabajo.
      *
-     * @param array<int, array{mechanic_id: int, share_percentage?: numeric|null}> $assignments
+     * @param  array<int, array{mechanic_id: int, share_percentage?: numeric|null}>  $assignments
      */
     public function syncItemMechanics(WorkOrder $workOrder, WorkOrderItem $item, array $assignments): WorkOrderItem
     {
@@ -79,6 +79,7 @@ class WorkOrderCommissionService
                 if ($existing->has($mechanicId)) {
                     // Se conservan el % de comisión copiado y las horas cargadas.
                     $existing[$mechanicId]->update(['share_percentage' => $share]);
+
                     continue;
                 }
 
@@ -108,7 +109,7 @@ class WorkOrderCommissionService
             $workOrder = WorkOrder::whereKey($workOrder->id)->lockForUpdate()->firstOrFail();
             $item->refresh();
 
-            if (!in_array($workOrder->status, [WorkOrderStatus::IN_PROGRESS, WorkOrderStatus::PAUSED], true)) {
+            if (! in_array($workOrder->status, [WorkOrderStatus::IN_PROGRESS, WorkOrderStatus::PAUSED], true)) {
                 throw new WorkOrderException(
                     'Las horas solo pueden cargarse con la orden de trabajo en progreso o pausada.',
                     422,
@@ -160,7 +161,7 @@ class WorkOrderCommissionService
         $missingCost = 0;
 
         foreach ($workOrder->items as $item) {
-            if (!$item->isCommissionable() || $item->status === WorkOrderItemStatus::CANCELLED) {
+            if (! $item->isCommissionable() || $item->status === WorkOrderItemStatus::CANCELLED) {
                 continue;
             }
 
@@ -171,6 +172,7 @@ class WorkOrderCommissionService
             foreach ($item->mechanicAssignments as $assignment) {
                 if ($assignment->hours === null) {
                     $missingHours++;
+
                     continue;
                 }
 
@@ -180,6 +182,7 @@ class WorkOrderCommissionService
 
                 if ($laborCost === null) {
                     $missingCost++;
+
                     continue;
                 }
 
@@ -241,7 +244,7 @@ class WorkOrderCommissionService
         $total = '0.00';
 
         foreach ($workOrder->items as $item) {
-            if (!$item->isCommissionable() || $item->status === WorkOrderItemStatus::CANCELLED) {
+            if (! $item->isCommissionable() || $item->status === WorkOrderItemStatus::CANCELLED) {
                 continue;
             }
 
@@ -281,7 +284,7 @@ class WorkOrderCommissionService
         $earnedAt = $workOrder->completed_at ?? now();
 
         foreach ($workOrder->items as $item) {
-            if (!$item->isCommissionable() || $item->status !== WorkOrderItemStatus::COMPLETED) {
+            if (! $item->isCommissionable() || $item->status !== WorkOrderItemStatus::COMPLETED) {
                 continue;
             }
 
@@ -397,7 +400,7 @@ class WorkOrderCommissionService
             );
         }
 
-        if (!$item->isCommissionable()) {
+        if (! $item->isCommissionable()) {
             throw new WorkOrderException(
                 'Solo los trabajos de mano de obra o servicio tienen mecánicos asignados.',
                 422,

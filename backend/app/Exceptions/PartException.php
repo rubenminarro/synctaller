@@ -2,6 +2,4 @@
 
 namespace App\Exceptions;
 
-class PartException extends AppException
-{
-}
+class PartException extends AppException {}

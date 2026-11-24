@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Http\Requests\StoreBrandRequest;
-use App\Http\Resources\ShowBrandResource;
 use App\Http\Requests\UpdateBrandRequest;
 use App\Http\Resources\BrandResource;
+use App\Http\Resources\ShowBrandResource;
 use App\Models\Brand;
 use App\Services\VehicleCatalogService;
 use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
@@ -31,38 +31,38 @@ class BrandController extends Controller implements HasMiddleware
 
     public function index(Request $request)
     {
-        
+
         $brands = Brand::when($request->filled('search'), function ($query) use ($request) {
             $search = $request->search;
             $query->where('name', 'like', "%{$search}%");
         })
-        ->latest()
-        ->paginate(
-            $request->per_page ?? 10
-        );
-    
+            ->latest()
+            ->paginate(
+                $request->per_page ?? 10
+            );
+
         return $this->successResponse(
             'Marcas obtenidas correctamente.',
             BrandResource::collection($brands->items()),
             200,
             [
                 'pagination' => [
-                    'total'       => $brands->total(),
-                    'perPage'     => $brands->perPage(),
+                    'total' => $brands->total(),
+                    'perPage' => $brands->perPage(),
                     'currentPage' => $brands->currentPage(),
-                    'lastPage'    => $brands->lastPage(),
-                ]
+                    'lastPage' => $brands->lastPage(),
+                ],
             ]
         );
     }
 
     public function store(StoreBrandRequest $request)
     {
-        
+
         $data = $request->validated();
 
         $brand = Brand::create($data);
-    
+
         return $this->successResponse(
             'Marca creada correctamente.',
             new ShowBrandResource($brand),
@@ -72,9 +72,9 @@ class BrandController extends Controller implements HasMiddleware
 
     public function show(Brand $brand)
     {
-        
+
         return $this->successResponse(
-            'Marca encontrada.', 
+            'Marca encontrada.',
             new ShowBrandResource($brand),
             200
         );
@@ -103,5 +103,4 @@ class BrandController extends Controller implements HasMiddleware
             200
         );
     }
-    
 }

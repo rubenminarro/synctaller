@@ -11,8 +11,9 @@ enum InsurerAuthorizationResult: string
     case PARTIAL = 'partial';
     case REJECTED = 'rejected';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::FULL => 'Total',
             self::PARTIAL => 'Parcial',
             self::REJECTED => 'Rechazada',

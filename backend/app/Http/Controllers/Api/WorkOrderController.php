@@ -3,29 +3,27 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Http\Resources\WorkOrderResource;
-use App\Http\Resources\ShowWorkOrderResource;
 use App\Http\Requests\StoreWorkOrderRequest;
 use App\Http\Requests\UpdateWorkOrderRequest;
-use App\Models\WorkOrder;
-use App\Models\Mechanic;
+use App\Http\Resources\ShowWorkOrderResource;
+use App\Http\Resources\WorkOrderResource;
 use App\Models\Budget;
+use App\Models\Mechanic;
+use App\Models\WorkOrder;
 use App\Services\WorkOrderService;
 use App\Traits\ApiResponse;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\Auth;
 
 class WorkOrderController extends Controller implements HasMiddleware
 {
-    
     use ApiResponse;
 
     public function __construct(
         protected WorkOrderService $workOrderService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {
@@ -41,7 +39,7 @@ class WorkOrderController extends Controller implements HasMiddleware
             new Middleware('permission:work-orders.cancel', only: ['cancel']),
         ];
     }
-    
+
     public function index(Request $request)
     {
         $search = trim($request->input('search', ''));
@@ -146,11 +144,11 @@ class WorkOrderController extends Controller implements HasMiddleware
             200,
             [
                 'pagination' => [
-                    'total'       => $workOrders->total(),
-                    'perPage'     => $workOrders->perPage(),
+                    'total' => $workOrders->total(),
+                    'perPage' => $workOrders->perPage(),
                     'currentPage' => $workOrders->currentPage(),
-                    'lastPage'    => $workOrders->lastPage(),
-                ]
+                    'lastPage' => $workOrders->lastPage(),
+                ],
             ]
         );
     }
@@ -183,7 +181,7 @@ class WorkOrderController extends Controller implements HasMiddleware
     public function store(StoreWorkOrderRequest $request)
     {
         $data = $request->validated();
-    
+
         $budget = Budget::findOrFail($data['budget_id']);
 
         $mechanic = Mechanic::findOrFail($data['mechanic_id']);
@@ -287,5 +285,4 @@ class WorkOrderController extends Controller implements HasMiddleware
             200
         );
     }
-
 }

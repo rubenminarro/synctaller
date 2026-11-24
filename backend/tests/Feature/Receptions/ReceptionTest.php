@@ -5,6 +5,7 @@ namespace Tests\Feature\Receptions;
 use App\Enums\ReceptionStatus;
 use App\Models\Reception;
 use App\Models\ReceptionCheckList;
+use App\Models\ReceptionPhoto;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -260,7 +261,7 @@ class ReceptionTest extends ReceptionTestCase
             ->assertJsonPath('data.0.description', 'Frente')
             ->json('data.0');
 
-        $path = \App\Models\ReceptionPhoto::findOrFail($photo['id'])->path;
+        $path = ReceptionPhoto::findOrFail($photo['id'])->path;
         Storage::disk('public')->assertExists($path);
 
         $this->getJson($url)->assertOk()->assertJsonCount(1, 'data');

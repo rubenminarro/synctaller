@@ -27,7 +27,7 @@ class StorePermissionRequest extends FormRequest
                 'required',
                 'string',
                 'max:100',
-                'regex:/^[a-z0-9]+\.[a-z0-9]+$/', 
+                'regex:/^[a-z0-9]+\.[a-z0-9]+$/',
                 Rule::unique('permissions', 'name'),
             ],
             'guard_name' => [
@@ -43,15 +43,15 @@ class StorePermissionRequest extends FormRequest
         return [
             'name' => [
                 'required' => 'El nombre del permiso es obligatorio.',
-                'string'   => 'El nombre del permiso debe ser una cadena de texto.',
-                'max'      => 'El nombre del permiso no puede exceder los 100 caracteres.',
-                'regex'    => 'El formato del permiso debe ser "recurso.accion" (ej: citas.ver).',
-                'unique'   => 'Este permiso ya existe en el sistema.',
+                'string' => 'El nombre del permiso debe ser una cadena de texto.',
+                'max' => 'El nombre del permiso no puede exceder los 100 caracteres.',
+                'regex' => 'El formato del permiso debe ser "recurso.accion" (ej: citas.ver).',
+                'unique' => 'Este permiso ya existe en el sistema.',
             ],
             'guard_name' => [
-                 'required' => 'El entorno de programación es obligatorio.',
-                 'string'   => 'El entorno de programación debe ser una cadena de texto.',
-                 'in'       => 'El entorno de programación seleccionado no es válido (debe ser web o api).',
+                'required' => 'El entorno de programación es obligatorio.',
+                'string' => 'El entorno de programación debe ser una cadena de texto.',
+                'in' => 'El entorno de programación seleccionado no es válido (debe ser web o api).',
             ],
         ];
     }

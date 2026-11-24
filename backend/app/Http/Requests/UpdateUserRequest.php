@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -14,14 +15,14 @@ class UpdateUserRequest extends FormRequest
 
     public function rules(): array
     {
-        
+
         $userId = $this->route('user');
 
         return [
             'name' => [
                 'sometimes',
-                'string', 
-                'alpha_dash', 
+                'string',
+                'alpha_dash',
                 'lowercase',
                 'min:4',
                 'max:20',
@@ -35,37 +36,36 @@ class UpdateUserRequest extends FormRequest
                 Rule::unique('users', 'email')->ignore($userId),
             ],
             'password' => [
-                'sometimes', 
+                'sometimes',
                 'confirmed',
                 Password::min(12)
                     ->letters()
                     ->mixedCase()
                     ->numbers()
                     ->symbols()
-                    ->uncompromised()
-                ,
+                    ->uncompromised(),
             ],
             'password_confirmation' => [
-                'required_with:password', 
-                'same:password'
+                'required_with:password',
+                'same:password',
             ],
             'role' => [
-                'sometimes', 
-                Rule::exists('roles', 'name')
+                'sometimes',
+                Rule::exists('roles', 'name'),
             ],
             'first_name' => [
                 'sometimes',
-                'string', 
-                'min:2', 
-                'max:100', 
-                'regex:/^[a-zA-Z\sñÑáéíóúÁÉÍÓÚ]+$/u'
+                'string',
+                'min:2',
+                'max:100',
+                'regex:/^[a-zA-Z\sñÑáéíóúÁÉÍÓÚ]+$/u',
             ],
             'last_name' => [
                 'sometimes',
-                'string', 
-                'min:2', 
-                'max:100', 
-                'regex:/^[a-zA-Z\sñÑáéíóúÁÉÍÓÚ]+$/u'
+                'string',
+                'min:2',
+                'max:100',
+                'regex:/^[a-zA-Z\sñÑáéíóúÁÉÍÓÚ]+$/u',
             ],
         ];
     }
@@ -92,7 +92,7 @@ class UpdateUserRequest extends FormRequest
                 'min' => 'La contraseña debe tener mínimo de 12 caracteres.',
                 'password.mixed' => 'La contraseña debe contener al menos una letra mayúscula y una letra minúscula.',
                 'password.numbers' => 'La contraseña debe contener al menos un número.',
-                'password.symbols' => 'La contraseña debe contener al menos un símbolo.',       
+                'password.symbols' => 'La contraseña debe contener al menos un símbolo.',
                 'password.letters' => 'La contraseña debe contener al menos una letra.',
                 'password.uncompromised' => 'La contraseña ha sido expuesta en una filtración de datos. Por favor, elige una contraseña diferente.',
             ],

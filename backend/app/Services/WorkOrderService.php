@@ -29,8 +29,7 @@ class WorkOrderService
         protected DocumentSequenceService $documentSequences,
         protected OwnerShareService $ownerShare,
         protected InternalExceptionService $internalExceptions
-    ) {
-    }
+    ) {}
 
     public function createFromBudget(
         Budget $budget,
@@ -67,7 +66,7 @@ class WorkOrderService
                 );
             }
 
-            if (!$mechanic->exists) {
+            if (! $mechanic->exists) {
                 throw new WorkOrderException(
                     'El mecánico seleccionado no existe.',
                     422,
@@ -145,7 +144,7 @@ class WorkOrderService
      */
     private function ensureInsurerRequirements(Budget $budget, ?int $exceptionId): ?InternalException
     {
-        if (!$this->ownerShare->hasInsurerItems($budget)) {
+        if (! $this->ownerShare->hasInsurerItems($budget)) {
             if ($exceptionId) {
                 $this->internalExceptions->notApplicable('El presupuesto no tiene líneas a cargo de la aseguradora: no necesita la excepción.');
             }
@@ -158,8 +157,8 @@ class WorkOrderService
         $claim = $this->ownerShare->openClaim($budget->reception_id);
         $exception = $exceptionId ? $this->internalExceptions->forWorkOrderStart($exceptionId, $budget) : null;
 
-        if ($claim && !$this->ownerShare->currentAuthorization($budget, $claim)) {
-            if (!$exception) {
+        if ($claim && ! $this->ownerShare->currentAuthorization($budget, $claim)) {
+            if (! $exception) {
                 throw new WorkOrderException(
                     'El presupuesto tiene líneas a cargo de la aseguradora sin su autorización: regístrela o use la excepción para iniciar sin autorización.',
                     422,
@@ -177,7 +176,7 @@ class WorkOrderService
 
         if (bccomp($current, $accepted, 2) > 0) {
             throw new WorkOrderException(
-                'La parte del dueño (' . Format::money($current) . ') supera lo que aceptó (' . Format::money($accepted) . '): registre una re-aceptación.',
+                'La parte del dueño ('.Format::money($current).') supera lo que aceptó ('.Format::money($accepted).'): registre una re-aceptación.',
                 422,
                 'WORK_ORDER_CLIENT_ACCEPTANCE_OUTDATED'
             );
@@ -413,7 +412,7 @@ class WorkOrderService
         WorkOrder $workOrder,
         WorkOrderItem $item
     ): WorkOrderItem {
-        
+
         return DB::transaction(function () use ($workOrder, $item) {
 
             $workOrder->refresh();
@@ -562,5 +561,4 @@ class WorkOrderService
             return $workOrder->fresh();
         });
     }
-
 }

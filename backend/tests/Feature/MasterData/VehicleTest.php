@@ -10,7 +10,9 @@ use Tests\Feature\Parts\PartsTestCase;
 class VehicleTest extends PartsTestCase
 {
     private Client $client;
+
     private Brand $brand;
+
     private VehicleModel $model;
 
     protected function setUp(): void

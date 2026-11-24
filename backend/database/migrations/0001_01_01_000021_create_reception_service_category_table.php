@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('reception_id')->constrained()->cascadeOnDelete();
             $table->foreignId('service_category_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
-            $table->unique(['reception_id','service_category_id'], 'r_sc_ui');
+            $table->unique(['reception_id', 'service_category_id'], 'r_sc_ui');
         });
     }
 

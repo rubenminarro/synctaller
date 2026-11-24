@@ -46,6 +46,7 @@ class WorkOrderSaleBreakdownTest extends InvoiceTestCase
         foreach ($workOrder['items'] as $item) {
             if ($item['description'] === 'Lavado') {
                 $this->postJson("{$url}/items/{$item['id']}/cancel")->assertOk();
+
                 continue;
             }
             $this->postJson("{$url}/items/{$item['id']}/start")->assertOk();

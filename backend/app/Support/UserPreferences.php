@@ -48,7 +48,7 @@ final class UserPreferences
      * Valores guardados completados con los predeterminados. Se ignoran claves
      * y valores que ya no existan en el catálogo.
      *
-     * @param array<string, mixed>|null $stored
+     * @param  array<string, mixed>|null  $stored
      * @return array<string, string>
      */
     public static function resolve(?array $stored): array

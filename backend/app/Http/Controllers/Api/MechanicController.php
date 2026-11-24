@@ -10,9 +10,9 @@ use App\Http\Resources\ShowMechanicResource;
 use App\Models\Mechanic;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\DB;
 
 class MechanicController extends Controller implements HasMiddleware
 {
@@ -39,11 +39,11 @@ class MechanicController extends Controller implements HasMiddleware
         $query->when($request->filled('employee_code'), function ($q) use ($request) {
             $q->where('employee_code', 'like', "%{$request->employee_code}%");
         });
-        
+
         $query->when($request->filled('specialty'), function ($q) use ($request) {
             $q->where('specialty', 'like', "%{$request->specialty}%");
         });
-        
+
         $query->when($request->filled('status'), function ($q) use ($request) {
             $q->where('status', $request->status);
         });
@@ -101,14 +101,14 @@ class MechanicController extends Controller implements HasMiddleware
                     'perPage' => $mechanics->perPage(),
                     'currentPage' => $mechanics->currentPage(),
                     'lastPage' => $mechanics->lastPage(),
-                ]
+                ],
             ]
         );
     }
 
     public function store(StoreMechanicRequest $request)
     {
-        
+
         $data = $request->validated();
 
         $data['status'] = $request->status ?? 'active';
@@ -139,11 +139,11 @@ class MechanicController extends Controller implements HasMiddleware
         );
     }
 
-    public function update(UpdateMechanicRequest $request, Mechanic $mechanic) 
+    public function update(UpdateMechanicRequest $request, Mechanic $mechanic)
     {
 
         $data = $request->validated();
-    
+
         DB::transaction(function () use (
             $mechanic,
             $data

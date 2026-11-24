@@ -16,8 +16,9 @@ enum VehicleColor: string
     case BROWN = 'brown';
     case BEIGE = 'beige';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::WHITE => 'Blanco',
             self::BLACK => 'Negro',
             self::GRAY => 'Gris',
@@ -31,5 +32,4 @@ enum VehicleColor: string
             self::BEIGE => 'Beige',
         };
     }
-    
 }

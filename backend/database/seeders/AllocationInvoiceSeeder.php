@@ -30,7 +30,7 @@ class AllocationInvoiceSeeder extends Seeder
             $workOrder = isset($scenario['work_order']) ? BudgetSeeder::of($scenario)?->workOrder : null;
             $allocation = $workOrder instanceof WorkOrder ? $workOrder->confirmedAllocation()->first() : null;
 
-            if (!$allocation || Invoice::where('allocation_id', $allocation->id)->exists()) {
+            if (! $allocation || Invoice::where('allocation_id', $allocation->id)->exists()) {
                 continue;
             }
 

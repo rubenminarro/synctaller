@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\CheckListItem;
+use Illuminate\Database\Seeder;
 
 class CheckListItemSeeder extends Seeder
 {

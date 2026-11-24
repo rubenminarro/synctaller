@@ -108,15 +108,15 @@ class AuditLogTest extends InvoiceTestCase
     {
         // Sin actingAs: el login usa el guard por defecto (web).
         $admin = User::create([
-            'name' => 'admin_' . Str::random(6),
+            'name' => 'admin_'.Str::random(6),
             'first_name' => 'Admin',
             'last_name' => 'Test',
-            'email' => Str::random(10) . '@test.local',
+            'email' => Str::random(10).'@test.local',
             'password' => bcrypt('password'),
         ])->assignRole('administrador');
 
         $user = User::create([
-            'name' => 'cajero_' . Str::random(6),
+            'name' => 'cajero_'.Str::random(6),
             'first_name' => 'Ana',
             'last_name' => 'Caja',
             'email' => 'caja@test.local',
@@ -195,7 +195,7 @@ class AuditLogTest extends InvoiceTestCase
             ->assertJsonPath('data.0.user.id', $admin->id)
             ->assertJsonPath('data.0.new_values.sale_price', 999);
 
-        $this->getJson("/api/audit-logs?event=created&user_id={$admin->id}&date_from=" . now()->toDateString())
+        $this->getJson("/api/audit-logs?event=created&user_id={$admin->id}&date_from=".now()->toDateString())
             ->assertOk()
             ->assertJsonPath('data.0.event.value', 'created');
 

@@ -15,8 +15,9 @@ enum AuditEvent: string
     case ROLES_SYNCED = 'roles_synced';
     case DOWNLOADED = 'downloaded';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::CREATED => 'Creado',
             self::UPDATED => 'Modificado',
             self::DELETED => 'Eliminado',

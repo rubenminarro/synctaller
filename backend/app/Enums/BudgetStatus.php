@@ -10,8 +10,9 @@ enum BudgetStatus: string
     case REJECTED = 'rejected';
     case CANCELLED = 'cancelled';
 
-public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::DRAFT => 'Borrador',
             self::SENT => 'Enviado',
             self::APPROVED => 'Aprobado',

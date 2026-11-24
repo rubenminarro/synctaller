@@ -26,8 +26,7 @@ class InvoiceController extends Controller implements HasMiddleware
 
     public function __construct(
         protected InvoiceService $invoiceService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {
@@ -71,11 +70,11 @@ class InvoiceController extends Controller implements HasMiddleware
             200,
             [
                 'pagination' => [
-                    'total'       => $invoices->total(),
-                    'perPage'     => $invoices->perPage(),
+                    'total' => $invoices->total(),
+                    'perPage' => $invoices->perPage(),
                     'currentPage' => $invoices->currentPage(),
-                    'lastPage'    => $invoices->lastPage(),
-                ]
+                    'lastPage' => $invoices->lastPage(),
+                ],
             ]
         );
     }

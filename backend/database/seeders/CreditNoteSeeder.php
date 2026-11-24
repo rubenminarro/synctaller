@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Services\CreditNoteService;
 use Illuminate\Database\Seeder;
@@ -23,17 +22,17 @@ class CreditNoteSeeder extends Seeder
         $cashier = ExampleScenarios::user(self::CASHIER);
 
         foreach (ExampleScenarios::chronological() as $scenario) {
-            if (!in_array($scenario['key'], ['H07', 'H13'], true)) {
+            if (! in_array($scenario['key'], ['H07', 'H13'], true)) {
                 continue;
             }
 
             $invoice = InvoiceSeeder::of($scenario);
 
-            if (!$invoice || $invoice->creditNotes()->exists()) {
+            if (! $invoice || $invoice->creditNotes()->exists()) {
                 continue;
             }
 
-            $number = fn (int $n) => '001-002-' . str_pad((string) ($invoice->id * 10 + $n), 7, '0', STR_PAD_LEFT);
+            $number = fn (int $n) => '001-002-'.str_pad((string) ($invoice->id * 10 + $n), 7, '0', STR_PAD_LEFT);
 
             if ($scenario['key'] === 'H13') {
                 ExampleScenarios::travel(ExampleScenarios::afterCompletion($scenario, 3, 15), fn () => $creditNoteService->register($invoice->refresh(), [

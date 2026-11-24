@@ -23,8 +23,7 @@ class InsurerService
     public function __construct(
         protected ClientService $clientService,
         protected DocumentSequenceService $documentSequences
-    ) {
-    }
+    ) {}
 
     /**
      * @return array{insurer: Insurer, warnings: string[]}
@@ -54,7 +53,7 @@ class InsurerService
 
                 if ($client->notifications_enabled) {
                     $warnings[] = 'El cliente vinculado conserva sus avisos por email activos (presupuestos, vehículo '
-                        . 'listo, facturas y mantenimiento). Si no deben enviarse, desactívelos en la ficha del cliente.';
+                        .'listo, facturas y mantenimiento). Si no deben enviarse, desactívelos en la ficha del cliente.';
                 }
             }
 
@@ -170,9 +169,9 @@ class InsurerService
 
             $insurer = Insurer::whereKey($insurer->id)->lockForUpdate()->firstOrFail();
 
-            if (!$insurer->status->canTransitionTo($status)) {
+            if (! $insurer->status->canTransitionTo($status)) {
                 throw new InsurerException(
-                    'La aseguradora ya está ' . mb_strtolower($status->label()) . '.',
+                    'La aseguradora ya está '.mb_strtolower($status->label()).'.',
                     422,
                     'INSURER_INVALID_STATUS_TRANSITION'
                 );

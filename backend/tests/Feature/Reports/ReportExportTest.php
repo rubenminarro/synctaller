@@ -33,11 +33,11 @@ class ReportExportTest extends InvoiceTestCase
         $csv = $response->getContent();
 
         $this->assertStringStartsWith("\xEF\xBB\xBF", $csv);
-        $this->assertStringContainsString("\"Reporte de ventas\"", $csv);
+        $this->assertStringContainsString('"Reporte de ventas"', $csv);
         $this->assertStringContainsString("Período;\"{$from} a {$to}\"", $csv);
-        $this->assertStringContainsString("Concepto;Valor", $csv);
-        $this->assertStringContainsString("Facturas;1", $csv);
-        $this->assertStringContainsString("\"Gravadas 10%\";225781,00", $csv);
+        $this->assertStringContainsString('Concepto;Valor', $csv);
+        $this->assertStringContainsString('Facturas;1', $csv);
+        $this->assertStringContainsString('"Gravadas 10%";225781,00', $csv);
         $this->assertStringContainsString('"Cobrado — Por medio de pago"', $csv);
     }
 

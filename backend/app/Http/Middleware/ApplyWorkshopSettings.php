@@ -14,8 +14,7 @@ class ApplyWorkshopSettings
 {
     public function __construct(
         private readonly WorkshopSettingService $settings
-    ) {
-    }
+    ) {}
 
     public function handle(Request $request, Closure $next): Response
     {

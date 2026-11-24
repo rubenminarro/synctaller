@@ -40,8 +40,7 @@ class ReportController extends Controller implements HasMiddleware
         protected ReportService $reportService,
         protected ReportExportService $reportExportService,
         protected ClaimSummaryService $claimSummaryService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {

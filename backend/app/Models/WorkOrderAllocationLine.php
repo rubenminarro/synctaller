@@ -42,7 +42,7 @@ class WorkOrderAllocationLine extends Model
         static::updating(fn () => WorkOrderAllocation::immutable());
 
         $onlyDraft = function (self $line) {
-            if (!WorkOrderAllocation::whereKey($line->work_order_allocation_id)->first()?->isDraft()) {
+            if (! WorkOrderAllocation::whereKey($line->work_order_allocation_id)->first()?->isDraft()) {
                 WorkOrderAllocation::immutable();
             }
         };

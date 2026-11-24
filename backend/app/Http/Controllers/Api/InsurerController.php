@@ -20,8 +20,7 @@ class InsurerController extends Controller implements HasMiddleware
 
     public function __construct(
         protected InsurerService $insurerService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {
@@ -59,11 +58,11 @@ class InsurerController extends Controller implements HasMiddleware
             200,
             [
                 'pagination' => [
-                    'total'       => $insurers->total(),
-                    'perPage'     => $insurers->perPage(),
+                    'total' => $insurers->total(),
+                    'perPage' => $insurers->perPage(),
                     'currentPage' => $insurers->currentPage(),
-                    'lastPage'    => $insurers->lastPage(),
-                ]
+                    'lastPage' => $insurers->lastPage(),
+                ],
             ]
         );
     }

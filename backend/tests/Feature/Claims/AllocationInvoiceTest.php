@@ -16,9 +16,9 @@ use App\Models\Reception;
 class AllocationInvoiceTest extends ClaimTestCase
 {
     /** Reparto del Ejemplo 1 confirmado: aseguradora 1.800.000 y dueño 970.000 (sin IVA). */
-    private function confirmedExample(int|null $deductible = 0): array
+    private function confirmedExample(?int $deductible = 0): array
     {
-        if (!InvoiceStamp::exists()) {
+        if (! InvoiceStamp::exists()) {
             $this->createStamp()->assertCreated();
         }
         [$workOrder, $budget, $claim] = $this->completedClaimWorkOrder(deductible: $deductible);
