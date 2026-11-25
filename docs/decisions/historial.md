@@ -755,6 +755,16 @@ un taller. La identificación por host es el paso 2.
 | Contrato | Sin documento manual: el contrato es el código (`routes/api.php`, Form Requests y Resources), con el formato común de `backend/CLAUDE.md`, y lo cubren los tests de cada módulo |
 | Por cambio | "Cambiar la API" deja de pedir actualizar la guía en `docs/README.md` y en el `CLAUDE.md` de la raíz |
 
+### 2.92 Avisos de seguridad en dependencias (deuda #19, 2026-11-25)
+
+| Tema | Decisión |
+|---|---|
+| Alcance | Decisión del usuario: resolver la deuda #19 antes del paso 2 de T2. `composer audit` informaba 8 avisos en 5 paquetes; tres tocan el host o los proxies de confianza, que importan para identificar el taller por el host |
+| Versiones | Las primeras que corrigen todos los avisos y tienen dos semanas publicadas: `laravel/framework` 13.42.0 (2026-11-10; la corrección empieza en 13.40.0) y `symfony/http-foundation`, `http-kernel`, `routing` y `yaml` 7.4.23 (2026-11-04). Las 7.4.24 y Laravel 13.43 y 13.44 son de la última semana y quedan fuera |
+| Actualización mínima | Solo esos cinco paquetes (`composer update` con la versión de cada uno, sin `--with-dependencies`): con dependencias, Composer subía otros 25 paquetes a versiones de esta semana. El `composer.json` no cambia: las restricciones ya admitían esas versiones |
+| Proxies | La aplicación no configura proxies de confianza (`bootstrap/app.php`), así que el aviso de `private_ranges` no la alcanzaba como está. Se corrige igual: el paso 2 puede necesitarlos detrás de un balanceador |
+| Revisión | Entre 13.39 y 13.42 no hay cambios que rompan lo que usa la aplicación: correcciones de base de datos, colas y colecciones, y `preventLazyLoading` con `cursor()`, que la aplicación no usa |
+
 ---
 
 ## 3. Frontend

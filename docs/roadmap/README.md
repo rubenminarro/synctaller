@@ -7,6 +7,8 @@ original y no se renumeran. El detalle por módulo está en [`modules/README.md`
 
 | Fecha | Backend | Frontend | Notas |
 |---|---|---|---|
+| 2026-11-25 | Tests puntuales en verde (131, 2087 aserciones): carpetas `Http`, `Auth`, `Access`, `Tenancy`, `Notifications`, `Documents`, `Invoices` y `Settings`; Pint sin pendientes; `composer audit` sin avisos | Sin corrida: el cambio no tocó el frontend | Deuda #19, actualización de dependencias (historial 2.92). Corrida local, sin la suite completa |
+| 2026-11-25 | 508 tests en verde, 9007 aserciones (antes de la deuda #19); Pint sin pendientes | Vitest en verde (51), ESLint y build | T2, paso 1 y guía de Postman quitada (historial 2.90 y 2.91). Corrida de la CI sobre `main` (`6b0ef8b`), no local |
 | 2026-11-25 | Tests puntuales en verde: `tests/Feature/Tenancy` (10, 20 aserciones, cada test comprobado contra su protección quitada) y las carpetas `Notifications`, `Auth`, `Access`, `Settings` y `Seeders` (78, 902 aserciones); Pint sin pendientes; migración central probada en MySQL (`synctaller_central`) | ESLint (sin cambios en el frontend) | T2, paso 1 (historial 2.90). Corrida local, sin la suite completa. Sin revisión en navegador: la API no cambia |
 | 2026-11-25 | 498 tests en verde, 8987 aserciones (antes de T2); Pint sin pendientes | Vitest en verde (51), ESLint y build | V16 y M10 (historial 2.89). Corrida de la CI sobre `main` (`3137016`), no local |
 | 2026-11-25 | Tests puntuales en verde (52, 1736 aserciones): `DeductibleNetModeTest`, `AllocationInvoiceTest`, `ClaimTest`, `WorkOrderAllocationTest`, `WorkOrderInsurerFlowTest`, `InsurerReportsTest`, `InsurerTest`, `InsurerAuthorizationTest`, `BudgetItemResponsibilityTest` y `DatabaseSeederTest`; Pint sin pendientes | Vitest en verde (`features/allocations` y `features/claims`, 17), ESLint y build | V16 y encendido de M10 (historial 2.89). Corrida local, sin la suite completa. Revisión en navegador con cajero y recepcionista, en una base temporal |
@@ -26,11 +28,10 @@ Ninguna entrega empieza sin autorización del usuario. **El sistema no está lis
 
 | Orden | Tarea | Bloqueo |
 |---|---|---|
-| 1 | Avisos de seguridad en dependencias del backend ([deuda técnica](deuda-tecnica.md) #19) | Decisión del usuario. Conviene antes del paso 2: tres avisos tocan el host y los proxies |
-| 2 | **T2, paso 2:** identificación por host (`IdentifyTenant`), conexión por defecto `tenant` y errores `TENANT_*` | Tras el paso 1 (historial 2.90). Empieza con el diseño y las preguntas, según §3.2 de la [especificación](../especificacion-aseguradoras.html) |
-| 3 | Retención de 5 años y suspensión por etapas en la línea T (V14, G10) | Decisión comercial sobre P9; se suma al plan de T5 |
-| 4 | Resto de T2 (paso 3) a T5 | Según el plan de la sección 2.80 del [historial](../decisions/historial.md) |
-| 5 | Tarea P8 (fotos y firmas a privado) | Después de T4; requisito antes del primer taller comercial |
+| 1 | **T2, paso 2:** identificación por host (`IdentifyTenant`), conexión por defecto `tenant` y errores `TENANT_*` | Tras el paso 1 (historial 2.90) y la deuda #19 (2.92). Empieza con el diseño y las preguntas, según §3.2 de la [especificación](../especificacion-aseguradoras.html) |
+| 2 | Retención de 5 años y suspensión por etapas en la línea T (V14, G10) | Decisión comercial sobre P9; se suma al plan de T5 |
+| 3 | Resto de T2 (paso 3) a T5 | Según el plan de la sección 2.80 del [historial](../decisions/historial.md) |
+| 4 | Tarea P8 (fotos y firmas a privado) | Después de T4; requisito antes del primer taller comercial |
 
 Las entregas de las respuestas de la contadora (sección 2.83 del historial) quedaron completas el 2026-11-25 con V16 y el
 encendido de M10 (2.89).
