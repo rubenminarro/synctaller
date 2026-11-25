@@ -7,6 +7,7 @@ original y no se renumeran. El detalle por módulo está en [`modules/README.md`
 
 | Fecha | Backend | Frontend | Notas |
 |---|---|---|---|
+| 2026-11-24 | 493 tests en verde, 8805 aserciones; Pint sin pendientes | Vitest en verde (46), ESLint y build | M12 (historial 2.84). Corrida de la CI sobre `main` (`d51fddf`), no local |
 | 2026-11-24 | 488 tests en verde (línea base), 8560 aserciones; Pint sin pendientes | Vitest en verde (43), ESLint y build | **Baseline** (historial 2.82): después de aplicar Pint a todo el backend. Desde acá, tests puntuales salvo pedido del usuario |
 | 2026-11-24 | 488 tests en verde, 8560 aserciones (antes de Pint) | Vitest en verde (43), lint y build | Commit inicial del monorepo |
 
@@ -64,9 +65,9 @@ Plan de §9 de la [especificación](../especificacion-aseguradoras.html).
 | M | M10: deducible facturado | COMPLETADO, con el interruptor apagado |
 | M | M11: reportes | COMPLETADO |
 | M | M11: avisos a la aseguradora | PENDIENTE (V7) |
-| M | M12: retenciones de IVA | PENDIENTE (diseño sin aprobar, V17) |
+| M | M12: retenciones de IVA y renta | COMPLETADO |
 
-Frontend: FA0 a FA4 y M10 completos ([detalle](../modules/aseguradoras.md)).
+Frontend: FA0 a FA4, M10 y M12 completos ([detalle](../modules/aseguradoras.md)).
 
 ## Línea T: infraestructura SaaS
 
