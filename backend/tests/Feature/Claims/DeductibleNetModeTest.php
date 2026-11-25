@@ -9,8 +9,9 @@ use App\Models\Reception;
 
 /**
  * Modalidad neta del deducible (M10): la aseguradora recibe lo cubierto menos el deducible sin IVA y el dueño, el
- * deducible en una línea propia de su factura. Detrás del interruptor insurer.deductible_net_mode (apagado, rige A).
- * Ejemplo 7 de la especificación, IVA del deducible por siniestro (V15), deducible mayor que lo cubierto (V16) y R11.
+ * deducible en una línea propia de su factura. Detrás del interruptor insurer.deductible_net_mode (encendido por
+ * defecto; apagado, rige A). Ejemplo 7 de la especificación, IVA del deducible por siniestro (V15), deducible mayor que
+ * lo cubierto con su tope (V16) y R11.
  */
 class DeductibleNetModeTest extends ClaimTestCase
 {
@@ -109,10 +110,11 @@ class DeductibleNetModeTest extends ClaimTestCase
     public function test_the_switch_keeps_rule_a_while_off(): void
     {
         $this->actingAsAdmin();
+        config(['insurer.deductible_net_mode' => false]);
         $reception = $this->openReception();
         $insurerId = $this->insurer();
 
-        // Apagado (por defecto) no se elige la modalidad, ni en el siniestro ni en la aseguradora.
+        // Apagado no se elige la modalidad, ni en el siniestro ni en la aseguradora.
         $this->postJson('/api/claims', $this->claimBody($reception->id, $insurerId, ['deductible_billing_mode' => 'net_of_deductible']))
             ->assertStatus(422)->assertJsonValidationErrors('deductible_billing_mode');
         $this->patchJson("/api/insurers/{$insurerId}", ['deductible_billing_mode' => 'net_of_deductible'])
@@ -174,16 +176,44 @@ class DeductibleNetModeTest extends ClaimTestCase
         $this->invoice($workOrder, $draft, $ownerClientId)->assertStatus(422)->assertJsonPath('error_code', 'ALLOCATION_DEDUCTIBLE_MISMATCH');
     }
 
-    public function test_a_deductible_above_the_covered_amount_is_rejected(): void
+    public function test_a_deductible_above_the_covered_amount_is_capped(): void
     {
         $this->actingAsAdmin();
-        // V16 sin respuesta: 2.000.000 sin IVA contra 1.800.000 cubiertos.
-        [$workOrder] = $this->netClaimWorkOrder(deductible: 2000000, includesTax: false);
+        // V16: 2.000.000 sin IVA contra 1.800.000 cubiertos. El dueño paga lo cubierto; los 200.000 que sobran no se
+        // cobran y la aseguradora, sin nada que le quede, no recibe factura.
+        [$workOrder, , $claim] = $this->netClaimWorkOrder(deductible: 2000000, includesTax: false);
 
         $draft = $this->postJson($this->url($workOrder))->assertCreated()->json('data');
         $this->assertSame('1800000.00', collect($draft['lines'])->where('portion_type.value', 'owner_deductible')->sum('amount').'.00');
-        $this->postJson($this->url($workOrder, $draft['id'], 'confirm'))
-            ->assertStatus(422)->assertJsonPath('error_code', 'ALLOCATION_DEDUCTIBLE_EXCEEDS_COVERED');
+        $this->assertFalse(collect($draft['lines'])->contains('portion_type.value', 'insurer_covered'));
+        $this->assertTrue(collect($draft['checks'])->every(fn (array $check) => $check['ok']));
+        $this->assertNull(collect($draft['checks'])->firstWhere('rule', 'deductible_covered'));
+        $this->assertSame('200000.00', $draft['summary']['deductible_uncollected']);
+        $this->assertSame(['owner'], collect($draft['summary']['responsibles'])->pluck('role')->all());
+
+        $this->postJson($this->url($workOrder, $draft['id'], 'confirm'))->assertOk()
+            ->assertJsonPath('data.summary.deductible_uncollected', '200000.00');
+
+        // El siniestro no se cancela: el deducible del reparto depende de él aunque no queden porciones de la aseguradora.
+        $this->postJson("/api/claims/{$claim->id}/cancel", ['reason' => 'Error de carga.'])
+            ->assertStatus(422)->assertJsonPath('error_code', 'CLAIM_HAS_INSURER_ALLOCATIONS');
+
+        // Con el IVA incluido la base baja a 1.818.181,82: sigue por encima de lo cubierto, así que R11 no cambia y se
+        // factura sin otra versión del reparto.
+        $this->patchJson("/api/claims/{$claim->id}", ['deductible_includes_tax' => true])->assertOk();
+        $this->getJson($this->url($workOrder, $draft['id']))->assertOk()->assertJsonPath('data.summary.deductible_uncollected', '18181.82');
+
+        $insurerClientId = Insurer::findOrFail($claim->insurer_id)->client_id;
+        $ownerClientId = Reception::findOrFail($workOrder['reception_id'])->client_id;
+        $this->invoice($workOrder, $draft, $insurerClientId)->assertStatus(422)->assertJsonPath('error_code', 'ALLOCATION_CLIENT_NOT_RESPONSIBLE');
+
+        // Dueño: 970.000 de lo suyo más 1.800.000 del deducible (dos líneas, una por concepto), con IVA = 3.047.000.
+        $owner = $this->invoice($workOrder, $draft, $ownerClientId)->assertCreated()->assertJsonPath('data.totals.total', '3047000.00')->json('data');
+        $this->assertSame('1800000.00', (string) InvoiceItem::where('invoice_id', $owner['id'])->where('description', 'Deducible de siniestro N.º S-123')->sum('base_total').'.00');
+
+        $this->postJson("/api/invoices/{$owner['id']}/issue")->assertOk();
+        $this->postJson("/api/invoices/{$owner['id']}/payments", ['amount' => 3047000, 'method' => 'cash'])->assertCreated();
+        $this->deliver($workOrder)->assertCreated();
     }
 
     public function test_a_claim_takes_the_default_mode_of_its_insurer(): void

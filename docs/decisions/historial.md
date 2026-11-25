@@ -709,6 +709,25 @@ Quinta entrega del orden de la sección 2.83. Regla vigente en [reglas de negoci
 | Frontend | Decisión del usuario: fuera de plazo el botón "Anular" no se muestra y un aviso remite a la nota de crédito (solo a quien tiene `invoices.cancel`) |
 | Datos existentes | Las facturas emitidas en meses anteriores dejan de poder anularse desde la entrega. Los datos de ejemplo anulan el mismo día de la emisión: no cambian |
 | Pruebas | `InvoiceIssueTest` (límite del mes con instantes en UTC y borrador no anulable) e `InvoiceDetailPage.test.tsx` (botón y aviso) |
+
+### 2.89 Deducible mayor que lo cubierto y encendido de M10 (V16, 2026-11-25)
+
+Sexta y última entrega del orden de la sección 2.83. Regla vigente en [reglas de negocio](../reglas-de-negocio.md), 6.31.
+Reemplaza el rechazo provisorio de la sección 2.75.
+
+| Tema | Decisión |
+|---|---|
+| Tope | El deducible que se factura en una OT (porciones `owner_deductible`) es la base del deducible asignado, como máximo lo que la aseguradora cubre en ella: sus porciones más las del deducible. Un solo cálculo, `AllocationBillingService::expectedOwnerDeductible`, para la propuesta, R11 y el control al facturar (`ownerDeductibleBase` conserva la base sin tope para la propuesta) |
+| Lo que sobra | Decisión del usuario (recomendación): no se cobra ni pasa a otra OT del mismo siniestro. R7 y la sugerencia del deducible de la OT siguiente siguen contando el deducible asignado entero; para cobrarlo en otra OT, el cajero baja a mano el de la primera |
+| Regla retirada | `deductible_covered` y su `ALLOCATION_DEDUCTIBLE_EXCEEDS_COVERED` dejan de existir: un deducible mayor que lo cubierto se confirma |
+| Factura en cero | No hace falta código: sin porciones, la aseguradora no figura entre los responsables y generarle la factura da `ALLOCATION_CLIENT_NOT_RESPONSIBLE` (422, existente). La entrega no cambia |
+| Revalidación | Con el tope alcanzado, si el deducible baja o sube sin quedar por debajo de lo cubierto (por ejemplo, al indicar que incluye el IVA), R11 sigue cumpliéndose y no se pide otra versión del reparto: el dueño ya paga el máximo |
+| Contrato | Campo nuevo `summary.deductible_uncollected` en el reparto (base sin IVA que no se cobra, `0.00` si no hay). Sin rutas, permisos ni códigos HTTP nuevos |
+| Cancelación del siniestro | Decisión del usuario (recomendación): las porciones `owner_deductible` también la bloquean, con el mismo `CLAIM_HAS_INSURER_ALLOCATIONS`. Sin eso, con todo lo cubierto pasado al deducible, el siniestro se cancelaba con la factura del deducible vigente. Cambia el mensaje, no el código |
+| Encendido de M10 | Decisión del usuario (recomendación): `INSURER_DEDUCTIBLE_NET_MODE` pasa a `true` por defecto (`config/insurer.php` y `.env.example`) y el interruptor se conserva para apagarlo sin tocar código. La modalidad sigue eligiéndose por aseguradora y por siniestro: sin ella rige la regla A. Cada `.env` existente conserva su valor |
+| Datos de ejemplo | Decisión del usuario (recomendación): sin escenario nuevo; los siniestros de ejemplo no tienen modalidad y `DatabaseSeederTest` no cambia |
+| Frontend | El editor del reparto pierde la etiqueta de `deductible_covered` y muestra un aviso con el deducible no cobrado, en el borrador y en el confirmado, con el importe de la API |
+| Pruebas | `DeductibleNetModeTest`: el caso del deducible mayor que lo cubierto pasa a confirmarse (sin porciones de la aseguradora, `deductible_uncollected`, cancelación bloqueada, cambio del IVA sin otra versión, factura de la aseguradora rechazada, la del dueño de 3.047.000 y la entrega); el del interruptor apagado lo fija explícitamente |
 ---
 
 ## 3. Frontend

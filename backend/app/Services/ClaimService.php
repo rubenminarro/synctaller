@@ -129,13 +129,15 @@ class ClaimService
 
             $this->ensureOpen($claim, 'cancelarse', 'CLAIM_NOT_CANCELLABLE');
 
-            $covered = WorkOrderAllocationLine::where('portion_type', AllocationPortionType::INSURER_COVERED)
+            // El deducible facturado (M10) también depende del siniestro: con todo lo cubierto pasado al deducible (V16)
+            // no quedan porciones de la aseguradora, y el siniestro igual no se cancela.
+            $covered = WorkOrderAllocationLine::whereIn('portion_type', [AllocationPortionType::INSURER_COVERED, AllocationPortionType::OWNER_DEDUCTIBLE])
                 ->whereHas('allocation', fn ($q) => $q->where('claim_id', $claim->id)->where('status', AllocationStatus::CONFIRMED))
                 ->exists();
 
             if ($covered) {
                 throw new ClaimException(
-                    'El siniestro tiene un reparto confirmado con importes a cargo de la aseguradora: corrija el reparto antes de cancelarlo.',
+                    'El siniestro tiene un reparto confirmado con importes a cargo de la aseguradora o de su deducible: corrija el reparto antes de cancelarlo.',
                     422,
                     'CLAIM_HAS_INSURER_ALLOCATIONS'
                 );

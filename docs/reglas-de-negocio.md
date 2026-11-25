@@ -513,8 +513,8 @@ Entrega M3 de `docs/especificacion-aseguradoras.html` (decisiones del 2026-10-29
   cambian (`prohibited`: se cancela y se registra otro). El deducible no baja de lo asignado en los
   repartos confirmados (`CLAIM_DEDUCTIBLE_BELOW_ALLOCATED`, 422; 6.27) ni cambia con una factura vigente
   a la aseguradora (`CLAIM_DEDUCTIBLE_LOCKED`, 422; 6.29).
-* **Cancelación** (`POST claims/{id}/cancel`, motivo obligatorio): solo `open` (`CLAIM_NOT_CANCELLABLE`) y sin lo cubierto en un
-  reparto confirmado (`CLAIM_HAS_INSURER_ALLOCATIONS`, 422; 6.27). Las líneas `insurer` de los presupuestos en borrador
+* **Cancelación** (`POST claims/{id}/cancel`, motivo obligatorio): solo `open` (`CLAIM_NOT_CANCELLABLE`) y sin lo cubierto ni el
+  deducible (`owner_deductible`, V16) en un reparto confirmado (`CLAIM_HAS_INSURER_ALLOCATIONS`, 422; 6.27). Las líneas `insurer` de los presupuestos en borrador
   de la recepción vuelven a `owner` (6.4).
 * **Estado sincronizado con la recepción** (`ClaimStatusService`, en la transacción del evento): la entrega lo cierra, la
   anulación de la entrega lo reabre y la cancelación de la recepción lo cancela ("Recepción cancelada: <motivo>").
@@ -661,7 +661,8 @@ Entrega M8 de `docs/especificacion-aseguradoras.html` (§4.5, §5.7, §6.2–6.3
   (`ALLOCATION_NOT_EDITABLE`, 422; también para `DELETE`).
 * **Vista previa:** el borrador trae `checks` (cada regla con `ok`, mensaje y `error_code`) y todas las versiones
   `summary` (por responsable: `insurer|owner|workshop`; total; deducible y `deductible_fiscal_pending`, calculado =
-  deducible > 0 que no se factura: sin la modalidad neta o sin su IVA, 6.31; advertencias de autorización faltante o cambiada). También `concepts`: lo vendido por concepto
+  deducible > 0 que no se factura: sin la modalidad neta o sin su IVA, 6.31; `deductible_uncollected`, la base del
+  deducible que no se cobra por superar lo cubierto, V16; advertencias de autorización faltante o cambiada). También `concepts`: lo vendido por concepto
   (`source_type`/`source_id`, descripción, `is_extra`, `responsibility` del ítem, `coverable` = puede ir a la
   aseguradora por R4, cantidad, precio y `base_total`, lo que debe sumar por R1) y `authorized_total` de su ítem en la
   autorización vigente (por ítem: varios conceptos lo comparten; `null` en extras o sin autorización). Lo usa el editor
@@ -674,11 +675,12 @@ Entrega M8 de `docs/especificacion-aseguradoras.html` (§4.5, §5.7, §6.2–6.3
   absorbido; se consume al confirmar); R5 `ALLOCATION_OWNER_AMOUNT_NOT_ACCEPTED` (lo del dueño ≤ última aceptación +
   extras aprobados, sin tolerancia; se resuelve con re-aceptación, absorción o complementario); R7
   `ALLOCATION_DEDUCTIBLE_EXCEEDS_CLAIM` (deducibles confirmados del siniestro ≤ el suyo). Todos 422 salvo R2. La versión
-  confirmada anterior pasa a `superseded`. Con deducible mayor a 0 se confirma igual: no se factura hasta M10 (A).
+  confirmada anterior pasa a `superseded`. Con deducible mayor a 0 se confirma igual: se factura solo con la modalidad neta en vigor y su
+  IVA indicado (M10, 6.31); sin ella rige A y no se factura.
 * **Efectos:** `POST work-orders/{id}/invoice` rechaza la OT que requiere reparto
   (`WORK_ORDER_REQUIRES_ALLOCATION_INVOICING`, 422; decisión del 2026-10-29: desde M8, para no facturarla entera al
-  dueño antes de M9). El siniestro no se cancela con lo cubierto en un reparto confirmado
-  (`CLAIM_HAS_INSURER_ALLOCATIONS`, 422) ni su deducible baja de lo asignado (`CLAIM_DEDUCTIBLE_BELOW_ALLOCATED`, 422).
+  dueño antes de M9). El siniestro no se cancela con lo cubierto o el deducible en un reparto
+  confirmado (`CLAIM_HAS_INSURER_ALLOCATIONS`, 422) ni su deducible baja de lo asignado (`CLAIM_DEDUCTIBLE_BELOW_ALLOCATED`, 422).
   El detalle de la OT trae `allocation` (resumen de la confirmada) con `work-order-allocations.show`.
 * **Permisos:** `work-order-allocations.index|show` (recepcionista, jefe de taller y cajero) y
   `store|update|confirm|destroy` (cajero).
@@ -796,9 +798,9 @@ usuario: esperan V7; mientras tanto rige D).
 Entrega M10 de `docs/especificacion-aseguradoras.html` (§6.6, Ejemplo 7; decisiones del 2026-10-30;
 `AllocationBillingService`, `AllocationService`, `InvoiceService`). Migración `000071`.
 
-* **Interruptor** (`config/insurer.php`, `INSURER_DEDUCTIBLE_NET_MODE`, **apagado por defecto**): la modalidad la
-  confirmó un dueño de taller que lleva la contabilidad; se enciende en producción con la confirmación escrita de un
-  contador (V21). Apagado, la modalidad no se puede elegir (422 `VALIDATION_ERROR` en `deductible_billing_mode`) y rige
+* **Interruptor** (`config/insurer.php`, `INSURER_DEDUCTIBLE_NET_MODE`, **encendido por defecto** desde el 2026-11-25,
+  historial 2.89): la confirmó la contadora (V21) y V16 ya está implementado. Se conserva para apagarlo sin tocar
+  código. Apagado, la modalidad no se puede elegir (422 `VALIDATION_ERROR` en `deductible_billing_mode`) y rige
   la regla A aunque un siniestro la tenga cargada (`AllocationBillingService::netMode`).
 * **Modalidad** (`DeductibleBillingMode`: `net_of_deductible`; nula = regla A): en la aseguradora, por defecto
   (`insurers.deductible_billing_mode`), y en el siniestro (`claims.deductible_billing_mode`), que la copia al abrirse si
@@ -812,9 +814,15 @@ Entrega M10 de `docs/especificacion-aseguradoras.html` (§6.6, Ejemplo 7; decisi
 * **Reparto:** porción nueva `owner_deductible` (del dueño, `isOwner()`). La propuesta descuenta la base del deducible
   asignado a la OT de lo cubierto por la aseguradora, concepto por concepto en orden, y la pasa al dueño sobre el mismo
   concepto (R1 y R2 no cambian; R3 queda con holgura). Reglas nuevas, en este orden al final de `checks`:
-  `deductible_tax`; `deductible_covered` (deducible mayor que lo cubierto, V16 sin respuesta: `ALLOCATION_DEDUCTIBLE_EXCEEDS_COVERED`,
-  422, decisión del usuario); **R11** (las porciones `owner_deductible` suman la base del deducible de la OT; sin la
-  modalidad, 0: `ALLOCATION_DEDUCTIBLE_MISMATCH`, 422). R5 no cuenta el deducible (lo controlan el deducible aceptado, R7
+  `deductible_tax` y **R11** (las porciones `owner_deductible` suman la base del deducible de la OT, como máximo lo que
+  la aseguradora cubre en ella; sin la modalidad, 0: `ALLOCATION_DEDUCTIBLE_MISMATCH`, 422).
+* **Deducible mayor que lo cubierto** (V16, historial 2.89): el dueño paga hasta lo cubierto por la aseguradora en la
+  OT (sus porciones más las del deducible) y lo que sobra **no se cobra** ni pasa a otra OT del siniestro (R7 sigue
+  contando el deducible asignado entero). La propuesta pasa todo lo cubierto al deducible; sin porciones, la aseguradora
+  no es responsable del reparto y no recibe factura (`ALLOCATION_CLIENT_NOT_RESPONSIBLE` si se intenta). El resumen del
+  reparto trae `deductible_uncollected` (base que no se cobra; `0.00` si no hay). Con el tope alcanzado, un cambio del
+  deducible que lo deje igual o por encima de lo cubierto no pide otra versión del reparto. Ya no existe la regla
+  `deductible_covered` ni `ALLOCATION_DEDUCTIBLE_EXCEEDS_COVERED`. R5 no cuenta el deducible (lo controlan el deducible aceptado, R7
   y R11).
 * **Facturas:** la de la aseguradora, solo lo cubierto ya neto; la del dueño (**la misma**, al contado, decisión del
   usuario), una línea por porción `owner_deductible`, cantidad 1, «Deducible de siniestro N.º {número}» (o el código
@@ -825,8 +833,8 @@ Entrega M10 de `docs/especificacion-aseguradoras.html` (§6.6, Ejemplo 7; decisi
 * **Entrega:** con la modalidad neta y el IVA indicado, `DELIVERY_CLAIM_DEDUCTIBLE_PENDING` deja de bloquear el deducible
   mayor a 0 y rigen las facturas (6.29). Desconocido sigue bloqueando. El resumen del siniestro (6.30) ajusta sus alertas,
   y `deductible_fiscal_pending` (reparto y resumen) es `false` con el deducible que se factura (corrección del 2026-10-30).
-* **Fuera de alcance:** otras modalidades y los datos de ejemplo (el interruptor viene apagado). El documento que respalda
-  la modalidad (V20) se sube como documento del siniestro, con los tipos `contract` y `policy` (6.24).
+* **Fuera de alcance:** otras modalidades y los datos de ejemplo (decisión del usuario del 2026-11-25: sin escenario de
+  la modalidad neta). El documento que respalda la modalidad (V20) se sube como documento del siniestro, con los tipos `contract` y `policy` (6.24).
 
 ## 6.32 Configuración del taller
 

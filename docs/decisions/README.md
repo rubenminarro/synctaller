@@ -48,7 +48,7 @@ Las secciones están en el [historial de decisiones](historial.md), que se compl
 | Fallo cerrado | `DB_DATABASE` vacío en producción: sin taller activo, una consulta falla |
 | Conexión a la central | Persistente solo en la central; elimina la sobrecarga medida |
 | Zona horaria | `APP_TIMEZONE`, por defecto `America/Asuncion`. La base guarda hora local y la API envía UTC |
-| Deducible mayor a 0 | Implementado detrás de `INSURER_DEDUCTIBLE_NET_MODE`. No se enciende sin la confirmación escrita del contador |
+| Deducible mayor a 0 | Modalidad neta detrás de `INSURER_DEDUCTIBLE_NET_MODE`, encendida desde el 2026-11-25 (V21 y V16, historial 2.89). Facturado como máximo lo cubierto |
 | Notas de crédito | SyncTaller las registra, no las emite (P10) |
 | Documentos de siniestros | Disco privado sin URL; toda descarga pasa por la API y se audita |
 | Monorepo | Desde el 2026-11-24, `backend/` y `frontend/` en un solo repositorio, sin el historial de Git anterior. Cada app conserva sus dependencias y su configuración; la raíz solo orquesta (historial 2.82) |
