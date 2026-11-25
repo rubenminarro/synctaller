@@ -677,6 +677,22 @@ y correo del cliente. Reglas vigentes en [reglas de negocio](../reglas-de-negoci
 | Frontend | Teléfono y correo en el detalle y en "Editar datos"; aviso en el borrador con los datos que faltan |
 | Pruebas | `InvoiceDraftTest` (copia, edición, validación, `missing` y emisión sin bloqueo), `AllocationInvoiceTest` (copia en el reparto), `DocumentPdfTest` (PDF) y `EditInvoiceModal.test.tsx` |
 | Pendiente | El dígito verificador del RUC (la otra parte de V10) sigue esperando la documentación de la SET |
+
+### 2.87 Ajustes V18, V20 y V15 (2026-11-25)
+
+Cuarta entrega del orden de la sección 2.83: los ajustes chicos que dejaron las respuestas de la contadora. Reglas vigentes
+en [reglas de negocio](../reglas-de-negocio.md), 6.28 (notas de crédito), 6.24 (documentos del siniestro) y 6.31 (IVA del
+deducible).
+
+| Tema | Decisión |
+|---|---|
+| V18, timbrado | El timbrado de la nota de crédito registrada pasa a ser **obligatorio** (`stamp_number` `required`; `VALIDATION_ERROR`, 422). Decisión del usuario: solo para los registros nuevos. Las notas ya registradas sin timbrado quedan como están (la columna sigue admitiendo nulo) y no se agrega cómo completarlas |
+| V18, plazo | «Antes del cierre del ejercicio» es una recomendación: decisión del usuario, no se valida ni se avisa |
+| V20 | Tipos nuevos en `ClaimDocumentType`: `contract` ("Contrato") y `declarant_id` ("Cédula del declarante"). La columna `type` es texto: sin migración |
+| V15 | Decisión del usuario: «no incluye IVA» es el valor inicial **solo en el formulario de alta del frontend**. La API no cambia (nulo sigue siendo posible y sigue bloqueando con la modalidad neta) y los siniestros existentes no se tocan. Sin deducible el campo no se muestra y el alta envía `null` |
+| Contrato | Cambia una validación (timbrado obligatorio) y se suman dos valores al enum de tipos de documento. Sin rutas, permisos ni `error_code` nuevos |
+| Datos de ejemplo | `CreditNoteSeeder` carga el timbrado en sus notas |
+| Pruebas | `CreditNoteTest` (sin timbrado → 422), `ClaimDocumentTest` (los dos tipos nuevos), `AllocationInvoiceTest` (el body con timbrado) y `claims/api.test.ts` (valor inicial del alta) |
 ---
 
 ## 3. Frontend
@@ -740,3 +756,11 @@ se retiró; queda lo que explica el código actual.
 | Aviso | Alerta amarilla arriba del detalle, solo en el borrador, con los datos que trae `customer.missing`; no bloquea el botón "Emitir" (la regla la decide el backend, 2.86) |
 | Edición | Teléfono y correo en el modal "Editar datos", junto a la dirección; vacíos se mandan como `null` |
 | Detalle | Filas "Teléfono" y "Correo" en la tarjeta de la factura, con "—" cuando faltan (también en las facturas anteriores a V10) |
+
+### Ajustes V18, V20 y V15 (2026-11-25)
+
+| Tema | Decisión |
+|---|---|
+| Nota de crédito | "Timbrado" pasa a ser obligatorio en el formulario; el error por campo lo da el backend (2.87) |
+| Documentos del siniestro | "Contrato" y "Cédula del declarante" en el selector de tipo, después de "Póliza" |
+| IVA del deducible | El alta arranca en "No incluye IVA"; la edición muestra lo guardado (un siniestro sin indicar sigue sin indicar). La ayuda recuerda que, por lo general, la póliza no lo incluye salvo que diga «IVA incluido» |

@@ -377,6 +377,7 @@ Documentos del siniestro (M4, ver `reglas-de-negocio.md` 6.24). En Postman: Body
 | Caso | Método / Endpoint | Body | HTTP | Resultado / error_code |
 |---|---|---|---|---|
 | Subir la denuncia (PDF) | `POST {{base_url}}/claims/{{claim_id}}/documents` | `file` = un PDF, `type` = `loss_report` | 201 | `original_name`, `mime`, `size`, `sha256`; nunca `path`. Guardar `{{claim_document_id}}` |
+| Subir el contrato o la cédula del declarante (V20) | ídem | `type` = `contract` o `declarant_id` | 201 | `type.label` "Contrato" o "Cédula del declarante" |
 | Subir un SVG, un HTML o un archivo de más de 10 MB | ídem | — | 422 | `VALIDATION_ERROR` en `file` |
 | Extensión que no coincide (una imagen renombrada a `.pdf`) | ídem | — | 422 | `VALIDATION_ERROR` en `file`: "La extensión del archivo no coincide con su contenido." |
 | Listar | `GET {{base_url}}/claims/{{claim_id}}/documents` | — | 200 | Sin `path` |
@@ -2332,6 +2333,7 @@ baja.
 | Fecha anterior a la factura / futura | ídem | `issue_date` | 422 | `CREDIT_NOTE_DATE_BEFORE_INVOICE` / `VALIDATION_ERROR` |
 | Número repetido entre las vigentes | ídem | mismo `number` | 409 | `CREDIT_NOTE_DUPLICATE_NUMBER` |
 | Importe con decimales | ídem | `"amount": 10.5` | 422 | `VALIDATION_ERROR` |
+| Sin timbrado (V18) | ídem | sin `stamp_number` o `null` | 422 | `VALIDATION_ERROR` (`errors.stamp_number`) |
 | Saldada solo con notas, sin pagos | `GET {{base_url}}/invoices/{{invoice_id}}` | — | 200 | `payment_summary.status` `credited`; con pagos y notas, `paid` |
 | Anular la factura con notas vigentes | `POST …/invoices/{{invoice_id}}/cancel` | `{ "reason": "…" }` | 422 | `INVOICE_HAS_CREDIT_NOTES` |
 | Anular la nota (mal cargada) | `POST …/invoices/{{invoice_id}}/credit-notes/{{credit_note_id}}/cancel` | `{ "reason": "Se cargó dos veces." }` | 200 | `status` `cancelled`; el saldo vuelve. Otra vez → `CREDIT_NOTE_NOT_CANCELLABLE` |

@@ -55,12 +55,28 @@ describe('siniestros', () => {
   })
 })
 
+describe('siniestros: IVA del deducible (V15)', () => {
+  it('el alta empieza en «no incluye» y lo envía solo si hay deducible', () => {
+    expect(claimFormValues().deductible_includes_tax).toBe('false')
+    expect(newClaimInput(9, { ...claimFormValues(), deductible_amount: '500000' })).toMatchObject({ deductible_includes_tax: false })
+    // Sin deducible el campo no se ve: el valor inicial no viaja.
+    expect(newClaimInput(9, { ...claimFormValues(), deductible_amount: '' })).toMatchObject({ deductible_includes_tax: null })
+    expect(newClaimInput(9, { ...claimFormValues(), deductible_amount: '0' })).toMatchObject({ deductible_includes_tax: null })
+  })
+
+  it('la edición muestra lo guardado: un siniestro sin indicar sigue sin indicar', () => {
+    expect(claimFormValues({ ...claim, deductible_includes_tax: null }).deductible_includes_tax).toBe('')
+    expect(claimFormValues({ ...claim, deductible_includes_tax: true }).deductible_includes_tax).toBe('true')
+  })
+})
+
 describe('siniestros: deducible con la modalidad neta (M10)', () => {
   const net = { value: 'net_of_deductible' as const, label: 'Neta del deducible' }
 
   it('el IVA del deducible va como booleano (sin indicar, null); la modalidad, solo si cambió', () => {
     expect(newClaimInput(9, { ...claimFormValues(), deductible_includes_tax: '' })).toMatchObject({ deductible_includes_tax: null })
-    expect(newClaimInput(9, { ...claimFormValues(), deductible_includes_tax: 'true' })).toMatchObject({ deductible_includes_tax: true })
+    expect(newClaimInput(9, { ...claimFormValues(), deductible_amount: '500000', deductible_includes_tax: '' })).toMatchObject({ deductible_includes_tax: null })
+    expect(newClaimInput(9, { ...claimFormValues(), deductible_amount: '500000', deductible_includes_tax: 'true' })).toMatchObject({ deductible_includes_tax: true })
     expect(newClaimInput(9, claimFormValues())).not.toHaveProperty('deductible_billing_mode')
 
     const withNet = { ...claim, deductible_billing_mode: net, deductible_includes_tax: false }

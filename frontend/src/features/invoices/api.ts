@@ -182,7 +182,7 @@ export function creditableByItem(invoice: Pick<Invoice, 'items' | 'credit_notes'
   return remaining
 }
 
-/** Cuerpo del registro: solo las líneas con importe mayor a 0; timbrado vacío → null. */
+/** Cuerpo del registro: solo las líneas con importe mayor a 0; timbrado vacío → null (el backend lo exige, V18). */
 export function creditNoteInput(
   values: { number: string; stamp_number: string; issue_date: string; reason: string },
   amounts: Record<number, string>,

@@ -174,6 +174,7 @@ class AllocationInvoiceTest extends ClaimTestCase
         $issued = $this->postJson("/api/invoices/{$insurer['id']}/issue")->assertOk()->json('data');
         $this->postJson("/api/invoices/{$issued['id']}/credit-notes", [
             'number' => '001-002-0000001',
+            'stamp_number' => '12345678',
             'issue_date' => now()->toDateString(),
             'reason' => 'La aseguradora pidió refacturar.',
             'items' => collect($issued['items'])->map(fn ($item) => ['invoice_item_id' => $item['id'], 'amount' => (int) $item['total']])->all(),

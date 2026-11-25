@@ -36,7 +36,7 @@ Todos **COMPLETADOS** según el [criterio del índice](README.md#criterio). Hist
 | Reglas | `reglas-de-negocio.md` 6.10 y 6.28 |
 | Depende de | Cierre económico, clientes |
 | Tests | `InvoiceDraft` 7, `InvoiceIssue` 6, `CreditNote` 6, `WorkOrderSaleBreakdown` 1 |
-| Observaciones | La anulación vigente sigue igual hasta responder V19 |
+| Observaciones | La anulación vigente sigue igual hasta implementar V19, ya decidida (ver [aseguradoras](aseguradoras.md)) |
 
 ## Pagos (FASE 16)
 
@@ -44,8 +44,8 @@ Todos **COMPLETADOS** según el [criterio del índice](README.md#criterio). Hist
 |---|---|
 | Objetivo | Registrar cobros |
 | Implementado | Pagos parciales, medios de pago, vuelto, recibo para crédito, anulación y resumen de caja |
-| Pendiente | Retenciones de IVA (M12) |
+| Pendiente | Nada conocido |
 | Reglas | `reglas-de-negocio.md` 6.11 |
 | Depende de | Facturación |
 | Tests | `Payment` 11 |
-| Observaciones | Hasta tener M12, las facturas a aseguradoras quedan con un saldo que nunca se cobra |
+| Observaciones | Las retenciones de IVA y renta (M12, 6.33) cuentan como un pago: descuentan el saldo de la factura. Ver [aseguradoras](aseguradoras.md) |

@@ -199,7 +199,7 @@ export function ClaimFormModal({
             <FormField
               label="¿El deducible incluye IVA?"
               error={errors.deductible_includes_tax}
-              hint="Sin indicarlo se guarda igual, pero el reparto y la factura del deducible lo necesitan."
+              hint="Por lo general no lo incluye, salvo que la póliza diga «IVA incluido». Sin indicarlo se guarda igual, pero el reparto y la factura del deducible lo necesitan."
             >
               <div className="form-selectgroup" role="radiogroup" aria-label="¿El deducible incluye IVA?">
                 {(

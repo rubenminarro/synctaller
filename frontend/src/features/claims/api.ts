@@ -6,7 +6,7 @@ import type { ListParams } from '@/types/api'
 
 export type ClaimStatus = 'open' | 'closed' | 'cancelled'
 export type ClaimType = 'own' | 'third_party'
-export type ClaimDocumentType = 'loss_report' | 'policy' | 'adjuster_report' | 'authorization' | 'photo' | 'other'
+export type ClaimDocumentType = 'loss_report' | 'policy' | 'contract' | 'declarant_id' | 'adjuster_report' | 'authorization' | 'photo' | 'other'
 /** Modalidad de facturación del deducible (M10). null: rige la regla A (con deducible mayor a 0 no se factura). */
 export type DeductibleBillingMode = 'net_of_deductible'
 
@@ -104,6 +104,8 @@ export const CLAIM_TYPES: Record<ClaimType, string> = {
 export const CLAIM_DOCUMENT_TYPES: Record<ClaimDocumentType, string> = {
   loss_report: 'Denuncia',
   policy: 'Póliza',
+  contract: 'Contrato',
+  declarant_id: 'Cédula del declarante',
   adjuster_report: 'Informe del perito',
   authorization: 'Autorización',
   photo: 'Foto',
@@ -133,7 +135,7 @@ export interface ClaimFormValues {
   inspected_at: string
   /** Vacío = desconocido; 0 = sin deducible. */
   deductible_amount: string
-  /** '' = sin indicar (V15: se elige, sin valor por defecto). */
+  /** '' = sin indicar. El alta empieza en 'false' (V15: «no incluye» como valor inicial); la edición muestra lo guardado. */
   deductible_includes_tax: '' | 'true' | 'false'
   /** Solo en la edición (el alta copia la de la aseguradora). */
   deductible_billing_mode: DeductibleBillingMode | ''
@@ -172,6 +174,8 @@ export function newClaimInput(receptionId: number, values: ClaimFormValues) {
     claim_type: values.claim_type,
     insured_name: nullIfEmpty(values.insured_name),
     ...details(values),
+    // Sin deducible el campo no se muestra: el valor inicial ('false') no se envía si el usuario no lo vio.
+    ...(Number(values.deductible_amount) > 0 ? {} : { deductible_includes_tax: null }),
   }
 }
 
@@ -207,7 +211,7 @@ export function claimFormValues(claim?: Claim): ClaimFormValues {
     inspection_scheduled_at: dateTime(claim?.adjuster.inspection_scheduled_at ?? null),
     inspected_at: dateTime(claim?.adjuster.inspected_at ?? null),
     deductible_amount: claim?.deductible_amount ?? '',
-    deductible_includes_tax: claim?.deductible_includes_tax === true ? 'true' : claim?.deductible_includes_tax === false ? 'false' : '',
+    deductible_includes_tax: !claim ? 'false' : claim.deductible_includes_tax === true ? 'true' : claim.deductible_includes_tax === false ? 'false' : '',
     deductible_billing_mode: claim?.deductible_billing_mode?.value ?? '',
     coverage_notes: claim?.coverage_notes ?? '',
   }
