@@ -18,8 +18,8 @@ putenv("DB_DATABASE={$database}");
 $_ENV['DB_DATABASE'] = $_SERVER['DB_DATABASE'] = $database;
 
 /*
- * Base central de la línea T (historial 2.90), en otro archivo. La migran y la vacían los tests que la usan
- * (`Tests\Concerns\UsesCentralDatabase`): el resto de la suite no la toca.
+ * Base central de la línea T (historial 2.90 y 2.93), en otro archivo. La migra `Tests\TestCase` una vez por
+ * ejecución, con el taller de prueba en el que corre todo test.
  */
 $central = __DIR__.'/../database/testing-central.sqlite';
 

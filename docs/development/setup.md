@@ -41,6 +41,7 @@ CREATE DATABASE synctaller_central CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode
 cd backend
 php artisan migrate --seed     # solo sobre una base vacía; tarda unos 15 s
 php artisan migrate --database=central --path=database/migrations/central   # base central (línea T)
+php artisan tenants:register "Taller principal" 127.0.0.1 synctaller   # el taller del host de VITE_API_URL
 php artisan storage:link       # fotos, firmas y logo
 cd ..
 npm test                       # backend y frontend en verde
@@ -56,6 +57,7 @@ npm run dev                    # API en :8000, cola y SPA en :5173
 git pull
 cd backend && composer install && php artisan migrate
 php artisan migrate --database=central --path=database/migrations/central   # crear antes synctaller_central si no existe
+php artisan tenants:register "Taller principal" 127.0.0.1 synctaller   # una sola vez, desde T2 paso 2 (falla si ya existe)
 php artisan db:seed --class=RolesAndPermissionsSeeder   # si la entrega agregó permisos
 cd ../frontend && npm ci
 ```
@@ -99,5 +101,5 @@ En desarrollo, `MAIL_MAILER=log` escribe los emails en `storage/logs/laravel.log
 | `php artisan test` | Todos en verde |
 | `php artisan migrate:status` | Todas las migraciones en `Ran` |
 | `php artisan migrate:status --database=central --path=database/migrations/central` | La de `tenants` en `Ran` |
-| `GET /api/branding` | 200 |
+| `GET /api/branding` | 200 (`404 TENANT_NOT_FOUND` si falta registrar el taller del host) |
 | Login en el frontend | Entra con un usuario sembrado |

@@ -1,7 +1,9 @@
 <?php
 
 use App\Models\Tenant;
+use App\Multitenancy\Actions\DeferQueueTenancyAction;
 use App\Multitenancy\Tasks\PrefixTenantCacheTask;
+use App\Multitenancy\Tasks\SwitchDefaultConnectionTask;
 use App\Multitenancy\Tasks\SwitchTenantPermissionsCacheTask;
 use Illuminate\Broadcasting\BroadcastEvent;
 use Illuminate\Events\CallQueuedListener;
@@ -9,7 +11,6 @@ use Illuminate\Mail\SendQueuedMailable;
 use Illuminate\Notifications\SendQueuedNotifications;
 use Illuminate\Queue\CallQueuedClosure;
 use Spatie\Multitenancy\Actions\ForgetCurrentTenantAction;
-use Spatie\Multitenancy\Actions\MakeQueueTenantAwareAction;
 use Spatie\Multitenancy\Actions\MakeTenantCurrentAction;
 use Spatie\Multitenancy\Actions\MigrateTenantAction;
 use Spatie\Multitenancy\Jobs\NotTenantAware;
@@ -30,12 +31,13 @@ return [
     ],
 
     /*
-     * Tareas al activar un taller, en este orden: la base, después la cache y por último los permisos, que releen la
-     * cache ya con el prefijo del taller. Ninguna abre una conexión: preparar el taller (comprobar su base y aplicar
-     * su configuración) es otra fase (historial 2.80).
+     * Tareas al activar un taller, en este orden: la base, la conexión por defecto (historial 2.93), después la cache
+     * y por último los permisos, que releen la cache ya con el prefijo del taller. Ninguna abre una conexión:
+     * preparar el taller (comprobar su base y aplicar su configuración) es otra fase (historial 2.80).
      */
     'switch_tenant_tasks' => [
         SwitchTenantDatabaseTask::class,
+        SwitchDefaultConnectionTask::class,
         PrefixTenantCacheTask::class,
         SwitchTenantPermissionsCacheTask::class,
     ],
@@ -43,8 +45,10 @@ return [
     'tenant_model' => Tenant::class,
 
     /*
-     * Apagado hasta T3. El paquete revisa todos los jobs de la cola: si un job se considera del taller y no trae uno,
-     * lo borra y falla. Mientras nada active un taller, encenderlo perdería los avisos a clientes.
+     * Apagado hasta T3. Hoy no tiene efecto: los listeners de colas del paquete no se registran
+     * (`DeferQueueTenancyAction`, en `actions`; historial 2.93). En T3, primero se vuelve a la acción del paquete y
+     * después se enciende esto, cuando todo job lleve su taller: con los listeners y esto encendido, un job que se
+     * considera del taller y no trae uno se borra y falla, y se perderían los avisos a clientes.
      */
     'queues_are_tenant_aware_by_default' => false,
 
@@ -61,7 +65,8 @@ return [
     'actions' => [
         'make_tenant_current_action' => MakeTenantCurrentAction::class,
         'forget_current_tenant_action' => ForgetCurrentTenantAction::class,
-        'make_queue_tenant_aware_action' => MakeQueueTenantAwareAction::class,
+        // Sin los listeners de colas del paquete hasta T3 (historial 2.93).
+        'make_queue_tenant_aware_action' => DeferQueueTenancyAction::class,
         'migrate_tenant' => MigrateTenantAction::class,
     ],
 

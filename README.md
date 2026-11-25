@@ -63,6 +63,7 @@ CREATE DATABASE synctaller_central CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode
 cd backend
 php artisan migrate --seed     # solo sobre una base vacía; tarda unos 15 s
 php artisan migrate --database=central --path=database/migrations/central   # base central (línea T)
+php artisan tenants:register "Taller principal" 127.0.0.1 synctaller   # el taller del host de VITE_API_URL
 php artisan storage:link       # fotos, firmas y logo
 cd ..
 npm run dev
@@ -124,6 +125,9 @@ El puerto 5173 es fijo (`strictPort`). Para cambiarlo hay que ajustar también `
   `php artisan db:seed --class=RolesAndPermissionsSeeder`.
 * La base central (`DB_CENTRAL_DATABASE`, por defecto `synctaller_central`) tiene sus propias migraciones:
   `php artisan migrate --database=central --path=database/migrations/central`. El `migrate` de siempre no las ve.
+* La API identifica el taller por el host (reglas de negocio 6.34): sin un taller registrado para el host de
+  `VITE_API_URL` (`127.0.0.1` por defecto), todo responde `404 TENANT_NOT_FOUND`. Se registra con
+  `php artisan tenants:register "Taller principal" 127.0.0.1 synctaller`.
 * `migrate:fresh`, `migrate:refresh` y `db:wipe` **borran todos los datos**. No usarlos sobre una base con datos que interesen.
 * Los seeders son **idempotentes**: sobre una base ya sembrada no duplican ni fallan, pero agregan los datos de ejemplo que
   falten. Sobre una base con datos reales, correr solo los necesarios.

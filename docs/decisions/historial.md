@@ -765,6 +765,23 @@ un taller. La identificación por host es el paso 2.
 | Proxies | La aplicación no configura proxies de confianza (`bootstrap/app.php`), así que el aviso de `private_ranges` no la alcanzaba como está. Se corrige igual: el paso 2 puede necesitarlos detrás de un balanceador |
 | Revisión | Entre 13.39 y 13.42 no hay cambios que rompan lo que usa la aplicación: correcciones de base de datos, colas y colecciones, y `preventLazyLoading` con `cursor()`, que la aplicación no usa |
 
+### 2.93 T2, paso 2: identificación del taller por el host (2026-11-25)
+
+Segundo paso de T2 según el plan de la sección 2.80. Reglas vigentes en [reglas de negocio](../reglas-de-negocio.md),
+6.34. La API no cambia mientras haya un solo taller: lo nuevo son los cuatro `error_code` `TENANT_*`.
+
+| Tema | Decisión |
+|---|---|
+| Middleware | `IdentifyTenant`, en el grupo `api` antes de `ApplyWorkshopSettings` y de `auth:sanctum`, con el orden de §3.2. No olvida el taller al terminar: cada request es un proceso. `getHost()` ya da el host en minúsculas y sin puerto |
+| Errores | `TenantException` (hereda de `AppException`) con los cuatro códigos de §3.2. Mensajes aprobados por el usuario. Si la base no responde, el taller no queda activo y el detalle va al log |
+| Conexión por defecto | Decisión del usuario: `tenant` **solo en HTTP**. Una tarea nueva, `SwitchDefaultConnectionTask`, la cambia al activar un taller y devuelve la anterior al olvidarlo. La consola, el worker y el scheduler siguen con `DB_CONNECTION` hasta T3, donde se completa el fallo cerrado de TD10. Motivo: la cola, la cache y los recordatorios todavía no saben de talleres, y con `tenant` sin base dejarían de funcionar |
+| Colas | Hallazgo: con los listeners de colas del paquete, un job que no es "del taller" olvida el taller y al terminar lo vuelve a activar, lo que reconecta `tenant`. Un job `sync` (en los tests, o un `dispatchSync`) dejaba el resto del request fuera de su conexión. Hasta T3 no se registran (`DeferQueueTenancyAction`): los jobs corren donde se procesan, como antes de la línea T. T3 los hace llevar su taller (§3.5) |
+| Registro | Decisión del usuario: comando `tenants:register {name} {domain} {database}`, que solo crea la fila (el alta completa es T5). El dominio es solo el host, en minúsculas |
+| Desarrollo | Decisión del usuario: el taller #1 se registra con dominio `127.0.0.1` y base `synctaller`, el host al que ya llama el frontend (`VITE_API_URL`). Sin cambios en el frontend ni en el `.env` |
+| Frontend | Decisión del usuario: sin cambios. El SPA ya muestra el `message` de la API; una pantalla propia para los `TENANT_*` se decide con varios talleres reales. CORS para varios orígenes y `VITE_API_URL` por taller quedan para T4 |
+| Proxies | Sin proxies de confianza: se usa el `Host` del request. Se configuran con la infraestructura (T4) |
+| Tests | Todo test corre en un taller de prueba (`TestCase`, id 1000) registrado con el host de `APP_URL` y la base de siempre, activado antes de RefreshDatabase para que su transacción quede en `tenant`. La central se migra una vez por ejecución para toda la suite (reemplaza `UsesCentralDatabase`). Los tests con varios talleres usan bases extra (`UsesTenantDatabases`, `database/testing-tenant-{nombre}.sqlite`) y la transacción en la conexión fija `sqlite`, porque cambiar de taller reconecta `tenant`. `tests/Feature/Tenancy` pasa de 10 a 25 tests; cada uno se comprobó contra su protección quitada |
+
 ---
 
 ## 3. Frontend

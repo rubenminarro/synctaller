@@ -7,7 +7,6 @@ use App\Models\Tenant;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
-use Tests\Concerns\UsesCentralDatabase;
 use Tests\TestCase;
 
 /**
@@ -16,7 +15,6 @@ use Tests\TestCase;
 class TenantTest extends TestCase
 {
     use RefreshDatabase;
-    use UsesCentralDatabase;
 
     public function test_the_tenant_is_stored_in_the_central_database_and_not_in_the_workshop_one(): void
     {
