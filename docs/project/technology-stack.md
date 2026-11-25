@@ -7,7 +7,7 @@ Versiones leídas de `composer.lock` y de la instalación del frontend el 2026-1
 | Componente | Versión | Uso |
 |---|---|---|
 | PHP | `^8.3` | Requisito del proyecto |
-| `laravel/framework` | 13.39.0 | Framework |
+| `laravel/framework` | 13.42.0 | Framework. Los componentes de Symfony que usa, en 7.4 (`http-foundation`, `http-kernel`, `routing` y `yaml` en 7.4.23; historial 2.92) |
 | `laravel/sanctum` | 4.3.3 | Tokens Bearer |
 | `spatie/laravel-permission` | 8.3.2 | Roles y permisos |
 | `barryvdh/laravel-dompdf` | 3.1.2 | PDF, con `dompdf/dompdf` 3.1.6 |
