@@ -308,7 +308,7 @@ export interface ClaimEconomicSummary {
   }
   billing?: {
     /** Solo de las facturas emitidas; los borradores se cuentan aparte. */
-    totals: { net_invoiced: string; collected: string; balance: string }
+    totals: { net_invoiced: string; collected: string; withheld?: string; balance: string }
     by_recipient: {
       recipient_type: 'insurer' | 'customer'
       recipient_label: string
@@ -318,6 +318,8 @@ export interface ClaimEconomicSummary {
       credited_total: string
       net_invoiced: string
       collected: string
+      /** Retenciones vigentes (M12): el saldo ya las descuenta. */
+      withheld?: string
       balance: string
     }[]
     invoices: {
@@ -333,6 +335,7 @@ export interface ClaimEconomicSummary {
       total: string
       credited_total: string
       paid_total: string
+      withheld_total?: string
       balance: string
       payment_status: string | null
     }[]

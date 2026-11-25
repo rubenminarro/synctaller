@@ -106,6 +106,36 @@
         </table>
     @endif
 
+    @if ($withholdings->isNotEmpty())
+        <h2>Retenciones registradas</h2>
+        <table class="grid" style="margin-top: 4px;">
+            <thead>
+                <tr>
+                    <th>Impuesto</th>
+                    <th>Comprobante</th>
+                    <th>Timbrado</th>
+                    <th>Fecha</th>
+                    <th class="num">Importe</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($withholdings as $withholding)
+                    <tr>
+                        <td>{{ $withholding->tax->label() }}</td>
+                        <td>{{ $withholding->certificate_number }}</td>
+                        <td>{{ $withholding->certificate_stamp_number }}</td>
+                        <td>{{ $withholding->withholding_date->format('d/m/Y') }}</td>
+                        <td class="num">{{ \App\Support\Format::money($withholding->amount) }}</td>
+                    </tr>
+                @endforeach
+                <tr class="strong">
+                    <td colspan="4" class="num">Saldo</td>
+                    <td class="num">{{ \App\Support\Format::money($invoice->balance()) }}</td>
+                </tr>
+            </tbody>
+        </table>
+    @endif
+
     @if ($invoice->cancellation_reason)
         <h2>Anulación</h2>
         <div>{{ $invoice->cancelled_at?->format('d/m/Y H:i') }} — {{ $invoice->cancellation_reason }}</div>

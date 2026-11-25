@@ -328,6 +328,15 @@ class InvoiceService
                 );
             }
 
+            // Una retención registrada cancela parte del saldo (M12): se anula antes que la factura.
+            if ($invoice->withholdings()->registered()->exists()) {
+                throw new InvoiceException(
+                    'La factura tiene retenciones registradas: anúlelas antes de anular la factura.',
+                    422,
+                    'INVOICE_HAS_WITHHOLDINGS'
+                );
+            }
+
             $invoice->update([
                 'status' => InvoiceStatus::CANCELLED,
                 'cancelled_at' => now(),

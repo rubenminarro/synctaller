@@ -26,6 +26,7 @@ use App\Http\Controllers\Api\InventoryStockController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\InvoiceCreditNoteController;
 use App\Http\Controllers\Api\InvoiceStampController;
+use App\Http\Controllers\Api\InvoiceWithholdingController;
 use App\Http\Controllers\Api\MaintenancePlanController;
 use App\Http\Controllers\Api\MechanicCommissionController;
 use App\Http\Controllers\Api\MechanicController;
@@ -235,6 +236,15 @@ Route::middleware('auth:sanctum')->scopeBindings()->group(function () {
     Route::get('invoices/{invoice}/credit-notes/{creditNote}', [InvoiceCreditNoteController::class, 'show'])->name('invoices.credit-notes.show');
 
     Route::post('invoices/{invoice}/credit-notes/{creditNote}/cancel', [InvoiceCreditNoteController::class, 'cancel'])->name('invoices.credit-notes.cancel');
+
+    // Retenciones de IVA o renta sobre facturas a crédito (M12): se registran y se anulan, no se editan.
+    Route::get('invoices/{invoice}/withholdings', [InvoiceWithholdingController::class, 'index'])->name('invoices.withholdings.index');
+
+    Route::post('invoices/{invoice}/withholdings', [InvoiceWithholdingController::class, 'store'])->name('invoices.withholdings.store');
+
+    Route::get('invoices/{invoice}/withholdings/{withholding}', [InvoiceWithholdingController::class, 'show'])->name('invoices.withholdings.show');
+
+    Route::post('invoices/{invoice}/withholdings/{withholding}/cancel', [InvoiceWithholdingController::class, 'cancel'])->name('invoices.withholdings.cancel');
 
     Route::post('invoices/{invoice}/payments', [PaymentController::class, 'store'])->name('invoices.payments.store');
 

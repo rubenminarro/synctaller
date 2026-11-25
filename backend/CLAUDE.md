@@ -36,7 +36,7 @@ Si una regla contradice al código, **el código manda**: registrar la discrepan
 * Operaciones sobre varios registros en `DB::transaction`; concurrencia con `lockForUpdate`.
   Orden de bloqueo: OT → línea → `part_stocks`; OT → recepción (recálculo de estado); factura → pago;
   recepción → entregas; compra → `part_stocks`; compra → pago a proveedor; recepción → siniestro; presupuesto → autorización de la
-  aseguradora → documentos del siniestro; presupuesto u OT → excepción interna; siniestro → OT → reparto → excepción; siniestro → OT → reparto → factura; factura → nota de crédito;
+  aseguradora → documentos del siniestro; presupuesto u OT → excepción interna; siniestro → OT → reparto → excepción; siniestro → OT → reparto → factura; factura → nota de crédito; factura → retención;
   documento → serie de códigos (siempre última).
 * **Códigos internos** (`BUD-`, `OT-`, `COM-`, `REP-`, `SRV-`, `DIA-`, `ASE-`, `SIN-`): salen de `DocumentSequenceService::create()`
   (serie en `App\Enums\DocumentSeries`, contador en `document_sequences`), nunca de `max(id) + 1`. El contador de la
@@ -106,9 +106,9 @@ Controller (HasMiddleware) → Form Request → Service → Model/Eloquent → A
 
 | Carpeta | Contenido |
 |---|---|
-| `app/Http/Controllers/Api` | 58 controllers |
+| `app/Http/Controllers/Api` | 59 controllers |
 | `app/Http/Requests` | Validación (mensajes en español) |
-| `app/Services` | Reglas de negocio (47 services, incluido `AuditLogger`) |
+| `app/Services` | Reglas de negocio (48 services, incluido `AuditLogger`) |
 | `app/Jobs`, `app/Mail`, `app/Notifications`, `app/Console/Commands` | Envío de avisos (FASE 23) |
 | `app/Models` | Modelos Eloquent (muchos con `SoftDeletes`) |
 | `app/Http/Resources` | Contrato JSON |
@@ -119,7 +119,7 @@ Controller (HasMiddleware) → Form Request → Service → Model/Eloquent → A
 | `app/Traits/FileResponse.php` | Descarga de archivos generados (PDF, CSV) y de documentos subidos (`storedFileResponse`: adjunto y `nosniff`) |
 | `app/Traits/Auditable.php` | Registro automático de cambios en `audit_logs` |
 | `bootstrap/app.php` | Mapeo de excepciones a JSON |
-| `config/invoice.php`, `maintenance.php`, `notifications.php`, `company.php`, `insurer.php` | Parámetros de negocio (`invoice.default_tax_rate` es el IVA de presupuestos y facturas; `company` son los datos del taller para los PDF; `insurer.deductible_net_mode` habilita la modalidad neta del deducible, 6.31) |
+| `config/invoice.php`, `maintenance.php`, `notifications.php`, `company.php`, `insurer.php` | Parámetros de negocio (`invoice.default_tax_rate` es el IVA de presupuestos y facturas; `invoice.vat_withholding_percentage`, el porcentaje del IVA que se sugiere como retención, 6.33; `company` son los datos del taller para los PDF; `insurer.deductible_net_mode` habilita la modalidad neta del deducible, 6.31) |
 
 ### Contrato de respuesta
 
@@ -159,7 +159,7 @@ de los permisos, ordenados; el administrador recibe todos los del guard `api` po
 | `mechanic` | Ejecuta la OT | Diagnóstico (consulta y usa el catálogo de ítems), iniciar/pausar/completar OT e ítems, consumir/devolver repuestos, sus horas y comisiones, historial, estado de mantenimiento, dashboard (bloque taller) |
 | `recepcionista` | Atiende al cliente | Clientes, vehículos, recepciones, checklist, presupuestos completos, registrar entregas, alertas de mantenimiento, reporte de presupuestos, avisos a clientes (consultar y reenviar), ver repuestos de la OT y registrar la respuesta del cliente a los extras, aseguradoras completas (alta, edición, estado, baja y contactos), siniestros (alta, edición y cancelación, con sus documentos: subir, listar y descargar), autorizaciones de la aseguradora (registrar y consultar) y re-aceptaciones del dueño y consulta del reparto de la OT |
 | `jefe-taller` | Organiza el trabajo | OT completas, ítems, repuestos en OT (incluida la respuesta del cliente a los extras), asignación y horas de todos, diagnóstico y su catálogo de ítems, intervalos de mantenimiento por vehículo, reporte de productividad, consulta de compras, pagos a proveedores y cuentas por pagar, consulta de aseguradoras y siniestros (alta, edición y cancelación, con sus documentos: subir, listar y descargar), autorizaciones de la aseguradora (registrar y consultar) y excepciones internas (otorgar y consultar) y consulta del reparto de la OT |
-| `cajero` | Cobra y paga | Facturas, pagos, resumen de caja, reportes de ventas, clientes, cuentas por cobrar y siniestros, consulta de compras, pagos a proveedores completos (registrar, anular, resumen de egresos), cuentas por pagar, avisos a clientes (consultar y reenviar) y consulta de aseguradoras, siniestros (con la descarga de sus documentos), autorizaciones de la aseguradora y excepciones internas, y el reparto de la OT completo (generar, editar, confirmar y descartar el borrador), y notas de crédito externas (registrar y anular) |
+| `cajero` | Cobra y paga | Facturas, pagos, resumen de caja, reportes de ventas, clientes, cuentas por cobrar y siniestros, consulta de compras, pagos a proveedores completos (registrar, anular, resumen de egresos), cuentas por pagar, avisos a clientes (consultar y reenviar) y consulta de aseguradoras, siniestros (con la descarga de sus documentos), autorizaciones de la aseguradora y excepciones internas, y el reparto de la OT completo (generar, editar, confirmar y descartar el borrador), notas de crédito externas y retenciones de IVA y renta (registrar y anular) |
 | `deposito` | Stock | Repuestos, proveedores, inventario, compras completas, repuestos en OT, reporte de inventario, consulta de pagos a proveedores y cuentas por pagar |
 
 El rol del mecánico se llama `mechanic` (no `mecanico`). El seeder crea usuarios de cada rol (`README.md` de la raíz, "Datos de prueba").

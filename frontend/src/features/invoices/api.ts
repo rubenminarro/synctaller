@@ -68,12 +68,25 @@ export interface Invoice {
     discount: string
     total: string
   }
-  /** El saldo descuenta pagos y notas de crédito (`credited_total`, P10). */
-  payment_summary: { paid_total: string; credited_total: string; balance: string; status: InvoicePaymentStatus | null }
+  /**
+   * El saldo descuenta pagos, notas de crédito (`credited_total`, P10) y retenciones (`withheld_total`, M12).
+   * `vat_withholding_suggestion`: retención de IVA sugerida (30 % del IVA menos lo ya retenido); `null` si la factura
+   * no admite retenciones (solo emitidas a crédito).
+   */
+  payment_summary: {
+    paid_total: string
+    credited_total: string
+    withheld_total: string
+    balance: string
+    status: InvoicePaymentStatus | null
+    vat_withholding_suggestion: string | null
+  }
   /** Solo en `GET /invoices/{id}`. */
   payments?: Payment[]
   /** Notas de crédito registradas sobre la factura, también las anuladas (P10). Solo en `GET /invoices/{id}`. */
   credit_notes?: CreditNote[]
+  /** Retenciones registradas sobre la factura, también las anuladas (M12). Solo en `GET /invoices/{id}`. */
+  withholdings?: Withholding[]
   issued_at: string | null
   issued_by: number | null
   cancelled_at: string | null
@@ -167,6 +180,69 @@ export function creditNoteInput(
 export const creditNotesApi = {
   create: (invoiceId: number, body: CreditNoteInput) => postData<CreditNote>(`/invoices/${invoiceId}/credit-notes`, body),
   cancel: (invoiceId: number, id: number, reason: string) => postData<CreditNote>(`/invoices/${invoiceId}/credit-notes/${id}/cancel`, { reason }),
+}
+
+export type WithholdingTax = 'vat' | 'income'
+export type WithholdingStatus = 'registered' | 'cancelled'
+
+/**
+ * `InvoiceWithholdingResource` (M12): retención de IVA o renta que el cliente practicó sobre una factura a crédito. El
+ * importe es el del comprobante, en guaraníes. Cancela saldo sin movimiento de caja. Inmutable: se anula con motivo.
+ */
+export interface Withholding {
+  id: number
+  invoice_id: number
+  tax: { value: WithholdingTax; label: string }
+  amount: string
+  certificate_number: string
+  certificate_stamp_number: string
+  withholding_date: string
+  status: { value: WithholdingStatus; label: string }
+  registered_by: { id: number; name: string } | null
+  cancelled_at: string | null
+  cancelled_by: { id: number; name: string } | null
+  cancellation_reason: string | null
+  created_at: string
+}
+
+export interface WithholdingInput {
+  tax: WithholdingTax
+  amount: number
+  certificate_number: string
+  certificate_stamp_number: string
+  withholding_date: string
+}
+
+export const WITHHOLDING_STATUS: StatusMap = {
+  registered: { label: 'Registrada', color: 'teal' },
+  cancelled: { label: 'Anulada', color: 'red' },
+}
+
+export const WITHHOLDING_TAXES: Record<WithholdingTax, string> = {
+  vat: 'IVA',
+  income: 'Renta',
+}
+
+/** Cuerpo del registro: textos recortados e importe entero (el tope por saldo lo valida el backend). */
+export function withholdingInput(values: {
+  tax: WithholdingTax
+  amount: string
+  certificate_number: string
+  certificate_stamp_number: string
+  withholding_date: string
+}): WithholdingInput {
+  return {
+    tax: values.tax,
+    amount: Number(values.amount.trim()),
+    certificate_number: values.certificate_number.trim(),
+    certificate_stamp_number: values.certificate_stamp_number.trim(),
+    withholding_date: values.withholding_date,
+  }
+}
+
+export const withholdingsApi = {
+  create: (invoiceId: number, body: WithholdingInput) => postData<Withholding>(`/invoices/${invoiceId}/withholdings`, body),
+  cancel: (invoiceId: number, id: number, reason: string) => postData<Withholding>(`/invoices/${invoiceId}/withholdings/${id}/cancel`, { reason }),
 }
 
 export const INVOICE_STATUS: StatusMap = {

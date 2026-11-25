@@ -146,7 +146,7 @@ footer { margin-top: 32px; font-size: 14px; color: var(--muted); }
     <span><b>Fecha:</b> 2026-11-24 (versión 3: 2026-10-28; versión 2: 2026-10-27)</span>
     <span><b>Backend:</b> main (716010f), Laravel 13.38.0</span>
     <span><b>Frontend revisado:</b> main (cbbb559)</span>
-    <span><b>Estado:</b> decisiones A–G, P1–P9 y P10 (2026-10-29) aprobadas; M10 implementada con el interruptor apagado (V21 cumplida el 2026-11-24; se enciende después del ajuste de V16); M12 rediseñada en la versión 4 y <b>pendiente de aprobación</b>; la parte fiscal respondida por una contadora; siguen pendientes V3, V5 y V13 (§10.1). <b>No apto para producción</b></span>
+    <span><b>Estado:</b> decisiones A–G, P1–P9 y P10 (2026-10-29) aprobadas; M10 implementada con el interruptor apagado (V21 cumplida el 2026-11-24; se enciende después del ajuste de V16); M12 (versión 4) implementada el 2026-11-24 (reglas 6.33); la parte fiscal respondida por una contadora; siguen pendientes V3, V5 y V13 (§10.1). <b>No apto para producción</b></span>
   </div>
   <div class="legend" aria-label="Leyenda">
     <span class="item"><span class="tag h">Hecho</span> comprobado en el código o el entorno</span>
@@ -1490,7 +1490,7 @@ flowchart LR
     <thead><tr><th>#</th><th>Propuesta</th><th>Recomendación</th><th>Depende de</th></tr></thead>
     <tbody>
       <tr><td>M10</td><td>Modalidad neta del deducible (§6.6): modalidad en el siniestro, porciones <code>owner_deductible</code> descontadas de lo cubierto y línea propia en la factura del dueño</td><td>Implementada el 2026-10-30 detrás del interruptor <code>insurer.deductible_net_mode</code>, apagado (handoff 2.75): V15 se indica en cada siniestro, V16 se rechaza hasta tener respuesta y el deducible va en la misma factura del dueño. V21 se cumplió el 2026-11-24: se enciende después de ajustar V16 (el deducible facturado, como máximo lo cubierto)</td><td>G1, V15, V16 (respondidas)</td></tr>
-      <tr><td>M12</td><td>Retenciones de IVA y renta como cancelación sin caja (§9, rediseñada en la versión 4)</td><td>Aprobar el diseño. M9 ya está hecha: hasta tener M12, las facturas a aseguradoras quedan con un saldo que nunca se cobra (§10.4)</td><td>G3, V17 (respondidas)</td></tr>
+      <tr><td>M12</td><td>Retenciones de IVA y renta como cancelación sin caja (§9, rediseñada en la versión 4)</td><td>Implementada el 2026-11-24 (historial 2.84, reglas 6.33)</td><td>G3, V17 (respondidas)</td></tr>
     </tbody>
   </table></div>
 
@@ -1524,7 +1524,7 @@ flowchart LR
     <li><b>M8 → P10 → M9</b> (revisión económica): la corrección de repartos facturados usa las notas de crédito registradas (P10). <b>M10</b> solo con G1 respondida. <b>M11</b> al final.</li>
     <li><b>T6</b> (primer taller comercial) cuando T1–T5, la tarea P8 y el MVP estén aprobados. Los siniestros con deducible mayor a 0 no se habilitan comercialmente sin M10.</li>
   </ol>
-  <footer>Punto de control: la especificación termina aquí. Las decisiones técnicas de §10.2 están aprobadas. P10 se aprobó el 2026-10-29; M10 (neta) está implementada con el interruptor apagado y la propuesta M12 de la versión 4 espera tu aprobación. La parte fiscal de §10.1 la respondió una contadora el 2026-11-24 y el módulo no está listo para producción. Ningún paso de implementación empieza sin tu autorización.</footer>
+  <footer>Punto de control: la especificación termina aquí. Las decisiones técnicas de §10.2 están aprobadas. P10 se aprobó el 2026-10-29; M10 (neta) está implementada con el interruptor apagado y M12 (versión 4) está implementada. La parte fiscal de §10.1 la respondió una contadora el 2026-11-24 y el módulo no está listo para producción. Ningún paso de implementación empieza sin tu autorización.</footer>
 </section>
 </main>
 </div>

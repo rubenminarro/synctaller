@@ -2334,6 +2334,44 @@ baja.
 | Reporte de ventas | `GET {{base_url}}/reports/sales` | — | 200 | `credit_notes` (cantidad, total e IVA, por fecha de la nota) y `net_total`; `totals.total` sin cambios |
 | Sin permiso | recepcionista: registrar o anular; mecánico: listar | — | 403 | `FORBIDDEN` |
 
+### 16.5.2 Retenciones de IVA y renta (M12)
+
+Ver `reglas-de-negocio.md` 6.33. Sobre una factura **emitida a crédito** (`{{invoice_id}}`, por ejemplo la de 16.3), con
+el token del cajero. Importe del comprobante, en guaraníes enteros. `GET invoices/{{invoice_id}}` trae antes la sugerencia
+en `payment_summary.vat_withholding_suggestion` (30 % del IVA de la factura).
+
+`POST {{base_url}}/invoices/{{invoice_id}}/withholdings`
+
+```json
+{
+  "tax": "vat",
+  "amount": 10000,
+  "certificate_number": "001-001-0000123",
+  "certificate_stamp_number": "17654321",
+  "withholding_date": "2026-11-24"
+}
+```
+
+Esperado: `201`, `tax.value` `vat`, `status.value` `registered` → `withholding_id`. `GET invoices/{{invoice_id}}` trae
+`payment_summary.withheld_total`, `withholdings[]` y el saldo baja; sin pagos, `payment_summary.status` `partial`.
+
+| Caso | Método / Endpoint | Body | HTTP | Resultado / error_code |
+|---|---|---|---|---|
+| Factura al contado, en borrador o anulada | `POST …/invoices/{id}/withholdings` | el de arriba | 422 | `INVOICE_NOT_WITHHOLDABLE` |
+| Más que el saldo | ídem | `amount` mayor | 422 | `INVOICE_WITHHOLDING_EXCEEDS_BALANCE` |
+| Fecha anterior a la factura / futura | ídem | `withholding_date` | 422 | `INVOICE_WITHHOLDING_DATE_BEFORE_INVOICE` / `VALIDATION_ERROR` |
+| Sin timbrado o impuesto inválido | ídem | sin `certificate_stamp_number` / `"tax": "otro"` | 422 | `VALIDATION_ERROR` |
+| Renta del mismo comprobante | ídem | `"tax": "income"`, `"amount": 2000` | 201 | Se suma a lo retenido |
+| Mismo comprobante e impuesto otra vez | ídem | el de arriba | 409 | `INVOICE_WITHHOLDING_DUPLICATE` |
+| Mismo comprobante en otra factura | `POST …/invoices/{otra}/withholdings` | el de arriba | 201 | Un comprobante cubre varias facturas |
+| Pago del resto | `POST …/invoices/{{invoice_id}}/payments` | `amount` = saldo | 201 | `payment_summary.status` `paid`; `payments/summary` solo suma el pago |
+| Anular la factura con retenciones vigentes | `POST …/invoices/{{invoice_id}}/cancel` | `{ "reason": "…" }` | 422 | `INVOICE_HAS_WITHHOLDINGS` |
+| Anular la retención (mal cargada) | `POST …/invoices/{{invoice_id}}/withholdings/{{withholding_id}}/cancel` | `{ "reason": "Se cargó mal el importe." }` | 200 | `status` `cancelled`; el saldo vuelve. Otra vez → `INVOICE_WITHHOLDING_NOT_CANCELLABLE` |
+| Listar y ver | `GET …/withholdings`, `GET …/withholdings/{{withholding_id}}` | — | 200 | También las anuladas; con otra factura en la URL → 404 |
+| PDF de la factura y recibo | `GET …/invoices/{{invoice_id}}/pdf`, `GET …/payments/{id}/receipt` | — | 200 | Listan las retenciones vigentes |
+| Reporte de ventas | `GET {{base_url}}/reports/sales` | — | 200 | `withholdings` (cantidad, total, `vat`, `income`, por fecha de la retención); `collected` sin cambios |
+| Cuentas por cobrar | `GET {{base_url}}/reports/receivables?client_id={id}` | — | 200 | `invoices[].withheld_total` |
+| Sin permiso | recepcionista o jefe de taller: registrar o anular | — | 403 | `FORBIDDEN` |
 ### 16.6 Listado y resumen de caja
 
 | Caso | Método / Endpoint | HTTP | Resultado / error_code |

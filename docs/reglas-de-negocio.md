@@ -248,7 +248,7 @@ Cada cambio de regla actualiza este documento en la misma rama.
 * `draft → issued → cancelled`. Emitir exige RUC/CI y, a crédito, vencimiento ≥ hoy; toma el número del timbrado
   activo y vigente con `lockForUpdate` (`001-001-0000001`); números no se reutilizan. Emitida es inmutable
   (`INVOICE_NOT_EDITABLE`). Con pagos vigentes no se anula (`INVOICE_HAS_PAYMENTS`), ni con notas de crédito
-  vigentes (`INVOICE_HAS_CREDIT_NOTES`, 6.28).
+  vigentes (`INVOICE_HAS_CREDIT_NOTES`, 6.28), ni con retenciones vigentes (`INVOICE_HAS_WITHHOLDINGS`, 6.33).
 * La OT de un siniestro que requiere reparto no se factura por `POST work-orders/{id}/invoice`
   (`WORK_ORDER_REQUIRES_ALLOCATION_INVOICING`, 422; 6.27): se factura por responsable desde su reparto (6.29).
 * Fuera de alcance hoy: SIFEN y la emisión de notas de crédito (las emitidas fuera se registran, 6.28). El PDF de la
@@ -261,7 +261,7 @@ Cada cambio de regla actualiza este documento en la misma rama.
 * Medios `cash|card|transfer|check`; referencia obligatoria salvo efectivo; banco en cheque. Vuelto solo en efectivo
   (`amount_received` ≥ `amount`; se guarda `change_amount`).
 * Recibo `REC-000001` solo para facturas a crédito. El pago no se edita: se anula con motivo.
-* Saldo (total − pagos − notas de crédito vigentes, 6.28) y estado de cobro (`unpaid|partial|paid|credited`) se
+* Saldo (total − pagos − notas de crédito vigentes, 6.28 − retenciones vigentes, 6.33) y estado de cobro (`unpaid|partial|paid|credited`) se
   calculan; resumen de caja por medio de pago.
 * Contrato: el listado de pagos trae `invoice_number` y `customer_name` de la factura (no en los pagos del detalle de
   la factura).
@@ -830,3 +830,43 @@ Entrega T1 de `docs/especificacion-aseguradoras.html` (decisiones del 2026-11-01
   guarda por línea y el presupuesto, que no la guarda, la deduce de sus importes (`Budget::taxRate`).
 * **Hora de los recordatorios:** la tarea corre cada minuto y compara la hora en `when()`, porque `routes/console.php` se
   evalúa en todo comando, incluso sin la base migrada.
+
+## 6.33 Retenciones de IVA y renta
+
+Entrega M12 de `docs/especificacion-aseguradoras.html` (§9, versión 4; respuestas de la contadora del 2026-11-24, V17;
+historial 2.83 y 2.84; `InvoiceWithholdingService`). Migración `000072`.
+
+* **Qué es:** la retención de IVA o de renta que un cliente (no solo una aseguradora) practica al pagar una factura a
+  crédito, registrada con su comprobante. Cancela parte del saldo **sin movimiento de caja**. El tratamiento contable
+  (crédito fiscal) queda fuera de SyncTaller.
+* **Modelo:** `InvoiceWithholding` (`tax` `WithholdingTax`: `vat|income`; `amount` en guaraníes enteros, el del
+  comprobante; `certificate_number` y `certificate_stamp_number`, número y timbrado del comprobante de la DNIT;
+  `withholding_date`; `status` `WithholdingStatus`: `registered|cancelled`), `Auditable`.
+* **Registro** (`POST invoices/{invoice}/withholdings`, permiso `invoice-withholdings.store`, cajero):
+  * solo factura emitida **a crédito** (`INVOICE_NOT_WITHHOLDABLE`, 422; V17: no hay retención al contado);
+  * hasta el saldo (`INVOICE_WITHHOLDING_EXCEEDS_BALANCE`, 422);
+  * fecha no futura (422 `VALIDATION_ERROR`) ni anterior a la emisión (`INVOICE_WITHHOLDING_DATE_BEFORE_INVOICE`, 422);
+  * número y timbrado obligatorios (letras, números, guiones, barras y puntos, ≤ 30);
+  * el mismo comprobante e impuesto dos veces en la misma factura, no (`INVOICE_WITHHOLDING_DUPLICATE`, 409). El mismo
+    comprobante sí puede ir en varias facturas (un pago de varias facturas en el mismo acto) y con IVA y renta;
+  * el monto mínimo a partir del cual se retiene no se valida: se registra lo que dice el comprobante.
+* **Sugerencia:** `payment_summary.vat_withholding_suggestion` en el detalle de la factura es el
+  `invoice.vat_withholding_percentage` (30) del IVA de la factura, menos lo ya retenido de IVA, sin superar el saldo,
+  redondeado a guaraníes (`Invoice::vatWithholdingSuggestion`); `null` si la factura no admite retenciones. Es solo una
+  ayuda: para la renta no hay sugerencia.
+* **Inmutable** (`INVOICE_WITHHOLDING_IMMUTABLE`, 409). Un registro mal cargado se anula con motivo
+  (`POST …/{withholding}/cancel`, `invoice-withholdings.cancel`; repetir → `INVOICE_WITHHOLDING_NOT_CANCELLABLE`, 422).
+* **Efectos:** el saldo de la factura descuenta lo retenido (pagos, nota de crédito hasta el saldo, recordatorios,
+  cuentas por cobrar, historial y resumen del siniestro lo toman solos; donde se precarga `credited_total` se precarga
+  `withheld_total`). Estado de cobro: una retención cuenta como un pago (`partial` con saldo, `paid` sin saldo);
+  `credited` solo si no hay pagos ni retenciones. Con retenciones vigentes la factura no se anula
+  (`INVOICE_HAS_WITHHOLDINGS`, 422). El resumen de caja (`payments/summary`) y lo cobrado del reporte de ventas no las
+  suman.
+* **Contrato:** el detalle de la factura agrega `payment_summary.withheld_total`, `payment_summary.vat_withholding_suggestion`
+  y `withholdings[]`; el reporte de ventas, el bloque `withholdings` (cantidad, total, IVA y renta, por fecha de la
+  retención); cuentas por cobrar con `client_id`, `invoices[].withheld_total`; el resumen del siniestro,
+  `invoices[].withheld_total` y `withheld` por destinatario y en los totales. El PDF de la factura lista las retenciones
+  y el saldo; el recibo, las retenciones de la factura.
+* **Consulta:** `GET invoices/{invoice}/withholdings` y `GET …/{withholding}` (scoped) con `invoices.show`.
+* **Datos de ejemplo** (`WithholdingSeeder`): la factura de la aseguradora de C05 con su retención de IVA y una de renta
+  anulada.

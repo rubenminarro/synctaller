@@ -177,6 +177,12 @@ export function SummaryBody({ summary }: { summary: ClaimEconomicSummary }) {
                       <span>Cobrado</span>
                       <span>{formatGuarani(group.collected)}</span>
                     </div>
+                    {Number(group.withheld ?? 0) > 0 && (
+                      <div className="d-flex justify-content-between small">
+                        <span>Retenido</span>
+                        <span>{formatGuarani(group.withheld ?? 0)}</span>
+                      </div>
+                    )}
                     <div className="d-flex justify-content-between small">
                       <span>Saldo</span>
                       <span>{formatGuarani(group.balance)}</span>

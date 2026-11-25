@@ -275,6 +275,10 @@ class RolesAndPermissionsSeeder extends Seeder
             /* invoice credit note permissions (P10; se consultan con invoices.show) */
             'invoice-credit-notes.store',
             'invoice-credit-notes.cancel',
+
+            /* invoice withholding permissions (M12; se consultan con invoices.show) */
+            'invoice-withholdings.store',
+            'invoice-withholdings.cancel',
             'invoices.destroy',
 
             /* payment permissions */
@@ -548,6 +552,7 @@ class RolesAndPermissionsSeeder extends Seeder
                     'invoices.index', 'invoices.show', 'invoices.store', 'invoices.update',
                     'invoices.issue', 'invoices.cancel', 'invoices.destroy',
                     'invoice-credit-notes.store', 'invoice-credit-notes.cancel',
+                    'invoice-withholdings.store', 'invoice-withholdings.cancel',
                     'payments.index', 'payments.show', 'payments.store', 'payments.cancel', 'payments.summary',
                     'purchases.index', 'purchases.show',
                     'supplier-payments.index', 'supplier-payments.show', 'supplier-payments.store',

@@ -21,6 +21,9 @@
         @if ($payment->reference)<tr><th>Referencia</th><td>{{ $payment->reference }}</td></tr>@endif
         @if ($payment->bank)<tr><th>Banco</th><td>{{ $payment->bank }}</td></tr>@endif
         <tr><th>Total de la factura</th><td class="num">{{ \App\Support\Format::money($invoice->total) }}</td></tr>
+        @foreach ($withholdings as $withholding)
+            <tr><th>Retención de {{ $withholding->tax->label() }} (comprobante {{ $withholding->certificate_number }})</th><td class="num">{{ \App\Support\Format::money($withholding->amount) }}</td></tr>
+        @endforeach
         <tr><th>Saldo actual de la factura</th><td class="num">{{ \App\Support\Format::money($balance) }}</td></tr>
     </table>
 

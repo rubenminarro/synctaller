@@ -59,6 +59,16 @@ function Sales({ report, groupBy }: { report: SalesReport; groupBy: 'day' | 'mon
           />
         </div>
       )}
+      {report.withholdings && report.withholdings.withholdings_count > 0 && (
+        <div className="row row-cards mb-3">
+          <StatTile
+            className="col-12 col-sm-6"
+            label="Retenciones"
+            value={formatGuarani(report.withholdings.total)}
+            hint={`${report.withholdings.withholdings_count} registrada(s) en el período · IVA ${formatGuarani(report.withholdings.vat)} · Renta ${formatGuarani(report.withholdings.income)}. No suman en lo cobrado.`}
+          />
+        </div>
+      )}
       <div className="row row-cards mb-3">
         <div className="col-12 col-lg-8">
           <ChartCard title={groupBy === 'day' ? 'Facturado por día' : 'Facturado por mes'}>

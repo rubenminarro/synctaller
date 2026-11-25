@@ -156,7 +156,8 @@ Base: `/api`. Todas las respuestas son JSON (el backend fuerza `Accept: applicat
   nunca concatenar nombre y apellido de un cliente. Nombre y apellido de usuarios y mecánicos no cambian.
 * **Facturas de una OT:** una OT con reparto tiene una factura por responsable (aseguradora y dueño): usar `invoices[]`;
   `invoice` es una clave heredada (la última). Estado de cobro `credited` ("Acreditada"): saldada solo con notas de
-  crédito.
+  crédito. Una retención de IVA o renta (M12) cuenta como un pago: el saldo la descuenta y la factura queda en `partial` o
+  `paid`.
 
 ---
 

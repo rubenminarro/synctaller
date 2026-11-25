@@ -7,7 +7,10 @@ use App\Enums\InvoiceCondition;
 use App\Enums\InvoicePaymentStatus;
 use App\Enums\InvoiceStatus;
 use App\Enums\PaymentStatus;
+use App\Enums\WithholdingStatus;
+use App\Enums\WithholdingTax;
 use App\Exceptions\InvoiceException;
+use App\Support\Decimal;
 use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -191,16 +194,42 @@ class Invoice extends Model
     }
 
     /**
-     * Saldo: total menos lo cobrado y lo acreditado (P10).
+     * Retenciones de IVA o renta registradas sobre la factura (M12), también las anuladas.
+     */
+    public function withholdings(): HasMany
+    {
+        return $this->hasMany(InvoiceWithholding::class)->orderBy('id');
+    }
+
+    /**
+     * Total retenido (retenciones vigentes, M12). Usa withheld_total si vino de
+     * withSum o la relación si está cargada.
+     */
+    public function withheldTotal(): string
+    {
+        if (array_key_exists('withheld_total', $this->attributes)) {
+            return bcadd((string) ($this->attributes['withheld_total'] ?? '0'), '0', 2);
+        }
+
+        $withholdings = $this->relationLoaded('withholdings')
+            ? $this->withholdings->where('status', WithholdingStatus::REGISTERED)
+            : $this->withholdings()->registered()->get();
+
+        return $withholdings->reduce(fn (string $sum, InvoiceWithholding $w) => bcadd($sum, $w->amount, 2), '0.00');
+    }
+
+    /**
+     * Saldo: total menos lo cobrado, lo acreditado (P10) y lo retenido (M12).
      */
     public function balance(): string
     {
-        return bcsub(bcsub((string) $this->total, $this->paidTotal(), 2), $this->creditedTotal(), 2);
+        return bcsub(bcsub(bcsub((string) $this->total, $this->paidTotal(), 2), $this->creditedTotal(), 2), $this->withheldTotal(), 2);
     }
 
     /**
      * Estado de cobro: solo aplica a facturas emitidas. Saldada solo con notas de
-     * crédito, sin pagos: acreditada (P10).
+     * crédito, sin pagos ni retenciones: acreditada (P10). Una retención cancela
+     * parte del saldo como un pago (M12).
      */
     public function paymentStatus(): ?InvoicePaymentStatus
     {
@@ -208,12 +237,39 @@ class Invoice extends Model
             return null;
         }
 
+        $collected = bcadd($this->paidTotal(), $this->withheldTotal(), 2);
+
         return match (true) {
-            bccomp($this->balance(), '0', 2) <= 0 && bccomp($this->paidTotal(), '0', 2) === 0 && bccomp($this->creditedTotal(), '0', 2) > 0 => InvoicePaymentStatus::CREDITED,
+            bccomp($this->balance(), '0', 2) <= 0 && bccomp($collected, '0', 2) === 0 && bccomp($this->creditedTotal(), '0', 2) > 0 => InvoicePaymentStatus::CREDITED,
             bccomp($this->balance(), '0', 2) <= 0 => InvoicePaymentStatus::PAID,
-            bccomp($this->paidTotal(), '0', 2) > 0 => InvoicePaymentStatus::PARTIAL,
+            bccomp($collected, '0', 2) > 0 => InvoicePaymentStatus::PARTIAL,
             default => InvoicePaymentStatus::UNPAID,
         };
+    }
+
+    /**
+     * Retención de IVA sugerida (M12): el porcentaje configurado del IVA de la
+     * factura menos lo ya retenido de IVA, sin superar el saldo. Solo para una
+     * factura emitida a crédito; el cajero carga el importe del comprobante.
+     */
+    public function vatWithholdingSuggestion(): ?string
+    {
+        if ($this->status !== InvoiceStatus::ISSUED || $this->condition !== InvoiceCondition::CREDIT) {
+            return null;
+        }
+
+        $percentage = (string) config('invoice.vat_withholding_percentage', 30);
+        $vat = bcadd((string) $this->iva_5, (string) $this->iva_10, 2);
+        $suggested = Decimal::round(bcdiv(bcmul($vat, $percentage, 8), '100', 8), (int) config('invoice.decimals', 0));
+
+        $withheld = $this->relationLoaded('withholdings')
+            ? $this->withholdings->where('status', WithholdingStatus::REGISTERED)->where('tax', WithholdingTax::VAT)
+            : $this->withholdings()->registered()->where('tax', WithholdingTax::VAT)->get();
+        $pending = bcsub($suggested, $withheld->reduce(fn (string $sum, InvoiceWithholding $w) => bcadd($sum, $w->amount, 2), '0.00'), 2);
+        $balance = $this->balance();
+        $amount = bccomp($pending, $balance, 2) > 0 ? $balance : $pending;
+
+        return bccomp($amount, '0', 2) > 0 ? Decimal::of($amount, 2) : '0.00';
     }
 
     public function creator(): BelongsTo
