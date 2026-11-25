@@ -21,7 +21,7 @@ class StoreCreditNoteRequest extends FormRequest
     {
         return [
             'number' => ['required', 'string', 'max:30', 'regex:/^[A-Za-z0-9\-\/.]+$/'],
-            'stamp_number' => ['nullable', 'string', 'max:30', 'regex:/^[A-Za-z0-9\-\/.]+$/'],
+            'stamp_number' => ['required', 'string', 'max:30', 'regex:/^[A-Za-z0-9\-\/.]+$/'],
             'issue_date' => ['required', 'date_format:Y-m-d', 'before_or_equal:today'],
             'reason' => ['required', 'string', 'min:3', 'max:1000'],
             'items' => ['required', 'array', 'min:1'],
@@ -36,6 +36,7 @@ class StoreCreditNoteRequest extends FormRequest
             'number.required' => 'El número de la nota de crédito es obligatorio.',
             'number.max' => 'El número no debe superar los 30 caracteres.',
             'number.regex' => 'El número solo admite letras, números, guiones, barras y puntos.',
+            'stamp_number.required' => 'El timbrado de la nota de crédito es obligatorio.',
             'stamp_number.max' => 'El timbrado no debe superar los 30 caracteres.',
             'stamp_number.regex' => 'El timbrado solo admite letras, números, guiones, barras y puntos.',
             'issue_date.required' => 'La fecha de la nota de crédito es obligatoria.',

@@ -87,6 +87,21 @@ class ClaimDocumentTest extends ClaimTestCase
         $this->getJson("/api/claims/{$claim->id}/documents")->assertOk()->assertJsonCount(2, 'data')->assertJsonMissingPath('data.0.path');
     }
 
+    public function test_the_contract_and_the_declarant_id_back_the_claim(): void
+    {
+        // V20: respaldan la modalidad el contrato y la póliza, y se presenta la cédula del declarante.
+        $claim = $this->claim();
+
+        $this->upload($claim, $this->pdf(), 'contract')
+            ->assertCreated()
+            ->assertJsonPath('data.type.value', 'contract')
+            ->assertJsonPath('data.type.label', 'Contrato');
+        $this->upload($claim, $this->png(), 'declarant_id')
+            ->assertCreated()
+            ->assertJsonPath('data.type.value', 'declarant_id')
+            ->assertJsonPath('data.type.label', 'Cédula del declarante');
+    }
+
     public function test_dangerous_or_mismatched_files_are_rejected(): void
     {
         $claim = $this->claim();

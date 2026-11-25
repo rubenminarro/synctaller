@@ -143,7 +143,7 @@ export function CreditNoteFormModal({ invoice, onClose }: { invoice: Invoice; on
           <TextField label="Número" name="number" required maxLength={30} value={values.number} onChange={set('number')} errors={errors} />
         </div>
         <div className="col-12 col-md-4">
-          <TextField label="Timbrado" name="stamp_number" maxLength={30} value={values.stamp_number} onChange={set('stamp_number')} errors={errors} />
+          <TextField label="Timbrado" name="stamp_number" required maxLength={30} value={values.stamp_number} onChange={set('stamp_number')} errors={errors} />
         </div>
         <div className="col-12 col-md-4">
           <TextField label="Fecha" name="issue_date" type="date" required max={todayInput()} value={values.issue_date} onChange={set('issue_date')} errors={errors} />

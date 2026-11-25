@@ -162,6 +162,8 @@ class CreditNoteTest extends InvoiceTestCase
             ->assertStatus(422)->assertJsonValidationErrors('issue_date');
         $this->register($invoice, $this->body($invoice, ['Tornillos' => 10.5]))
             ->assertStatus(422)->assertJsonValidationErrors('items.0.amount');
+        $this->register($invoice, $this->body($invoice, ['Tornillos' => 1000], ['stamp_number' => null]))
+            ->assertStatus(422)->assertJsonValidationErrors('stamp_number');
         $this->register($invoice, $this->body($invoice, [], ['number' => 'NC 01']))
             ->assertStatus(422)->assertJsonValidationErrors(['number', 'items']);
 

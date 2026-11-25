@@ -37,6 +37,7 @@ class CreditNoteSeeder extends Seeder
             if ($scenario['key'] === 'H13') {
                 ExampleScenarios::travel(ExampleScenarios::afterCompletion($scenario, 3, 15), fn () => $creditNoteService->register($invoice->refresh(), [
                     'number' => $number(1),
+                    'stamp_number' => '12345678',
                     'issue_date' => now()->toDateString(),
                     'reason' => 'El cliente reclamó el trabajo: se le acredita la factura completa.',
                     'items' => $invoice->items->map(fn (InvoiceItem $item) => ['invoice_item_id' => $item->id, 'amount' => (int) $item->total])->all(),
@@ -52,6 +53,7 @@ class CreditNoteSeeder extends Seeder
 
                 $creditNoteService->register($invoice, [
                     'number' => $number(1),
+                    'stamp_number' => '12345678',
                     'issue_date' => now()->toDateString(),
                     'reason' => 'Descuento acordado por la demora en la entrega.',
                     'items' => [['invoice_item_id' => $item->id, 'amount' => $amount]],
@@ -59,6 +61,7 @@ class CreditNoteSeeder extends Seeder
 
                 $wrong = $creditNoteService->register($invoice->refresh(), [
                     'number' => $number(2),
+                    'stamp_number' => '12345678',
                     'issue_date' => now()->toDateString(),
                     'reason' => 'Descuento acordado por la demora en la entrega.',
                     'items' => [['invoice_item_id' => $item->id, 'amount' => 1000]],

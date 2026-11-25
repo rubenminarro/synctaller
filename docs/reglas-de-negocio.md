@@ -527,7 +527,9 @@ Entrega M4 de `docs/especificacion-aseguradoras.html` (decisión E y decisiones 
   * nombre interno UUID con la extensión según el contenido (`claims/{claim}/{uuid}.ext`, armado solo en
     `ClaimDocumentService::pathFor`); el nombre original queda como dato;
   * se guardan `mime`, `size` y `sha256`. `path` nunca sale en la API ni en la auditoría.
-* **Subida** (`POST claims/{claim}/documents`, multipart: `file`, `type` `ClaimDocumentType`, `notes`):
+* **Subida** (`POST claims/{claim}/documents`, multipart: `file`, `type` `ClaimDocumentType`, `notes`). Tipos:
+  `loss_report`, `policy`, `contract`, `declarant_id`, `adjuster_report`, `authorization`, `photo` y `other`; el contrato y la
+  cédula del declarante se sumaron con V20 (historial 2.87):
   * PDF, JPG, PNG o WEBP, hasta 10 MB (provisorio, V8). SVG, HTML y cualquier otro tipo se rechazan;
   * se validan la extensión, el tipo MIME **real** (por contenido) y que la extensión coincida con el contenido;
   * con el siniestro abierto o cerrado; cancelado → `CLAIM_NOT_EDITABLE`.
@@ -693,8 +695,10 @@ talonario u otro sistema sobre la factura que corrige.
     (`CREDIT_NOTE_ITEM_MISMATCH`), todos 422;
   * **hasta el saldo** (`CREDIT_NOTE_EXCEEDS_BALANCE`, 422): para acreditar lo cobrado, primero se anula el pago. Sin
     saldos a favor ni devoluciones;
-  * fecha no futura ni anterior a la emisión (`CREDIT_NOTE_DATE_BEFORE_INVOICE`, 422); el plazo de un año no se valida
-    (V18 pendiente);
+  * fecha no futura ni anterior a la emisión (`CREDIT_NOTE_DATE_BEFORE_INVOICE`, 422). V18: emitirla «antes del cierre del
+    ejercicio» es una recomendación de la contadora; no se valida ni se avisa (historial 2.87);
+  * timbrado (`stamp_number`) **obligatorio** desde V18 (`VALIDATION_ERROR`, 422). Las notas registradas antes pueden
+    tenerlo vacío: la columna sigue admitiendo nulo;
   * número (letras, números, guiones, barras y puntos, ≤ 30) único entre las vigentes (`CREDIT_NOTE_DUPLICATE_NUMBER`, 409).
 * **Inmutable** (`CREDIT_NOTE_IMMUTABLE`, 409). Un registro mal cargado se anula con motivo
   (`POST …/{creditNote}/cancel`, `invoice-credit-notes.cancel`; repetir → `CREDIT_NOTE_NOT_CANCELLABLE`, 422).
@@ -799,6 +803,7 @@ Entrega M10 de `docs/especificacion-aseguradoras.html` (§6.6, Ejemplo 7; decisi
   (booleano, nulo = sin indicar). Si lo incluye, la base es importe × 100 / (100 + `invoice.default_tax_rate`) con BCMath
   (`deductibleBase`). Con la modalidad neta y deducible mayor a 0, sin indicarlo no se confirma el reparto, no se factura
   ni se entrega (`CLAIM_DEDUCTIBLE_TAX_UNDEFINED`, 422).
+  La API no tiene valor por defecto; el formulario de alta del frontend arranca en «no incluye» (V15, historial 2.87).
 * **Reparto:** porción nueva `owner_deductible` (del dueño, `isOwner()`). La propuesta descuenta la base del deducible
   asignado a la OT de lo cubierto por la aseguradora, concepto por concepto en orden, y la pasa al dueño sobre el mismo
   concepto (R1 y R2 no cambian; R3 queda con holgura). Reglas nuevas, en este orden al final de `checks`:
@@ -815,8 +820,8 @@ Entrega M10 de `docs/especificacion-aseguradoras.html` (§6.6, Ejemplo 7; decisi
 * **Entrega:** con la modalidad neta y el IVA indicado, `DELIVERY_CLAIM_DEDUCTIBLE_PENDING` deja de bloquear el deducible
   mayor a 0 y rigen las facturas (6.29). Desconocido sigue bloqueando. El resumen del siniestro (6.30) ajusta sus alertas,
   y `deductible_fiscal_pending` (reparto y resumen) es `false` con el deducible que se factura (corrección del 2026-10-30).
-* **Fuera de alcance:** otras modalidades, el documento que respalda la modalidad (V20; se puede subir como documento del
-  siniestro) y los datos de ejemplo (el interruptor viene apagado).
+* **Fuera de alcance:** otras modalidades y los datos de ejemplo (el interruptor viene apagado). El documento que respalda
+  la modalidad (V20) se sube como documento del siniestro, con los tipos `contract` y `policy` (6.24).
 
 ## 6.32 Configuración del taller
 

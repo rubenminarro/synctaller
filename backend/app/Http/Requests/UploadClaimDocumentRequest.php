@@ -78,7 +78,7 @@ class UploadClaimDocumentRequest extends FormRequest
             ],
             'type' => [
                 'required' => 'El tipo de documento es obligatorio.',
-                Enum::class => 'El tipo debe ser loss_report, policy, adjuster_report, authorization, photo u other.',
+                Enum::class => 'El tipo debe ser loss_report, policy, contract, declarant_id, adjuster_report, authorization, photo u other.',
             ],
             'notes' => [
                 'string' => 'Las notas deben ser un texto válido.',

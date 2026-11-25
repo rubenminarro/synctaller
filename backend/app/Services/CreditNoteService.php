@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\DB;
 class CreditNoteService
 {
     /**
-     * @param  array{number: string, stamp_number?: string|null, issue_date: string, reason: string, items: array<int, array{invoice_item_id: int, amount: int|string}>}  $data
+     * @param  array{number: string, stamp_number: string, issue_date: string, reason: string, items: array<int, array{invoice_item_id: int, amount: int|string}>}  $data
      */
     public function register(Invoice $invoice, array $data, User $user): InvoiceCreditNote
     {
@@ -60,7 +60,7 @@ class CreditNoteService
             $creditNote = InvoiceCreditNote::create([
                 'invoice_id' => $invoice->id,
                 'number' => $data['number'],
-                'stamp_number' => $data['stamp_number'] ?? null,
+                'stamp_number' => $data['stamp_number'],
                 'issue_date' => $data['issue_date'],
                 'reason' => $data['reason'],
                 'status' => CreditNoteStatus::REGISTERED,

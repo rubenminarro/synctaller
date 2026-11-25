@@ -17,7 +17,7 @@ responsable.
 | M1 | Tipo de cliente | COMPLETADO | 6.1 | `ClientKind` 9 |
 | M2 | Aseguradoras y contactos | COMPLETADO | 6.22 | `Insurer` 7 |
 | M3 | Siniestros | COMPLETADO | 6.23 | `Claim` 8 |
-| M4 | Documentos privados | COMPLETADO | 6.24 | `ClaimDocument` 6 |
+| M4 | Documentos privados | COMPLETADO | 6.24 | `ClaimDocument` 7 |
 | M5 | Responsable por línea | COMPLETADO | 6.4 | `BudgetItemResponsibility` 4 |
 | M6 | Autorizaciones | COMPLETADO | 6.25 | `InsurerAuthorization` 7 |
 | M7 | Bloqueo de OT y excepciones | COMPLETADO | 6.26 | `WorkOrderInsurerFlow` 8 |
@@ -37,7 +37,6 @@ Orden y decisiones en el [historial](../decisions/historial.md), sección 2.83 (
 
 | Pendiente | Qué lo destraba |
 |---|---|
-| Ajustes V18, V20 y V15 | Nada: timbrado obligatorio en la nota de crédito, tipos de documento nuevos, valor inicial del IVA del deducible |
 | Anulación solo en el mes de emisión (V19) | Nada: decisión tomada |
 | Encender M10 | Implementar V16 (deducible facturado, como máximo lo cubierto); V21 ya se cumplió |
 | Avisos a la aseguradora | Decisión comercial (V7, cerrada por ahora como "sin recordatorios") |

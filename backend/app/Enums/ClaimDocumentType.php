@@ -9,6 +9,8 @@ enum ClaimDocumentType: string
 {
     case LOSS_REPORT = 'loss_report';
     case POLICY = 'policy';
+    case CONTRACT = 'contract';
+    case DECLARANT_ID = 'declarant_id';
     case ADJUSTER_REPORT = 'adjuster_report';
     case AUTHORIZATION = 'authorization';
     case PHOTO = 'photo';
@@ -19,6 +21,8 @@ enum ClaimDocumentType: string
         return match ($this) {
             self::LOSS_REPORT => 'Denuncia',
             self::POLICY => 'Póliza',
+            self::CONTRACT => 'Contrato',
+            self::DECLARANT_ID => 'Cédula del declarante',
             self::ADJUSTER_REPORT => 'Informe del perito',
             self::AUTHORIZATION => 'Autorización',
             self::PHOTO => 'Foto',
