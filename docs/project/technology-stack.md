@@ -11,6 +11,7 @@ Versiones leídas de `composer.lock` y de la instalación del frontend el 2026-1
 | `laravel/sanctum` | 4.3.3 | Tokens Bearer |
 | `spatie/laravel-permission` | 8.3.2 | Roles y permisos |
 | `barryvdh/laravel-dompdf` | 3.1.2 | PDF, con `dompdf/dompdf` 3.1.6 |
+| `spatie/laravel-multitenancy` | 4.2.3 | Base central y una base por taller (línea T; ver "Multitenancy") |
 | `phpunit/phpunit` | 12.5.42 | Tests |
 | MySQL | 8 | Base de desarrollo; los tests usan SQLite en archivo |
 
@@ -44,5 +45,5 @@ interactivos. Hay que revisarla antes del primer taller comercial (historial 2.7
 
 ## Multitenancy
 
-`spatie/laravel-multitenancy` **no está instalado**. La versión elegida para T2 es la 4.2.3 (TD2); instalarla en `main` requiere la
-aprobación del usuario.
+`spatie/laravel-multitenancy` **4.2.3**, fija (TD2), instalada el 2026-11-25 en el paso 1 de T2 (historial 2.90). Está
+configurada, pero todavía nada activa un taller: la identificación por host es el paso 2.

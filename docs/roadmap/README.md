@@ -7,7 +7,8 @@ original y no se renumeran. El detalle por módulo está en [`modules/README.md`
 
 | Fecha | Backend | Frontend | Notas |
 |---|---|---|---|
-| 2026-11-25 | 498 tests en verde, 8987 aserciones; Pint sin pendientes | Vitest en verde (51), ESLint y build | V16 y M10 (historial 2.89). Corrida de la CI sobre `main` (`3137016`), no local |
+| 2026-11-25 | Tests puntuales en verde: `tests/Feature/Tenancy` (10, 20 aserciones, cada test comprobado contra su protección quitada) y las carpetas `Notifications`, `Auth`, `Access`, `Settings` y `Seeders` (78, 902 aserciones); Pint sin pendientes; migración central probada en MySQL (`synctaller_central`) | ESLint (sin cambios en el frontend) | T2, paso 1 (historial 2.90). Corrida local, sin la suite completa. Sin revisión en navegador: la API no cambia |
+| 2026-11-25 | 498 tests en verde, 8987 aserciones (antes de T2); Pint sin pendientes | Vitest en verde (51), ESLint y build | V16 y M10 (historial 2.89). Corrida de la CI sobre `main` (`3137016`), no local |
 | 2026-11-25 | Tests puntuales en verde (52, 1736 aserciones): `DeductibleNetModeTest`, `AllocationInvoiceTest`, `ClaimTest`, `WorkOrderAllocationTest`, `WorkOrderInsurerFlowTest`, `InsurerReportsTest`, `InsurerTest`, `InsurerAuthorizationTest`, `BudgetItemResponsibilityTest` y `DatabaseSeederTest`; Pint sin pendientes | Vitest en verde (`features/allocations` y `features/claims`, 17), ESLint y build | V16 y encendido de M10 (historial 2.89). Corrida local, sin la suite completa. Revisión en navegador con cajero y recepcionista, en una base temporal |
 | 2026-11-25 | 498 tests en verde, 8969 aserciones (antes de V16); Pint sin pendientes | Vitest en verde (51), ESLint y build | Anulación en el mes de emisión, V19 (historial 2.88). Corrida de la CI sobre `main` (`bab2f8a`), no local |
 | 2026-11-25 | Tests puntuales en verde (62, 2349 aserciones): carpetas `Invoices` y `Payments`, `DocumentPdfTest`, `AllocationInvoiceTest`, `ClaimTest`, `InsurerReportsTest` y `DatabaseSeederTest`; Pint sin pendientes | Vitest en verde (`features/invoices`, 8), ESLint y build | Anulación solo en el mes de emisión, V19 (historial 2.88). Corrida local, sin la suite completa. Revisión en navegador con cajero y administrador, en una base temporal |
@@ -25,10 +26,11 @@ Ninguna entrega empieza sin autorización del usuario. **El sistema no está lis
 
 | Orden | Tarea | Bloqueo |
 |---|---|---|
-| 1 | **T2, paso 1:** base central, paquete y modelo `Tenant` | No antes del 2026-11-09 (TD2: la versión 4.2.3 del paquete necesita dos semanas publicada). Empezar repitiendo la medición con esa versión ([`spike-t0/README.md`](../spike-t0/README.md)). Instalar el paquete en `main` requiere la aprobación del usuario |
-| 2 | Retención de 5 años y suspensión por etapas en la línea T (V14, G10) | Decisión comercial sobre P9; se suma al plan de T5 |
-| 3 | Resto de T2 a T5 | Tras el paso 1, según el plan de la sección 2.80 del [historial](../decisions/historial.md) |
-| 4 | Tarea P8 (fotos y firmas a privado) | Después de T4; requisito antes del primer taller comercial |
+| 1 | Avisos de seguridad en dependencias del backend ([deuda técnica](deuda-tecnica.md) #19) | Decisión del usuario. Conviene antes del paso 2: tres avisos tocan el host y los proxies |
+| 2 | **T2, paso 2:** identificación por host (`IdentifyTenant`), conexión por defecto `tenant` y errores `TENANT_*` | Tras el paso 1 (historial 2.90). Empieza con el diseño y las preguntas, según §3.2 de la [especificación](../especificacion-aseguradoras.html) |
+| 3 | Retención de 5 años y suspensión por etapas en la línea T (V14, G10) | Decisión comercial sobre P9; se suma al plan de T5 |
+| 4 | Resto de T2 (paso 3) a T5 | Según el plan de la sección 2.80 del [historial](../decisions/historial.md) |
+| 5 | Tarea P8 (fotos y firmas a privado) | Después de T4; requisito antes del primer taller comercial |
 
 Las entregas de las respuestas de la contadora (sección 2.83 del historial) quedaron completas el 2026-11-25 con V16 y el
 encendido de M10 (2.89).
@@ -85,14 +87,14 @@ Frontend: FA0 a FA4, M10 y M12 completos ([detalle](../modules/aseguradoras.md))
 |---|---|
 | T0: spike | COMPLETADO |
 | T1: configuración en la base | COMPLETADO |
-| T2: central e identificación | PENDIENTE, desde el 2026-11-09 |
+| T2: central e identificación | EN CURSO: paso 1 (central, paquete y modelo `Tenant`) hecho el 2026-11-25; faltan los pasos 2 y 3 |
 | T3: colas, cache, permisos y scheduler | PENDIENTE |
 | T4: storage | PENDIENTE |
 | Tarea P8: fotos y firmas a privado | PENDIENTE |
 | T5: ciclo de vida | PENDIENTE |
 | T6: migrar la instalación actual | PENDIENTE |
 
-Los pasos 0 a 7 de la revisión del spike son internos de T2, T3 y T5, no fases nuevas (historial 2.80). El paso 0 está hecho.
+Los pasos 0 a 7 de la revisión del spike son internos de T2, T3 y T5, no fases nuevas (historial 2.80). El paso 0 está hecho y se repitió con 4.2.3 el 2026-11-25; el paso 1 también (2.90).
 
 ## Pendiente sin fase
 

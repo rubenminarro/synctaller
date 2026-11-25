@@ -53,7 +53,9 @@ Contado el 2026-11-01 en `main`.
 
 ## Arquitectura objetivo: SaaS
 
-**No implementada.** Hoy hay una sola base por instalación, sin código de multitenancy. El diseño aprobado es una base central con el
+**En construcción (T2).** Hoy la API sigue usando una sola base por instalación. Desde el paso 1 de T2 (historial 2.90)
+existen la base central con la tabla `tenants`, el paquete y las tareas que cambian de taller, pero nada activa un taller
+todavía: la identificación por host es el paso 2. El diseño aprobado es una base central con el
 registro de talleres, una base por taller y una única cola central, con la multitenencia aislada en infraestructura. Ver §3 de la
 [especificación](../especificacion-aseguradoras.html), la [evaluación del paquete](../spike-t0/informe.md) y las decisiones TD1–TD11
 en [`decisions/README.md`](../decisions/README.md).

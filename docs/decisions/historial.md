@@ -728,6 +728,24 @@ Reemplaza el rechazo provisorio de la sección 2.75.
 | Datos de ejemplo | Decisión del usuario (recomendación): sin escenario nuevo; los siniestros de ejemplo no tienen modalidad y `DatabaseSeederTest` no cambia |
 | Frontend | El editor del reparto pierde la etiqueta de `deductible_covered` y muestra un aviso con el deducible no cobrado, en el borrador y en el confirmado, con el importe de la API |
 | Pruebas | `DeductibleNetModeTest`: el caso del deducible mayor que lo cubierto pasa a confirmarse (sin porciones de la aseguradora, `deductible_uncollected`, cancelación bloqueada, cambio del IVA sin otra versión, factura de la aseguradora rechazada, la del dueño de 3.047.000 y la entrega); el del interruptor apagado lo fija explícitamente |
+### 2.90 T2, paso 1: base central, paquete y modelo `Tenant` (2026-11-25)
+
+Primer paso de T2 según el plan de la sección 2.80. Solo infraestructura: **la API no cambia**, porque todavía nada activa
+un taller. La identificación por host es el paso 2.
+
+| Tema | Decisión |
+|---|---|
+| Medición | Se repitió el paso 0 con 4.2.3 y diez talleres ([`spike-t0/informe.md`](../spike-t0/informe.md), sección 9). Con la conexión persistente a la central, todos los endpoints quedan dentro de los umbrales de G (+11,2 ms de p95 como máximo, umbral 15 ms) |
+| Paquete | Decisión del usuario: se aprueba `spatie/laravel-multitenancy` **4.2.3**, fija (TD2). La 4.3.1 (2026-11-04) ya cumple dos semanas, pero sus cambios son de colas: se revisa al llegar a T3 |
+| Conexiones | `central` (registro de talleres, `DB_CENTRAL_DATABASE`, por defecto `synctaller_central`, con `PDO::ATTR_PERSISTENT`) y `tenant` (plantilla sin base, sin conexión persistente), como en §3.3. Usan el motor de `DB_CONNECTION`: MySQL en desarrollo, SQLite en los tests. `DB_CONNECTION` no cambia hasta el paso 2 |
+| Tabla `tenants` | En `database/migrations/central`, que el `migrate` de siempre no ve: `id`, `name`, `domain` y `database` únicos, `status` (`App\Enums\TenantStatus`: `active` y `suspended`, TD5) y `maintenance` (booleano). Se migra con `php artisan migrate --database=central --path=database/migrations/central` |
+| Modelo | `App\Models\Tenant` hereda del modelo del paquete, que fija la conexión central. Sin escenario en los seeders de ejemplo: no es un dato del taller |
+| Tareas al activar | La base del paquete, más dos propias en `app/Multitenancy/Tasks`: `PrefixTenantCacheTask` (prefijo `tenant:{id}:`) y `SwitchTenantPermissionsCacheTask` (`initializeCache()`, sin `forgetCachedPermissions()`, 2.80) |
+| Prefijo de cache | Hallazgo de la medición: el del paquete (`tenant_id_{id}`, sin separador) hace que la clave `0abc` del taller 1 y la `abc` del taller 10 coincidan. Se usa el de §3.6, con separador |
+| Colas | `queues_are_tenant_aware_by_default = false` hasta T3. El paquete revisa todos los jobs: uno que considere del taller y no traiga taller lo borra y falla, y en este paso ningún job lleva taller |
+| Base local | Decisión del usuario: se crea `synctaller_central` en el MySQL de desarrollo y se migra. `synctaller` no se toca |
+| Pruebas | `tests/Feature/Tenancy` (10 tests), con la central en otro archivo SQLite (`database/testing-central.sqlite`) migrado una vez por ejecución (`Tests\Concerns\UsesCentralDatabase`). Se comprobó que cada test de las tareas falla al quitar su protección: la tarea de base, el prefijo propio, la tarea de permisos y las colas apagadas |
+
 ---
 
 ## 3. Frontend

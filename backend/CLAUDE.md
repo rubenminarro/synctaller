@@ -65,7 +65,8 @@ Si una regla contradice al código, **el código manda**: registrar la discrepan
 ### Entorno (Windows / Laragon)
 
 * Tests: `php artisan test` o `vendor/bin/phpunit` (SQLite en archivo, `database/testing.sqlite`: migra y siembra roles y
-  permisos una vez por ejecución, cada test en una transacción; no sembrarlos en `setUp`). Si `pdo_sqlite` está deshabilitado:
+  permisos una vez por ejecución, cada test en una transacción; no sembrarlos en `setUp`). Los tests de la base central
+  usan `Tests\Concerns\UsesCentralDatabase` (otro archivo, `database/testing-central.sqlite`). Si `pdo_sqlite` está deshabilitado:
   `php -d extension=pdo_sqlite -d extension=sqlite3 vendor/bin/phpunit`. Los tests no necesitan red:
   `phpunit.xml` fija `EMAIL_DNS_CHECK=false` (sin consulta DNS de emails) y `uncompromised()` se simula con `Http::fake`.
   También desactiva la sincronización a disco de SQLite (`DB_SQLITE_SYNCHRONOUS`, `DB_SQLITE_JOURNAL_MODE`, conexión
@@ -115,6 +116,7 @@ Controller (HasMiddleware) → Form Request → Service → Model/Eloquent → A
 | `app/Enums` | Estados y tipos |
 | `app/Exceptions` | `AppException` y una subclase por módulo |
 | `app/Support/Decimal.php` | Redondeo BCMath |
+| `app/Multitenancy/Tasks` | Tareas propias al activar un taller (línea T, historial 2.90). La config está en `config/multitenancy.php` y la base central, en `database/migrations/central` |
 | `app/Traits/ApiResponse.php` | `successResponse` / `errorResponse` |
 | `app/Traits/FileResponse.php` | Descarga de archivos generados (PDF, CSV) y de documentos subidos (`storedFileResponse`: adjunto y `nosniff`) |
 | `app/Traits/Auditable.php` | Registro automático de cambios en `audit_logs` |
