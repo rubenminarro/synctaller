@@ -9,6 +9,7 @@ use App\Models\InvoiceStamp;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\View;
 use Illuminate\Testing\TestResponse;
 use Tests\Feature\Invoices\InvoiceTestCase;
 
@@ -101,7 +102,16 @@ class DocumentPdfTest extends InvoiceTestCase
             ->assertCreated()
             ->json('data');
 
+        // V11: una factura particular declara su condición y no trae datos de siniestro.
+        $data = null;
+        View::composer('pdf.receipt', function ($view) use (&$data) {
+            $data = $view->getData();
+        });
         $this->assertPdf($this->get("/api/payments/{$payment['id']}/receipt"), "recibo-{$payment['receipt_number']}.pdf");
+        $html = preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags(str_replace('<', ' <', view('pdf.receipt', $data)->render()))));
+        $this->assertStringContainsString("Factura que cancela {$credit['number']}", $html);
+        $this->assertStringContainsString('Condición de la factura Crédito', $html);
+        $this->assertStringNotContainsString('Siniestro', $html);
 
         $cash = $this->issuedInvoice();
         $cashPayment = $this->postJson("/api/invoices/{$cash['id']}/payments", ['amount' => 1000, 'method' => 'cash'])

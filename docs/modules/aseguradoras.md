@@ -23,7 +23,7 @@ responsable.
 | M7 | Bloqueo de OT y excepciones | COMPLETADO | 6.26 | `WorkOrderInsurerFlow` 8 |
 | M8 | Reparto económico | COMPLETADO | 6.27 | `WorkOrderAllocation` 9, `WorkOrderSaleBreakdown` 1 |
 | P10 | Notas de crédito registradas | COMPLETADO | 6.28 | `CreditNote` 6 |
-| M9 | Facturas por responsable | COMPLETADO | 6.29 | `AllocationInvoice` 5 |
+| M9 | Facturas por responsable | COMPLETADO | 6.29 | `AllocationInvoice` 6 |
 | M10 | Deducible facturado, modalidad neta | COMPLETADO, **apagado** | 6.31 | `DeductibleNetMode` 5 |
 | M11 | Reportes | COMPLETADO | 6.30 | `InsurerReports` 4 |
 | M11 | Avisos a la aseguradora | PENDIENTE | D, V7 | Sin tests |
@@ -37,7 +37,6 @@ Orden y decisiones en el [historial](../decisions/historial.md), sección 2.83 (
 
 | Pendiente | Qué lo destraba |
 |---|---|
-| Recibo completo (V11) | Nada: condición de la factura y siniestro en el recibo |
 | Datos del cliente en la factura (V10) | Nada: sin bloqueo, con aviso |
 | Ajustes V18, V20 y V15 | Nada: timbrado obligatorio en la nota de crédito, tipos de documento nuevos, valor inicial del IVA del deducible |
 | Anulación solo en el mes de emisión (V19) | Nada: decisión tomada |

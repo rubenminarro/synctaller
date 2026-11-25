@@ -646,6 +646,19 @@ el usuario al pedir que empiece. Reglas vigentes en [reglas de negocio](../regla
 | Datos de ejemplo | `WithholdingSeeder`: la retención de IVA sugerida y una de renta anulada en la factura de la aseguradora de C05. `DatabaseSeederTest` verifica los dos estados y los dos impuestos |
 | Pruebas | `tests/Feature/Invoices/InvoiceWithholdingTest` (5): sugerencia, saldo, estado, caja y ventas; condición, tope, fechas, validación y duplicados; anulación y bloqueo de la factura; cuentas por cobrar y PDF; permisos por rol |
 | Verificación | En el navegador, sobre una base temporal sembrada: cajero (alta con la sugerencia, error de tope, anulación, reporte de ventas y resumen del siniestro) y recepcionista (solo lectura) |
+
+### 2.85 Recibo completo (V11, 2026-11-24)
+
+Primera entrega del orden de la sección 2.83. La contadora respondió (V11) que el recibo, sin timbrado pero correlativo,
+declara la factura que cancela, la forma de pago (contado o crédito), la fecha y los detalles del siniestro. Reglas
+vigentes en [reglas de negocio](../reglas-de-negocio.md), 6.18.
+
+| Tema | Decisión |
+|---|---|
+| Numeración | `REC-` ya era correlativo y sin huecos (los pagos se anulan, no se borran): sin cambios |
+| Forma de pago | Se muestra la **condición de la factura** (siempre crédito: solo esas tienen recibo), además del medio de pago que ya estaba |
+| Siniestro | Número (con el código `SIN-`), póliza y aseguradora cuando la factura sale de un reparto (M9), sea la de la aseguradora o la del dueño. La factura en PDF sigue mostrándolo solo en la de la aseguradora |
+| Pruebas | `AllocationInvoiceTest` (recibo de la factura a la aseguradora con el siniestro) y `DocumentPdfTest` (factura particular, sin siniestro), sobre el HTML que recibe la vista |
 ---
 
 ## 3. Frontend

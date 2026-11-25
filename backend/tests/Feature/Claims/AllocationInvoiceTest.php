@@ -6,6 +6,7 @@ use App\Models\Insurer;
 use App\Models\InvoiceItem;
 use App\Models\InvoiceStamp;
 use App\Models\Reception;
+use Illuminate\Support\Facades\View;
 
 /**
  * Facturas por responsable (M9): desde el reparto confirmado, una por cliente y
@@ -174,6 +175,38 @@ class AllocationInvoiceTest extends ClaimTestCase
         // Se factura de nuevo desde la versión vigente.
         $this->invoice($workOrder, $second, $insurerClientId)->assertCreated()->assertJsonPath('data.allocation_id', $second['id']);
         $this->invoice($workOrder, $allocation, $insurerClientId)->assertStatus(422)->assertJsonPath('error_code', 'ALLOCATION_NOT_CONFIRMED');
+    }
+
+    public function test_the_receipt_declares_the_invoice_condition_and_the_claim(): void
+    {
+        $this->actingAsAdmin();
+        [$workOrder, $allocation, $claim, $insurerClientId] = $this->confirmedExample();
+        $insurer = $this->invoice($workOrder, $allocation, $insurerClientId)->assertCreated()->json('data');
+        $issued = $this->postJson("/api/invoices/{$insurer['id']}/issue")->assertOk()->json('data');
+        $payment = $this->postJson("/api/invoices/{$issued['id']}/payments", [
+            'amount' => 100000,
+            'method' => 'transfer',
+            'reference' => 'TRA-001',
+        ])->assertCreated()->json('data');
+
+        // Lo que recibe la vista del recibo, renderizado como HTML (el PDF no se puede leer como texto).
+        $data = null;
+        View::composer('pdf.receipt', function ($view) use (&$data) {
+            $data = $view->getData();
+        });
+        $this->get("/api/payments/{$payment['id']}/receipt")->assertOk();
+        $html = preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags(str_replace('<', ' <', view('pdf.receipt', $data)->render()))));
+
+        // V11: la factura que cancela, su condición, la fecha y el siniestro con su póliza y aseguradora.
+        $claim->refresh();
+        $this->assertStringContainsString("Factura que cancela {$issued['number']} del ".now()->format('d/m/Y'), $html);
+        $this->assertStringContainsString('Condición de la factura Crédito', $html);
+        $this->assertStringContainsString((string) ($claim->claim_number ?? $claim->code), $html);
+        if ($claim->policy_number) {
+            $this->assertStringContainsString($claim->policy_number, $html);
+        }
+        $this->assertStringContainsString(Insurer::findOrFail($claim->insurer_id)->client->display_name, $html);
+        $this->assertStringContainsString($payment['receipt_number'], $html);
     }
 
     public function test_only_the_cashier_invoices(): void
