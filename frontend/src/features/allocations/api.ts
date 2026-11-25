@@ -75,6 +75,8 @@ export interface Allocation {
     deductible_amount: string | null
     /** Deducible mayor a 0: no se factura hasta definir su modalidad (M10). */
     deductible_fiscal_pending: boolean
+    /** Base del deducible de esta OT que no se cobra: supera lo que cubre la aseguradora (V16). */
+    deductible_uncollected: string
     warnings: string[]
   }
   /** Solo en el borrador: vista previa de la confirmación. */

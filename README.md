@@ -108,7 +108,7 @@ Cada app tiene su `.env.example`; los `.env` no se versionan.
 | `ADMIN_PASSWORD`, `TEST_PASSWORD` | Contraseñas que los seeders dan al administrador principal y al resto de los usuarios de prueba |
 | `EMAIL_DNS_CHECK` | Valida que exista el dominio de los emails; `false` solo sin red |
 | `MAIL_*`, `QUEUE_CONNECTION` | Avisos a clientes. Con `MAIL_MAILER=log` los emails van a `storage/logs/laravel.log` |
-| `INSURER_DEDUCTIBLE_NET_MODE` | Modalidad neta del deducible de siniestros: **apagada** hasta la confirmación escrita del contador |
+| `INSURER_DEDUCTIBLE_NET_MODE` | Modalidad neta del deducible de siniestros: **encendida** por defecto desde V16 (historial 2.89); `false` vuelve a la regla A |
 | `COMPANY_*` | Datos del taller en los PDF. Valores por defecto: el administrador los cambia en Configuración del sistema |
 
 **`frontend/.env`**: `VITE_API_URL`, la URL base de la API con el prefijo `/api` (`http://127.0.0.1:8000/api`).

@@ -13,7 +13,7 @@ deciden antes de T6 (V9). Este documento reúne solo los requisitos ya identific
 | `.env` sin datos de un taller: serían el valor por defecto de todos | Revisión del spike, historial 2.80 |
 | `APP_DEBUG=false` y `MAIL_MAILER` real | Práctica de Laravel |
 | Remitente autorizado en el servidor de correo | Handoff 2.78 |
-| `INSURER_DEDUCTIBLE_NET_MODE` apagado hasta la confirmación escrita del contador | `reglas-de-negocio.md` 6.31 |
+| `INSURER_DEDUCTIBLE_NET_MODE` encendido (por defecto desde V16) salvo decisión contraria | `reglas-de-negocio.md` 6.31 |
 | Sin `config:cache` en desarrollo | `backend/CLAUDE.md` |
 
 ## Requisitos antes del primer taller comercial

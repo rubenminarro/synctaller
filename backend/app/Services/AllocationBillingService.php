@@ -118,10 +118,11 @@ class AllocationBillingService
     }
 
     /**
-     * Lo que deben sumar las porciones owner_deductible del reparto (R11): con la modalidad neta, la base del deducible
-     * asignado a la OT; sin ella, 0. Null si falta saber si el deducible incluye el IVA.
+     * Base del deducible asignado a la OT (M10), sin el tope de V16: con la modalidad neta, el deducible del reparto sin
+     * IVA; sin ella, 0. Null si falta saber si el deducible incluye el IVA. La propuesta del reparto la descuenta de lo
+     * cubierto hasta donde alcance.
      */
-    public function expectedOwnerDeductible(WorkOrderAllocation $allocation): ?string
+    public function ownerDeductibleBase(WorkOrderAllocation $allocation): ?string
     {
         $claim = $allocation->claim;
 
@@ -130,6 +131,52 @@ class AllocationBillingService
         }
 
         return $this->deductibleBase($claim, $allocation->deductible_amount);
+    }
+
+    /**
+     * Lo que deben sumar las porciones owner_deductible del reparto (R11): la base del deducible de la OT, como máximo
+     * lo que la aseguradora cubre en ella (V16: lo cubierto más lo que ya pasó al deducible). Lo que sobra no se cobra.
+     * Null si falta saber si el deducible incluye el IVA.
+     *
+     * @param  Collection<int, WorkOrderAllocationLine>|null  $lines  Las porciones a considerar; por defecto, las guardadas.
+     */
+    public function expectedOwnerDeductible(WorkOrderAllocation $allocation, ?Collection $lines = null): ?string
+    {
+        $base = $this->ownerDeductibleBase($allocation);
+
+        if ($base === null || bccomp($base, '0', 2) <= 0) {
+            return $base;
+        }
+
+        $coverable = $this->coverableByInsurer($lines ?? $allocation->lines()->get());
+
+        return bccomp($base, $coverable, 2) <= 0 ? $base : $coverable;
+    }
+
+    /**
+     * Parte de la base del deducible de la OT que no se cobra porque supera lo que cubre la aseguradora (V16). 0 sin
+     * deducible, sin la modalidad neta o sin saber si incluye el IVA.
+     *
+     * @param  Collection<int, WorkOrderAllocationLine>|null  $lines
+     */
+    public function uncollectedDeductible(WorkOrderAllocation $allocation, ?Collection $lines = null): string
+    {
+        $base = $this->ownerDeductibleBase($allocation);
+        $expected = $this->expectedOwnerDeductible($allocation, $lines);
+
+        return $base === null || $expected === null ? '0.00' : bcsub($base, $expected, 2);
+    }
+
+    /**
+     * Lo que la aseguradora cubriría en el reparto antes del deducible: sus porciones más las del deducible.
+     *
+     * @param  Collection<int, WorkOrderAllocationLine>  $lines
+     */
+    private function coverableByInsurer(Collection $lines): string
+    {
+        return $lines
+            ->filter(fn (WorkOrderAllocationLine $line) => in_array($line->portion_type, [AllocationPortionType::INSURER_COVERED, AllocationPortionType::OWNER_DEDUCTIBLE], true))
+            ->reduce(fn (string $sum, WorkOrderAllocationLine $line) => bcadd($sum, Decimal::of($line->amount, 2), 2), '0.00');
     }
 
     /**

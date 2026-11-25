@@ -286,6 +286,7 @@ function DraftAllocation({ workOrder, allocation, absorption }: { workOrder: Wor
             </li>
           ))}
         </ul>
+        <UncollectedDeductible allocation={allocation} />
         {allocation.summary.warnings.map((warning) => (
           <div key={warning} className="alert alert-warning mt-2 mb-0" role="alert">
             {warning}
@@ -353,6 +354,18 @@ function DraftAllocation({ workOrder, allocation, absorption }: { workOrder: Wor
   )
 }
 
+/** Aviso del deducible que no se cobra porque supera lo que cubre la aseguradora (V16); el importe lo da la API. */
+function UncollectedDeductible({ allocation }: { allocation: Allocation }) {
+  if (!(Number(allocation.summary.deductible_uncollected) > 0)) return null
+
+  return (
+    <div className="alert alert-info mt-2 mb-0" role="status">
+      Deducible no cobrado: {formatMoney(allocation.summary.deductible_uncollected)} sin IVA. Supera lo que cubre la
+      aseguradora en esta OT: el dueño paga hasta lo cubierto y la diferencia no se cobra.
+    </div>
+  )
+}
+
 /** Texto de una regla cumplida; el `message` del backend describe la falla. */
 const CHECK_LABELS: Record<string, string> = {
   deductible: 'Deducible de esta OT informado.',
@@ -365,8 +378,7 @@ const CHECK_LABELS: Record<string, string> = {
   R5: 'La parte del dueño no supera lo que aceptó.',
   R7: 'Los deducibles asignados no superan el del siniestro.',
   deductible_tax: 'El siniestro indica si el deducible incluye IVA.',
-  deductible_covered: 'El deducible no supera lo que cubre la aseguradora.',
-  R11: 'Las porciones del deducible suman el deducible de esta OT sin IVA.',
+  R11: 'Las porciones del deducible suman el deducible de esta OT sin IVA, hasta lo que cubre la aseguradora.',
 }
 
 /** Una fila por concepto y una columna por tipo de porción; sin `onChange`, solo lectura. */
@@ -601,6 +613,7 @@ function ConfirmedAllocation({ workOrder, allocation, claim }: { workOrder: Work
         <div className="small text-secondary mt-2">
           Deducible asignado a esta OT: {allocation.deductible_amount === null ? 'sin informar' : formatMoney(allocation.deductible_amount)}
         </div>
+        <UncollectedDeductible allocation={allocation} />
         {blocked && (
           <div className="alert alert-warning mt-2 mb-0" role="alert">
             {blocked}

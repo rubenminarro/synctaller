@@ -263,14 +263,13 @@ class AllocationService
         $checks[] = $check('R7', ! $deductibleKnown || $this->deductibleWithinClaim($allocation, $claim),
             'La suma de los deducibles asignados a las órdenes de trabajo del siniestro supera su deducible.', 'ALLOCATION_DEDUCTIBLE_EXCEEDS_CLAIM');
 
-        // Modalidad neta del deducible (M10): el deducible de la OT, sin IVA, pasa de lo cubierto al dueño. Sin la
-        // modalidad, las porciones del deducible deben ser 0.
-        $expected = $this->allocationBilling->expectedOwnerDeductible($allocation);
+        // Modalidad neta del deducible (M10): el deducible de la OT, sin IVA, pasa de lo cubierto al dueño, como máximo
+        // lo que cubre la aseguradora en ella (V16: lo que sobra no se cobra). Sin la modalidad, las porciones del
+        // deducible deben ser 0.
+        $expected = $this->allocationBilling->expectedOwnerDeductible($allocation, $lines);
         $allocatedDeductible = $sum($lines->where('portion_type', AllocationPortionType::OWNER_DEDUCTIBLE));
         $checks[] = $check('deductible_tax', $expected !== null,
             'Indique en el siniestro si el deducible incluye el IVA: sin eso no se calcula su parte sin IVA.', 'CLAIM_DEDUCTIBLE_TAX_UNDEFINED');
-        $checks[] = $check('deductible_covered', $expected === null || bccomp($expected, bcadd($sum($covered), $allocatedDeductible, 2), 2) <= 0,
-            'El deducible de esta orden de trabajo ('.Format::money($expected ?? '0').' sin IVA) supera lo que cubre la aseguradora: el caso todavía no tiene una regla definida (V16).', 'ALLOCATION_DEDUCTIBLE_EXCEEDS_COVERED');
         $checks[] = $check('R11', $expected === null || bccomp($allocatedDeductible, $expected, 2) === 0,
             'Las porciones del deducible ('.Format::money($allocatedDeductible).') deben sumar el deducible de esta orden de trabajo sin IVA ('.Format::money($expected ?? '0').').', 'ALLOCATION_DEDUCTIBLE_MISMATCH');
 
@@ -316,6 +315,8 @@ class AllocationService
             // Pendiente: deducible mayor a 0 que no se factura (sin la modalidad neta o sin su IVA, M10).
             'deductible_fiscal_pending' => $allocation->deductible_amount !== null && bccomp((string) $allocation->deductible_amount, '0', 2) > 0
                 && ! $this->allocationBilling->deductibleInvoiced($allocation->claim),
+            // Base del deducible de la OT que no se cobra porque supera lo que cubre la aseguradora (V16).
+            'deductible_uncollected' => $this->allocationBilling->uncollectedDeductible($allocation, $allocation->lines),
             'warnings' => $warnings,
         ];
     }
@@ -362,14 +363,14 @@ class AllocationService
     /**
      * Modalidad neta del deducible (M10): la base del deducible de la OT se descuenta de lo cubierto por la aseguradora,
      * concepto por concepto en orden, y pasa al dueño como porción owner_deductible del mismo concepto (R1 y R2 no
-     * cambian). Si lo cubierto no alcanza, queda lo posible y la confirmación lo rechaza (V16).
+     * cambian). Si lo cubierto no alcanza, pasa todo lo cubierto y el resto del deducible no se cobra (V16).
      *
      * @param  Collection<int, array<string, mixed>>  $lines
      * @return Collection<int, array<string, mixed>>
      */
     private function withOwnerDeductible(Collection $lines, WorkOrderAllocation $allocation): Collection
     {
-        $remaining = $this->allocationBilling->expectedOwnerDeductible($allocation);
+        $remaining = $this->allocationBilling->ownerDeductibleBase($allocation);
 
         if ($remaining === null || bccomp($remaining, '0', 2) <= 0) {
             return $lines;
