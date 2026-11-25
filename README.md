@@ -56,11 +56,13 @@ Completar `backend/.env` (ver [Variables de entorno](#variables-de-entorno)) y c
 
 ```sql
 CREATE DATABASE synctaller CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE synctaller_central CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
 ```bash
 cd backend
 php artisan migrate --seed     # solo sobre una base vacía; tarda unos 15 s
+php artisan migrate --database=central --path=database/migrations/central   # base central (línea T)
 php artisan storage:link       # fotos, firmas y logo
 cd ..
 npm run dev
@@ -105,6 +107,7 @@ Cada app tiene su `.env.example`; los `.env` no se versionan.
 | `APP_TIMEZONE` | Zona horaria del taller (`America/Asuncion`). La base guarda esa hora; la API envía UTC |
 | `FRONTEND_URL`, `SANCTUM_STATEFUL_DOMAINS` | Origen de la SPA, el único que admiten CORS y Sanctum (`http://localhost:5173`) |
 | `DB_*` | Conexión a MySQL (base `synctaller`) |
+| `DB_CENTRAL_DATABASE` | Base central de la línea T, con el registro de talleres (`synctaller_central`). Usa el mismo servidor y usuario que `DB_*` |
 | `ADMIN_PASSWORD`, `TEST_PASSWORD` | Contraseñas que los seeders dan al administrador principal y al resto de los usuarios de prueba |
 | `EMAIL_DNS_CHECK` | Valida que exista el dominio de los emails; `false` solo sin red |
 | `MAIL_*`, `QUEUE_CONNECTION` | Avisos a clientes. Con `MAIL_MAILER=log` los emails van a `storage/logs/laravel.log` |
@@ -119,6 +122,8 @@ El puerto 5173 es fijo (`strictPort`). Para cambiarlo hay que ajustar también `
 
 * Después de traer cambios: `php artisan migrate` (solo las migraciones nuevas) y, si la entrega agregó permisos,
   `php artisan db:seed --class=RolesAndPermissionsSeeder`.
+* La base central (`DB_CENTRAL_DATABASE`, por defecto `synctaller_central`) tiene sus propias migraciones:
+  `php artisan migrate --database=central --path=database/migrations/central`. El `migrate` de siempre no las ve.
 * `migrate:fresh`, `migrate:refresh` y `db:wipe` **borran todos los datos**. No usarlos sobre una base con datos que interesen.
 * Los seeders son **idempotentes**: sobre una base ya sembrada no duplican ni fallan, pero agregan los datos de ejemplo que
   falten. Sobre una base con datos reales, correr solo los necesarios.

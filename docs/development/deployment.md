@@ -10,6 +10,8 @@ deciden antes de T6 (V9). Este documento reúne solo los requisitos ya identific
 | Un `queue:work` permanente y `schedule:run` cada minuto | [`setup.md`](setup.md) |
 | Zona horaria de MySQL fijada en `-03:00`, también al restaurar un respaldo | Handoff 2.79 |
 | `DB_DATABASE` vacío en producción, cuando exista la multitenancy | TD10 |
+| Base central creada y migrada (`DB_CENTRAL_DATABASE`, con `php artisan migrate --database=central --path=database/migrations/central`) antes de publicar el código | Historial 2.90 |
+| `max_connections` de MySQL con margen para la conexión persistente a la central: ocupa una conexión por proceso `php-cgi` | [Informe del spike](../spike-t0/informe.md), secciones 8 y 9 |
 | `.env` sin datos de un taller: serían el valor por defecto de todos | Revisión del spike, historial 2.80 |
 | `APP_DEBUG=false` y `MAIL_MAILER` real | Práctica de Laravel |
 | Remitente autorizado en el servidor de correo | Handoff 2.78 |

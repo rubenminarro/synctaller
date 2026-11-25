@@ -17,7 +17,7 @@ Las siglas se conservan tal como se usaron en el proyecto. Ojo: `D` (decisión d
 | S1 a S13 | Criterios del spike | Especificación, §3.13; [informe](../spike-t0/informe.md) |
 | TD1 a TD11 | Decisiones para T2 | Especificación, §10.2; historial 2.80 |
 | D1 a D10 | Discrepancias del estudio, no decisiones | [Deuda técnica](../roadmap/deuda-tecnica.md), 14.1 |
-| #1 a #18 | Deudas técnicas | [Deuda técnica](../roadmap/deuda-tecnica.md) |
+| #1 a #19 | Deudas técnicas | [Deuda técnica](../roadmap/deuda-tecnica.md) |
 
 ## Decisiones por tema
 

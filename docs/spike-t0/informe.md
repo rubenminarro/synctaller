@@ -292,3 +292,49 @@ taller y cache, y una borraba lo que usaba la otra. Las cifras de arriba son de 
 La medición es local: Windows, un taller y un proceso por variante. Compara variantes, pero no garantiza el rendimiento en
 producción. No se confirmó por qué cada conexión tarda tanto. Una conexión persistente ocupa una conexión por proceso
 `php-cgi`. Hay que repetir con 4.2.3 (TD2) y con 10 talleres (V9).
+
+## 9. Repetición con 4.2.3 y diez talleres (2026-11-25)
+
+Primer paso de T2 (TD2), antes de instalar el paquete en `main`. Decisiones en historial 2.90.
+
+### Método
+
+El mismo de la sección 8, sobre `main` (`595e301`), con dos cambios:
+
+* Paquete **4.2.3** en la copia del spike. El diff se aplicó igual salvo `bootstrap/app.php`, que cambió de formato con Pint;
+  la línea del middleware se agregó a mano.
+* **Diez talleres:** una central con diez filas (`t1.localhost` a `t10.localhost`) y diez bases clonadas de la de desarrollo.
+  Las variantes del spike rotan de taller en cada ciclo; `main` sigue con su única base. `measure.php` quedó con esa rotación.
+
+Equipo: PHP 8.3.16 con OPcache y sin Xdebug (`-d xdebug.mode=off`), Nginx 1.27.3, MySQL 8.4.3 y Laravel 13. 300 ciclos por
+endpoint, sin errores en los 4500 requests. Salida completa en [`resultado-4.2.3.txt`](resultado-4.2.3.txt). Al terminar se
+borraron las bases temporales; la de desarrollo solo se leyó para el volcado.
+
+### Sobrecarga contra `main` (diferencia de p95, ms)
+
+En este equipo `main` responde en 78 a 120 ms de p95, así que el 10 % de la base queda debajo de 15 ms y el umbral de G es
+15 ms en los cinco endpoints.
+
+| Endpoint | `main` (p95) | `initializeCache()` | Más conexión persistente a la central |
+|---|---|---|---|
+| `GET /api/me` | 101,1 | +18,7, no cumple | +6,8 |
+| `GET /api/work-orders` | 120,2 | +22,3, no cumple | +11,2 |
+| `GET /api/work-orders/{id}` | 120,0 | +18,3, no cumple | +10,2 |
+| `GET /api/reports/sales` | 92,0 | +15,2, no cumple | +5,4 |
+| `GET /api/branding` | 77,9 | +10,0 | +0,1 |
+
+### Conclusiones
+
+1. **Se confirma la sección 8 con 4.2.3:** la sobrecarga es la conexión a la central. Persistente, conectar baja de 14,4 a
+   0,6 ms (p50) y se cumplen todos los umbrales. El paquete agrega menos de 0,3 ms entre sus tres tareas.
+2. **Diez talleres no cambian el costo:** buscar el taller tarda 1,1 ms (p50) y cada taller guarda sus permisos en su
+   propia clave, de `tenant_id_1spatie.permission.cache` a `tenant_id_10spatie.permission.cache`, sin clave global en la
+   central.
+3. **Hallazgo nuevo: el prefijo de cache del paquete no tiene separador.** `tenant_id_` más el id más la clave hace que
+   la clave `0abc` del taller 1 y la clave `abc` del taller 10 sean la misma. Pasa con cualquier clave que empiece con un
+   dígito, como los hashes hexadecimales del limitador de intentos. T2 usa un prefijo propio, `tenant:{id}:` (§3.6).
+
+### Límites
+
+Los de la sección 8, salvo el de un solo taller. Las cifras absolutas no se comparan con las de la sección 8: es otro
+equipo, con otra versión de PHP.
