@@ -51,7 +51,7 @@ class WorkOrderAllocationController extends Controller implements HasMiddleware
 
         return $this->successResponse(
             'Factura generada en borrador correctamente.',
-            new ShowInvoiceResource($invoice->load(['items', 'workOrder', 'payments', 'creditNotes'])),
+            new ShowInvoiceResource($invoice->load(['items', 'workOrder', 'payments', 'creditNotes', 'withholdings'])),
             201
         );
     }

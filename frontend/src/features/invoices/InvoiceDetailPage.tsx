@@ -13,6 +13,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge'
 import { useAuth } from '@/features/auth/useAuth'
 import { INVOICE_PAYMENT_STATUS, INVOICE_STATUS, invoicesApi, type Invoice, type InvoiceItem } from '@/features/invoices/api'
 import { CreditNotesCard } from '@/features/invoices/CreditNotes'
+import { WithholdingsCard } from '@/features/invoices/Withholdings'
 import { EditInvoiceModal, InvoiceItemModal, IssueInvoiceModal } from '@/features/invoices/InvoiceModals'
 import { PAYMENT_STATUS, type Payment } from '@/features/payments/api'
 import { PaymentDetailModal } from '@/features/payments/PaymentDetailModal'
@@ -131,6 +132,12 @@ function InvoiceDetail({ invoice }: { invoice: Invoice }) {
                         <dd className="col-6 text-end">{formatGuarani(invoice.payment_summary.credited_total)}</dd>
                       </>
                     )}
+                    {Number(invoice.payment_summary.withheld_total) > 0 && (
+                      <>
+                        <dt className="col-6 fw-normal">Retenido (IVA y renta)</dt>
+                        <dd className="col-6 text-end">{formatGuarani(invoice.payment_summary.withheld_total)}</dd>
+                      </>
+                    )}
                     <dt className="col-6 h3 mb-0">Saldo</dt>
                     <dd className="col-6 text-end h3 mb-0">{formatGuarani(invoice.payment_summary.balance)}</dd>
                   </dl>
@@ -152,6 +159,7 @@ function InvoiceDetail({ invoice }: { invoice: Invoice }) {
               </div>
             )}
             <CreditNotesCard invoice={invoice} />
+            <WithholdingsCard invoice={invoice} />
           </div>
         </div>
       </PageBody>

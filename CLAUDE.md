@@ -44,7 +44,7 @@ y `npm test`.
 
 ## Tests: baseline y uso diario
 
-**Baseline inicial (2026-11-24, después de aplicar Pint):** corrida completa en verde. Backend: 488 tests y 8560 aserciones (6,8 min) y
+**Baseline inicial (2026-11-24, después de aplicar Pint):** corrida completa en verde. Backend (línea base): 488 tests y 8560 aserciones (6,8 min) y
 Pint sin pendientes. Frontend: ESLint sin errores, Vitest 43 de 43 y build correcto. Es la referencia: todo lo que venga
 después parte de un estado verde.
 

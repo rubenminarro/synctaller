@@ -51,12 +51,18 @@ class ShowInvoiceResource extends JsonResource
             'payment_summary' => [
                 'paid_total' => $this->paidTotal(),
                 'credited_total' => $this->creditedTotal(),
+                // Retenciones de IVA o renta vigentes (M12): cancelan saldo sin movimiento de caja.
+                'withheld_total' => $this->withheldTotal(),
                 'balance' => $this->balance(),
                 'status' => $this->paymentStatus()?->value,
+                // Retención de IVA sugerida (M12); null si la factura no admite retenciones.
+                'vat_withholding_suggestion' => $this->vatWithholdingSuggestion(),
             ],
             'payments' => PaymentResource::collection($this->whenLoaded('payments')),
             // Notas de crédito emitidas fuera del sistema (P10), también las anuladas.
             'credit_notes' => InvoiceCreditNoteResource::collection($this->whenLoaded('creditNotes')),
+            // Retenciones registradas (M12), también las anuladas.
+            'withholdings' => InvoiceWithholdingResource::collection($this->whenLoaded('withholdings')),
             'issued_at' => $this->issued_at,
             'issued_by' => $this->issued_by,
             'cancelled_at' => $this->cancelled_at,

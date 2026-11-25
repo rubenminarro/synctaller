@@ -48,6 +48,8 @@ export interface SalesReport {
   credit_notes?: { credit_notes_count: number; total: string; iva_5: string; iva_10: string }
   /** Emitido menos lo acreditado en el período. */
   net_total?: string
+  /** Retenciones de IVA o renta registradas en el período, por su fecha (M12). No son cobros de caja. */
+  withholdings?: { withholdings_count: number; total: string; vat: string; income: string }
 }
 
 /** Presupuestos creados en el período, por su estado actual. */
@@ -188,6 +190,8 @@ export interface ReceivablesReport {
     total: string
     paid_total: string
     credited_total: string
+    /** Retenciones vigentes (M12). */
+    withheld_total?: string
     balance: string
   }[]
 }

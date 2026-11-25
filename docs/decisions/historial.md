@@ -626,6 +626,26 @@ datos de quien responde). Transcripción y efectos en la [especificación](../es
 | Sin respuesta | V3 y V13 (talleres), V5 y la parte legal de V13 (asesor legal). No bloquean. Van en el [cuestionario pendiente](https://claude.ai/artifact/2APciv4PaFoKoPsDfAtJv1), junto con los términos comerciales de la suspensión (V14) y confirmaciones opcionales de la contadora sobre V16, V19, V10 y M12 |
 | Orden | 1) recibo completo (V11); 2) M12, si se aprueba el diseño; 3) datos del cliente en la factura (V10); 4) ajustes chicos (V18, V20, V15); 5) anulación (V19); 6) V16 y encender M10. Cada una en su rama |
 
+### 2.84 Retenciones de IVA y renta (M12, 2026-11-24)
+
+Entrega M12 con el diseño de la versión 4 de la [especificación](../especificacion-aseguradoras.html) (§9), aprobado por
+el usuario al pedir que empiece. Reglas vigentes en [reglas de negocio](../reglas-de-negocio.md), 6.33.
+
+| Tema | Decisión |
+|---|---|
+| Alcance | Cualquier cliente puede retener, no solo las aseguradoras (V17). Solo facturas emitidas a crédito |
+| Importe | Decisión del usuario: el del comprobante, cargado por el cajero. La API sugiere el 30 % del IVA (`invoice.vat_withholding_percentage`), menos lo ya retenido de IVA y sin pasar el saldo; para la renta no hay sugerencia porque no se conoce su porcentaje (pregunta C4 del cuestionario pendiente) |
+| Comprobante | Número y timbrado obligatorios. Un comprobante puede cubrir varias facturas: una fila por factura. Duplicado = mismo comprobante e impuesto vigentes en la misma factura (409) |
+| Monto mínimo | No se valida (V17: solo se retiene por encima de un monto): se registra lo que dice el comprobante |
+| Rutas | `invoices/{invoice}/withholdings`, como las notas de crédito (P10): registrar, anular con motivo, listar y ver. Una por factura, sin endpoint para varias a la vez |
+| Estado de cobro | Una retención cuenta como un pago: con saldo, `partial`; sin saldo, `paid`. `credited` queda para la factura saldada solo con notas de crédito. Por eso la factura de la aseguradora de C05 de los datos de ejemplo pasó de `unpaid` a `partial` |
+| Anulación de la factura | Bloqueada con retenciones vigentes (`INVOICE_HAS_WITHHOLDINGS`), como con pagos y notas de crédito |
+| Caja y reportes | Sin movimiento de caja: `payments/summary` y lo cobrado del reporte de ventas no cambian; el reporte de ventas trae `withholdings` aparte, por la fecha de la retención |
+| Saldo | `Invoice::balance()` resta las retenciones vigentes. Todo lugar que precargaba `creditNotes` o `credited_total` precarga también `withholdings` o `withheld_total`, para no hacer una consulta por factura |
+| Migración | `000072` (tabla `invoice_withholdings`), probada en MySQL con su `down` |
+| Datos de ejemplo | `WithholdingSeeder`: la retención de IVA sugerida y una de renta anulada en la factura de la aseguradora de C05. `DatabaseSeederTest` verifica los dos estados y los dos impuestos |
+| Pruebas | `tests/Feature/Invoices/InvoiceWithholdingTest` (5): sugerencia, saldo, estado, caja y ventas; condición, tope, fechas, validación y duplicados; anulación y bloqueo de la factura; cuentas por cobrar y PDF; permisos por rol |
+| Verificación | En el navegador, sobre una base temporal sembrada: cajero (alta con la sugerencia, error de tope, anulación, reporte de ventas y resumen del siniestro) y recepcionista (solo lectura) |
 ---
 
 ## 3. Frontend
@@ -673,3 +693,11 @@ se retiró; queda lo que explica el código actual.
 | Errores de la entrega | Se muestran con el mensaje del backend, sin repetir la regla |
 | Reportes | El reporte de siniestros agrupa sus importes por etapa; las facturas de un cliente de cuentas por cobrar se ven filtrando el reporte |
 | Deducible neto (M10) | La modalidad se elige solo al editar; el IVA del deducible es opcional, con aviso; la columna del deducible aparece solo cuando se usa |
+
+### Retenciones (M12, 2026-11-24)
+
+| Tema | Decisión |
+|---|---|
+| Ubicación | Tarjeta "Retenciones" en el detalle de la factura, debajo de las notas de crédito, y la fila "Retenido" en el cobro y en el resumen del siniestro |
+| Formulario | Arranca en IVA con la sugerencia del backend como importe; el texto de ayuda no repite el porcentaje (es configuración del backend) |
+| Reporte de ventas | Tarjeta "Retenciones" aparte de lo cobrado, solo si hubo retenciones en el período |

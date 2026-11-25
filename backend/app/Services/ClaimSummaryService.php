@@ -244,7 +244,7 @@ class ClaimSummaryService
         $insurerClientId = $claim->insurer?->client_id;
         $invoices = Invoice::whereIn('work_order_id', $workOrders->pluck('id'))
             ->whereIn('status', InvoiceStatus::currentStatuses())
-            ->with(['payments', 'creditNotes', 'workOrder'])
+            ->with(['payments', 'creditNotes', 'withholdings', 'workOrder'])
             ->orderBy('id')
             ->get()
             ->map(function (Invoice $invoice) use ($insurerClientId) {
@@ -264,6 +264,7 @@ class ClaimSummaryService
                     'total' => Decimal::of($invoice->total, 2),
                     'credited_total' => $issued ? $invoice->creditedTotal() : '0.00',
                     'paid_total' => $issued ? $invoice->paidTotal() : '0.00',
+                    'withheld_total' => $issued ? $invoice->withheldTotal() : '0.00',
                     'balance' => $issued ? $invoice->balance() : '0.00',
                     'payment_status' => $invoice->paymentStatus()?->label(),
                 ];
@@ -284,6 +285,7 @@ class ClaimSummaryService
                 'credited_total' => $credited,
                 'net_invoiced' => bcsub($invoiced, $credited, 2),
                 'collected' => $this->sum($issued->pluck('paid_total')),
+                'withheld' => $this->sum($issued->pluck('withheld_total')),
                 'balance' => $this->sum($issued->pluck('balance')),
             ];
         });
@@ -292,6 +294,7 @@ class ClaimSummaryService
             'totals' => [
                 'net_invoiced' => $this->sum($byRecipient->pluck('net_invoiced')),
                 'collected' => $this->sum($byRecipient->pluck('collected')),
+                'withheld' => $this->sum($byRecipient->pluck('withheld')),
                 'balance' => $this->sum($byRecipient->pluck('balance')),
             ],
             'by_recipient' => $byRecipient->values(),

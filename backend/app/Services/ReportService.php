@@ -9,6 +9,7 @@ use App\Enums\InvoiceRecipientType;
 use App\Enums\InvoiceStatus;
 use App\Enums\MaintenanceStatus;
 use App\Enums\ReceptionStatus;
+use App\Enums\WithholdingTax;
 use App\Enums\WorkOrderStatus;
 use App\Models\Budget;
 use App\Models\Client;
@@ -16,6 +17,7 @@ use App\Models\Insurer;
 use App\Models\InventoryMovement;
 use App\Models\Invoice;
 use App\Models\InvoiceCreditNote;
+use App\Models\InvoiceWithholding;
 use App\Models\Mechanic;
 use App\Models\Part;
 use App\Models\PartStock;
@@ -143,6 +145,11 @@ class ReportService
             ->whereDate('issue_date', '<=', $to->toDateString())
             ->get();
 
+        $withholdings = InvoiceWithholding::registered()
+            ->whereDate('withholding_date', '>=', $from->toDateString())
+            ->whereDate('withholding_date', '<=', $to->toDateString())
+            ->get();
+
         $format = $groupBy === 'day' ? 'Y-m-d' : 'Y-m';
         $total = $this->sum($invoices->pluck('total'));
         $collected = $this->paymentService->summary($from, $to);
@@ -194,6 +201,13 @@ class ReportService
                 'iva_10' => $this->sum($creditNotes->pluck('iva_10')),
             ],
             'net_total' => bcsub($total, $this->sum($creditNotes->pluck('total')), 2),
+            // Retenciones registradas en el período, por su fecha (M12). No son cobros de caja: `collected` no las suma.
+            'withholdings' => [
+                'withholdings_count' => $withholdings->count(),
+                'total' => $this->sum($withholdings->pluck('amount')),
+                'vat' => $this->sum($withholdings->where('tax', WithholdingTax::VAT)->pluck('amount')),
+                'income' => $this->sum($withholdings->where('tax', WithholdingTax::INCOME)->pluck('amount')),
+            ],
         ];
     }
 
@@ -394,7 +408,7 @@ class ReportService
 
         $insurerClients = $this->insurerClientIds();
 
-        $receivables = Invoice::where('status', InvoiceStatus::ISSUED)->with(['client', 'payments', 'creditNotes'])->get()
+        $receivables = Invoice::where('status', InvoiceStatus::ISSUED)->with(['client', 'payments', 'creditNotes', 'withholdings'])->get()
             ->map(fn (Invoice $i) => ['invoice' => $i, 'balance' => $i->balance()])
             ->filter(fn ($row) => bccomp($row['balance'], '0', 2) > 0)
             ->groupBy(fn ($row) => $row['invoice']->client_id)
@@ -459,7 +473,7 @@ class ReportService
 
         $rows = Invoice::where('status', InvoiceStatus::ISSUED)
             ->when($clientId, fn ($q) => $q->where('client_id', $clientId))
-            ->with(['client', 'payments', 'creditNotes', 'workOrder', 'allocation.claim'])
+            ->with(['client', 'payments', 'creditNotes', 'withholdings', 'workOrder', 'allocation.claim'])
             ->orderBy('id')
             ->get()
             ->map(function (Invoice $invoice) use ($today, $insurerClients) {
@@ -516,6 +530,7 @@ class ReportService
                 'total' => Decimal::of($row['invoice']->total, 2),
                 'paid_total' => $row['invoice']->paidTotal(),
                 'credited_total' => $row['invoice']->creditedTotal(),
+                'withheld_total' => $row['invoice']->withheldTotal(),
                 'balance' => $row['balance'],
             ])->values();
         }
@@ -566,7 +581,7 @@ class ReportService
 
     private function receivablesTotal(): string
     {
-        return Invoice::where('status', InvoiceStatus::ISSUED)->with(['payments', 'creditNotes'])->get()
+        return Invoice::where('status', InvoiceStatus::ISSUED)->with(['payments', 'creditNotes', 'withholdings'])->get()
             ->reduce(fn (string $sum, Invoice $i) => bcadd($sum, $i->balance(), 2), '0.00');
     }
 

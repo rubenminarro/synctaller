@@ -38,7 +38,7 @@ class DatabaseSeederTest extends TestCase
         'reception_check_list_items', 'diagnostics', 'diagnostic_items', 'diagnostic_item_photos', 'budgets',
         'budget_items', 'budget_client_acceptances', 'insurers', 'insurer_contacts', 'claims', 'claim_documents', 'insurer_authorizations', 'insurer_authorization_items', 'internal_exceptions', 'work_order_allocations', 'work_order_allocation_lines', 'part_categories', 'suppliers', 'parts', 'part_stocks', 'inventory_movements', 'invoice_stamps',
         'work_orders', 'work_order_items', 'work_order_parts', 'work_order_closings', 'notifications',
-        'invoices', 'invoice_items', 'invoice_credit_notes', 'invoice_credit_note_items', 'payments', 'vehicle_deliveries', 'client_notifications',
+        'invoices', 'invoice_items', 'invoice_credit_notes', 'invoice_credit_note_items', 'invoice_withholdings', 'payments', 'vehicle_deliveries', 'client_notifications',
         'purchases', 'purchase_items', 'supplier_payments', 'vehicle_maintenances', 'work_order_commissions',
     ];
 
@@ -128,10 +128,11 @@ class DatabaseSeederTest extends TestCase
         $confirmed = DB::table('work_order_allocations')->where('status', 'confirmed')->sole();
         $this->assertEqualsCanonicalizing(['insurer_covered', 'owner_responsibility'], DB::table('work_order_allocation_lines')->where('work_order_allocation_id', $confirmed->id)->distinct()->pluck('portion_type')->all());
         $this->assertSame(0, bccomp((string) $confirmed->sale_total, (string) DB::table('work_order_allocation_lines')->where('work_order_allocation_id', $confirmed->id)->sum('amount'), 2));
-        // Facturas por responsable (M9): una a la aseguradora (a crédito, impaga) y otra al dueño (al contado, cobrada).
+        // Facturas por responsable (M9): una a la aseguradora (a crédito, con su retención de IVA y sin pagos: pago
+        // parcial, M12) y otra al dueño (al contado, cobrada).
         $byAllocation = Invoice::where('allocation_id', $confirmed->id)->where('status', 'issued')->get();
         $this->assertSame(['cash', 'credit'], $byAllocation->map(fn (Invoice $invoice) => $invoice->condition->value)->sort()->values()->all());
-        $this->assertSame(['paid', 'unpaid'], $byAllocation->map(fn (Invoice $invoice) => $invoice->paymentStatus()->value)->sort()->values()->all());
+        $this->assertSame(['paid', 'partial'], $byAllocation->map(fn (Invoice $invoice) => $invoice->paymentStatus()->value)->sort()->values()->all());
         DB::table('claim_documents')->pluck('path')->each(fn (string $path) => Storage::disk('claim_documents')->assertExists($path));
         $this->assertTrue((bool) Vehicle::where('chassis', VehiclesSeeder::WITHOUT_PLATE_CHASSIS)->value('no_plate'));
         $this->assertGreaterThanOrEqual(30, Client::count());
@@ -199,11 +200,15 @@ class DatabaseSeederTest extends TestCase
         $this->assertSame(['credit' => 6, 'cash' => 13], DB::table('invoices')->selectRaw('`condition`, count(*) as total')
             ->groupBy('condition')->orderByDesc('condition')->pluck('total', 'condition')->map(fn ($total) => (int) $total)->all());
         $this->assertSame(
-            ['credited' => 1, 'paid' => 11, 'partial' => 2, 'unpaid' => 3],
+            // La factura de la aseguradora de C05 queda en pago parcial por su retención (M12).
+            ['credited' => 1, 'paid' => 11, 'partial' => 3, 'unpaid' => 2],
             Invoice::where('status', 'issued')->get()->countBy(fn (Invoice $invoice) => $invoice->paymentStatus()->value)->sortKeys()->all()
         );
         // Notas de crédito externas (P10): H13 acreditada entera; H07 con una parcial y otra anulada.
         $this->assertSame(['cancelled' => 1, 'registered' => 2], $this->statusCounts('invoice_credit_notes'));
+        // Retenciones (M12): la de IVA de la aseguradora de C05 y una de renta anulada.
+        $this->assertSame(['cancelled' => 1, 'registered' => 1], $this->statusCounts('invoice_withholdings'));
+        $this->assertSame(['income', 'vat'], DB::table('invoice_withholdings')->distinct()->orderBy('tax')->pluck('tax')->all());
         $this->assertSame(2, Invoice::where('status', 'issued')->where('condition', 'credit')->whereDate('due_date', '<', today())
             ->get()->filter(fn (Invoice $invoice) => bccomp($invoice->balance(), '0', 2) > 0)->count());
         $this->assertSame(['cancelled' => 1, 'registered' => 14], $this->statusCounts('payments'));

@@ -90,6 +90,8 @@ class DocumentPdfService
             'ivaTotal' => bcadd((string) $invoice->iva_5, (string) $invoice->iva_10, 2),
             // Notas de crédito emitidas fuera del sistema y registradas (P10), con el saldo.
             'creditNotes' => $invoice->creditNotes()->registered()->get(),
+            // Retenciones de IVA o renta registradas (M12).
+            'withholdings' => $invoice->withholdings()->registered()->get(),
             // Factura a la aseguradora desde un reparto (M9): con la referencia del siniestro y la póliza.
             'claim' => $this->insurerClaim($invoice),
         ]);
@@ -118,6 +120,8 @@ class DocumentPdfService
             'payment' => $payment,
             'invoice' => $payment->invoice,
             'balance' => $payment->invoice->balance(),
+            // Retenciones de la factura (M12): el recibo muestra lo retenido aparte del pago.
+            'withholdings' => $payment->invoice->withholdings()->registered()->get(),
         ]);
     }
 

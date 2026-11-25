@@ -52,6 +52,7 @@ class DatabaseSeeder extends Seeder
             AllocationInvoiceSeeder::class,
             PaymentSeeder::class,
             CreditNoteSeeder::class,
+            WithholdingSeeder::class,
             VehicleDeliverySeeder::class,
             // Ajustes de los últimos días, después de todos los consumos.
             InventoryAdjustmentSeeder::class,

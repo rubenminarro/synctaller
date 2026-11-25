@@ -57,7 +57,7 @@ class AllocationBillingService
     {
         return Invoice::where('allocation_id', $allocation->id)
             ->whereIn('status', InvoiceStatus::currentStatuses())
-            ->with(['items', 'payments', 'creditNotes'])
+            ->with(['items', 'payments', 'creditNotes', 'withholdings'])
             ->orderBy('id')
             ->get()
             ->filter(function (Invoice $invoice) {

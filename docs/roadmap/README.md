@@ -7,8 +7,8 @@ original y no se renumeran. El detalle por módulo está en [`modules/README.md`
 
 | Fecha | Backend | Frontend | Notas |
 |---|---|---|---|
-| 2026-11-24 | 488 tests en verde, 8560 aserciones; Pint sin pendientes | Vitest en verde (43), ESLint y build | **Baseline** (historial 2.82): después de aplicar Pint a todo el backend. Desde acá, tests puntuales salvo pedido del usuario |
-| 2026-11-24 | 488 tests en verde, 8560 aserciones | Vitest en verde (43), lint y build | Commit inicial del monorepo |
+| 2026-11-24 | 488 tests en verde (línea base), 8560 aserciones; Pint sin pendientes | Vitest en verde (43), ESLint y build | **Baseline** (historial 2.82): después de aplicar Pint a todo el backend. Desde acá, tests puntuales salvo pedido del usuario |
+| 2026-11-24 | 488 tests en verde, 8560 aserciones (antes de Pint) | Vitest en verde (43), lint y build | Commit inicial del monorepo |
 
 ## Próximas tareas
 
@@ -17,7 +17,7 @@ Ninguna entrega empieza sin autorización del usuario. **El sistema no está lis
 | Orden | Tarea | Bloqueo |
 |---|---|---|
 | 1 | **T2, paso 1:** base central, paquete y modelo `Tenant` | No antes del 2026-11-09 (TD2: la versión 4.2.3 del paquete necesita dos semanas publicada). Empezar repitiendo la medición con esa versión ([`spike-t0/README.md`](../spike-t0/README.md)). Instalar el paquete en `main` requiere la aprobación del usuario |
-| 2 | Entregas de las respuestas de la contadora: recibo completo (V11), M12, datos del cliente en la factura (V10), ajustes V18/V20/V15, anulación (V19) y V16 con el encendido de M10 | Orden y decisiones en la sección 2.83 del [historial](../decisions/historial.md). M12 espera la aprobación de su diseño (especificación, versión 4) |
+| 2 | Entregas de las respuestas de la contadora: recibo completo (V11), datos del cliente en la factura (V10), ajustes V18/V20/V15, anulación (V19) y V16 con el encendido de M10 | Orden y decisiones en la sección 2.83 del [historial](../decisions/historial.md). M12 (retenciones) quedó hecha el 2026-11-24 (2.84) |
 | 3 | Retención de 5 años y suspensión por etapas en la línea T (V14, G10) | Decisión comercial sobre P9; se suma al plan de T5 |
 | 4 | Resto de T2 a T5 | Tras el paso 1, según el plan de la sección 2.80 del [historial](../decisions/historial.md) |
 | 5 | Tarea P8 (fotos y firmas a privado) | Después de T4; requisito antes del primer taller comercial |

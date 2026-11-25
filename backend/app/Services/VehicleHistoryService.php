@@ -32,7 +32,7 @@ class VehicleHistoryService
         $invoices = Invoice::query()
             ->whereIn('work_order_id', $workOrderIds)
             ->where('status', InvoiceStatus::ISSUED)
-            ->with(['payments', 'creditNotes'])
+            ->with(['payments', 'creditNotes', 'withholdings'])
             ->get();
 
         $summary = [
