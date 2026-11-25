@@ -3138,7 +3138,7 @@ encabezado salen de las variables `COMPANY_*` del `.env`.
 | Factura emitida | `GET {{base_url}}/invoices/{{invoice_id}}/pdf` | 200 | `factura-001-001-….pdf`, con timbrado, IVA por tasa y la leyenda "no válido como documento fiscal" |
 | Factura en borrador | `GET {{base_url}}/invoices/{id-borrador}/pdf` | 200 | `factura-borrador-{id}.pdf`, marca `BORRADOR` |
 | Factura anulada | `GET {{base_url}}/invoices/{id-anulada}/pdf` | 200 | Marca `ANULADA` y el motivo |
-| Recibo (pago de factura a crédito) | `GET {{base_url}}/payments/{id}/receipt` | 200 | `recibo-REC-….pdf`; anulado → marca `ANULADO` |
+| Recibo (pago de factura a crédito) | `GET {{base_url}}/payments/{id}/receipt` | 200 | `recibo-REC-….pdf` con la factura que cancela, su condición y, en una factura de un reparto, el siniestro, la póliza y la aseguradora; anulado → marca `ANULADO` |
 | Recibo de un pago al contado | `GET {{base_url}}/payments/{id}/receipt` | 422 | `PAYMENT_WITHOUT_RECEIPT` |
 | Comprobante de entrega | `GET {{base_url}}/vehicle-deliveries/{id}/pdf` | 200 | `entrega-ENT-….pdf`, con km, quién retira, conformidad, OT y facturas, y la firma si se cargó |
 | Documento inexistente | `GET {{base_url}}/invoices/999999/pdf` | 404 | `RESOURCE_NOT_FOUND` |

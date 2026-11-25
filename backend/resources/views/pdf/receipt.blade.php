@@ -17,7 +17,14 @@
     </div>
 
     <table class="grid" style="margin-top: 10px;">
-        <tr><th style="width: 35%;">Medio de pago</th><td>{{ $payment->method->label() }}</td></tr>
+        <tr><th style="width: 35%;">Factura que cancela</th><td>{{ $invoice->number }} del {{ $invoice->issue_date?->format('d/m/Y') }}</td></tr>
+        <tr><th>Condición de la factura</th><td>{{ $invoice->condition->label() }}</td></tr>
+        @if ($claim)
+            <tr><th>Siniestro</th><td>{{ $claim->claim_number ?? $claim->code }}@if ($claim->claim_number) ({{ $claim->code }})@endif</td></tr>
+            @if ($claim->policy_number)<tr><th>Póliza</th><td>{{ $claim->policy_number }}</td></tr>@endif
+            @if ($insurerName)<tr><th>Aseguradora</th><td>{{ $insurerName }}</td></tr>@endif
+        @endif
+        <tr><th>Medio de pago</th><td>{{ $payment->method->label() }}</td></tr>
         @if ($payment->reference)<tr><th>Referencia</th><td>{{ $payment->reference }}</td></tr>@endif
         @if ($payment->bank)<tr><th>Banco</th><td>{{ $payment->bank }}</td></tr>@endif
         <tr><th>Total de la factura</th><td class="num">{{ \App\Support\Format::money($invoice->total) }}</td></tr>

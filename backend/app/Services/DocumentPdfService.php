@@ -98,7 +98,8 @@ class DocumentPdfService
     }
 
     /**
-     * Recibo de un pago de factura a crédito (los pagos al contado no tienen recibo).
+     * Recibo de un pago de factura a crédito (los pagos al contado no tienen recibo). Declara la factura que cancela,
+     * su condición, la fecha y, si la factura sale de un reparto, los datos del siniestro (V11, historial 2.83).
      *
      * @return array{filename: string, content: string}
      */
@@ -113,6 +114,7 @@ class DocumentPdfService
         }
 
         $payment->loadMissing(['invoice.client']);
+        $claim = $this->invoiceClaim($payment->invoice);
 
         return $this->render('pdf.receipt', "recibo-{$payment->receipt_number}.pdf", [
             'title' => "Recibo {$payment->receipt_number}",
@@ -122,6 +124,9 @@ class DocumentPdfService
             'balance' => $payment->invoice->balance(),
             // Retenciones de la factura (M12): el recibo muestra lo retenido aparte del pago.
             'withholdings' => $payment->invoice->withholdings()->registered()->get(),
+            // Siniestro de la factura (V11): número, póliza y aseguradora.
+            'claim' => $claim,
+            'insurerName' => $claim?->insurer()->withTrashed()->first()?->client?->display_name,
         ]);
     }
 
@@ -189,9 +194,17 @@ class DocumentPdfService
      */
     private function insurerClaim(Invoice $invoice): ?Claim
     {
-        $claim = $invoice->allocation_id ? $invoice->allocation?->claim : null;
+        $claim = $this->invoiceClaim($invoice);
 
         return $claim && $claim->insurer()->withTrashed()->value('client_id') === $invoice->client_id ? $claim : null;
+    }
+
+    /**
+     * Siniestro de una factura emitida desde un reparto (M9), sea a la aseguradora o al dueño.
+     */
+    private function invoiceClaim(Invoice $invoice): ?Claim
+    {
+        return $invoice->allocation_id ? $invoice->allocation?->claim : null;
     }
 
     private function vehicle(?Vehicle $vehicle): ?array

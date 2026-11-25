@@ -376,7 +376,9 @@ Cada cambio de regla actualiza este documento en la misma rama.
 * **PDF** (dompdf, `DocumentPdfService`, vistas en `resources/views/pdf`), con descarga `attachment`:
   * `GET budgets/{budget}/pdf`;
   * `GET invoices/{invoice}/pdf`;
-  * `GET payments/{payment}/receipt`: solo pagos con recibo, si no `PAYMENT_WITHOUT_RECEIPT` (422);
+  * `GET payments/{payment}/receipt`: solo pagos con recibo, si no `PAYMENT_WITHOUT_RECEIPT` (422). Declara la factura que
+    cancela con su fecha, la condición de la factura y, si sale de un reparto (M9), el siniestro (número y código), la póliza
+    y la aseguradora (V11, historial 2.83 y 2.85);
   * `GET vehicle-deliveries/{delivery}/pdf`: con la firma embebida.
 
   Permisos: el `show` de cada documento. Borradores y anulados se imprimen con marca de agua (`BORRADOR`,
