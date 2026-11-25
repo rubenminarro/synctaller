@@ -7,6 +7,7 @@ original y no se renumeran. El detalle por módulo está en [`modules/README.md`
 
 | Fecha | Backend | Frontend | Notas |
 |---|---|---|---|
+| 2026-11-25 | Tests puntuales en verde (62, 2349 aserciones): carpetas `Invoices` y `Payments`, `DocumentPdfTest`, `AllocationInvoiceTest`, `ClaimTest`, `InsurerReportsTest` y `DatabaseSeederTest`; Pint sin pendientes | Vitest en verde (`features/invoices`, 8), ESLint y build | Anulación solo en el mes de emisión, V19 (historial 2.88). Corrida local, sin la suite completa. Revisión en navegador con cajero y administrador, en una base temporal |
 | 2026-11-25 | Tests puntuales en verde (19, 604 aserciones): `CreditNoteTest`, `ClaimDocumentTest` y `AllocationInvoiceTest`; Pint sin pendientes | Vitest en verde (`claims/api.test.ts`, 7), ESLint y build | Ajustes V18, V20 y V15 (historial 2.87). Corrida local, sin la suite completa. Revisión en navegador con cajero, recepcionista y jefe de taller, en una base temporal |
 | 2026-11-24 | 495 tests en verde, 8888 aserciones (antes de V18, V20 y V15); Pint sin pendientes | Vitest en verde (47), ESLint y build | Datos del cliente en la factura, V10 (historial 2.86). Corrida de la CI sobre `main` (`e2aa4a8`), no local |
 | 2026-11-24 | 494 tests en verde, 8848 aserciones (antes de V10); Pint sin pendientes | Sin corrida: el cambio no tocó el frontend (la CI lo omite por rutas) | Recibo completo, V11 (historial 2.85). Corrida de la CI sobre `main` (`02dbd33`), no local |
@@ -21,7 +22,7 @@ Ninguna entrega empieza sin autorización del usuario. **El sistema no está lis
 | Orden | Tarea | Bloqueo |
 |---|---|---|
 | 1 | **T2, paso 1:** base central, paquete y modelo `Tenant` | No antes del 2026-11-09 (TD2: la versión 4.2.3 del paquete necesita dos semanas publicada). Empezar repitiendo la medición con esa versión ([`spike-t0/README.md`](../spike-t0/README.md)). Instalar el paquete en `main` requiere la aprobación del usuario |
-| 2 | Entregas de las respuestas de la contadora: anulación (V19) y V16 con el encendido de M10 | Orden y decisiones en la sección 2.83 del [historial](../decisions/historial.md). M12 (retenciones, 2.84), el recibo completo (V11, 2.85) y los datos del cliente en la factura (V10, 2.86) quedaron hechos el 2026-11-24; los ajustes V18, V20 y V15 (2.87), el 2026-11-25 |
+| 2 | Entrega que queda de las respuestas de la contadora: V16 con el encendido de M10 | Orden y decisiones en la sección 2.83 del [historial](../decisions/historial.md). M12 (retenciones, 2.84), el recibo completo (V11, 2.85) y los datos del cliente en la factura (V10, 2.86) quedaron hechos el 2026-11-24; los ajustes V18, V20 y V15 (2.87) y la anulación solo en el mes de emisión (V19, 2.88), el 2026-11-25 |
 | 3 | Retención de 5 años y suspensión por etapas en la línea T (V14, G10) | Decisión comercial sobre P9; se suma al plan de T5 |
 | 4 | Resto de T2 a T5 | Tras el paso 1, según el plan de la sección 2.80 del [historial](../decisions/historial.md) |
 | 5 | Tarea P8 (fotos y firmas a privado) | Después de T4; requisito antes del primer taller comercial |

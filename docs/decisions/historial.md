@@ -693,6 +693,22 @@ deducible).
 | Contrato | Cambia una validación (timbrado obligatorio) y se suman dos valores al enum de tipos de documento. Sin rutas, permisos ni `error_code` nuevos |
 | Datos de ejemplo | `CreditNoteSeeder` carga el timbrado en sus notas |
 | Pruebas | `CreditNoteTest` (sin timbrado → 422), `ClaimDocumentTest` (los dos tipos nuevos), `AllocationInvoiceTest` (el body con timbrado) y `claims/api.test.ts` (valor inicial del alta) |
+
+### 2.88 Anulación solo en el mes de emisión (V19, 2026-11-25)
+
+Quinta entrega del orden de la sección 2.83. Regla vigente en [reglas de negocio](../reglas-de-negocio.md), 6.10.
+
+| Tema | Decisión |
+|---|---|
+| Regla | Una factura emitida se anula solo si `issue_date` cae en el mes en curso: todavía no se declaró. Después corresponde una nota de crédito registrada (6.28). `issue_date` es siempre el día de la emisión, así que es una referencia confiable |
+| Mes | El de la zona de la aplicación (`APP_TIMEZONE`, `America/Asuncion`). El último minuto del mes todavía admite anular |
+| Error | `INVOICE_CANCELLATION_PERIOD_CLOSED`, 422, nuevo. Se valida después de `INVOICE_NOT_CANCELLABLE` y antes de pagos, notas de crédito y retenciones |
+| Excepciones | Decisión del usuario: ninguna, ni para el administrador. Sin permiso nuevo |
+| Alcance | Decisión del usuario: todas las facturas, también las del reparto (6.29) |
+| Contrato | Campo nuevo `is_cancellable` en el detalle (`ShowInvoiceResource`): emitida y dentro del mes. Así el frontend no repite la regla. Sin rutas, permisos ni códigos HTTP nuevos |
+| Frontend | Decisión del usuario: fuera de plazo el botón "Anular" no se muestra y un aviso remite a la nota de crédito (solo a quien tiene `invoices.cancel`) |
+| Datos existentes | Las facturas emitidas en meses anteriores dejan de poder anularse desde la entrega. Los datos de ejemplo anulan el mismo día de la emisión: no cambian |
+| Pruebas | `InvoiceIssueTest` (límite del mes con instantes en UTC y borrador no anulable) e `InvoiceDetailPage.test.tsx` (botón y aviso) |
 ---
 
 ## 3. Frontend

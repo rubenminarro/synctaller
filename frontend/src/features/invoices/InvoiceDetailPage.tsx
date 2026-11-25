@@ -47,7 +47,10 @@ export function InvoiceDetailPage() {
   return <InvoiceDetail invoice={query.data} />
 }
 
-/** Factura `draft → issued → cancelled`. Solo el borrador se edita; emitida, solo se anula (sin pagos vigentes). */
+/**
+ * Factura `draft → issued → cancelled`. Solo el borrador se edita; emitida, solo se anula (sin pagos vigentes) dentro
+ * del mes de emisión (V19, `is_cancellable`); después se corrige con una nota de crédito.
+ */
 function InvoiceDetail({ invoice }: { invoice: Invoice }) {
   const { can } = useAuth()
   const navigate = useNavigate()
@@ -94,7 +97,7 @@ function InvoiceDetail({ invoice }: { invoice: Invoice }) {
                 Emitir
               </button>
             )}
-            {issued && can('invoices.cancel') && (
+            {invoice.is_cancellable && can('invoices.cancel') && (
               <button type="button" className="btn btn-outline-danger" onClick={() => setDialog('cancel')}>
                 <IconBan size={18} className="me-1" aria-hidden="true" />
                 Anular
@@ -111,6 +114,11 @@ function InvoiceDetail({ invoice }: { invoice: Invoice }) {
       />
       <PageBody>
         {draft && <MissingCustomerDataAlert invoice={invoice} />}
+        {issued && !invoice.is_cancellable && can('invoices.cancel') && (
+          <div className="alert alert-info" role="status">
+            Emitida en un mes anterior: ya no se puede anular. Para corregirla, registrar una nota de crédito.
+          </div>
+        )}
         <div className="row row-cards">
           <div className="col-12 col-lg-4">
             <InvoiceDataCard invoice={invoice} />

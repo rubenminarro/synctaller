@@ -779,7 +779,7 @@ stateDiagram-v2
     <li><b>Corrección (P6):</b> se genera una nueva versión desde la confirmada. Para confirmarla, la versión anterior <b>no puede tener facturas vigentes</b> (<code>ALLOCATION_HAS_INVOICES</code>, 409). El error incluye en <code>errors</code> el detalle de cada factura a resolver: número, destinatario, estado y si tiene pagos. El orden es:
       <ol class="plain">
         <li>los borradores de factura se eliminan;</li>
-        <li>las facturas emitidas se acreditan con una <b>nota de crédito registrada</b> (P10) por lo que corresponda corregir; mientras V19 no diga lo contrario, una emitida sin pagos también puede anularse con motivo (procedimiento vigente, 6.10);</li>
+        <li>las facturas emitidas se acreditan con una <b>nota de crédito registrada</b> (P10) por lo que corresponda corregir; una emitida sin pagos también puede anularse con motivo, solo dentro del mes de su emisión (V19, 6.10);</li>
         <li>la nota de crédito no supera el saldo pendiente: si hay que acreditar lo ya cobrado, primero se anulan esos pagos con el procedimiento vigente;</li>
         <li>se confirma la nueva versión, se factura lo que falte y se registran nuevamente los pagos que correspondan.</li>
       </ol>
@@ -792,9 +792,9 @@ stateDiagram-v2
         <li><b>Por línea y parcial:</b> cada línea de la nota referencia una línea de la factura y no supera lo que esa línea tiene sin acreditar. Así libera exactamente la porción del reparto que factura (R8 es por porción) y admite correcciones parciales.</li>
         <li><b>Hasta el saldo:</b> el total de la nota no supera el saldo pendiente de la factura. Para acreditar lo cobrado, primero se anulan los pagos (procedimiento vigente). En el MVP no hay saldos a favor ni devoluciones.</li>
         <li><b>Efectos:</b> el saldo y el estado de cobro de la factura descuentan lo acreditado, y el facturado de una porción es su base facturada menos la acreditada (R8, P6). Los efectos en la entrega, los recordatorios y los reportes se detallan al implementarla.</li>
-        <li><b>Sin cambios:</b> la anulación vigente (6.10) sigue igual mientras V19 no diga lo contrario. Emitir notas de crédito desde SyncTaller queda para cuando SIFEN sea obligatorio o se decida.</li>
+        <li><b>Anulación:</b> desde V19 (2026-11-25, historial 2.88) una factura emitida se anula solo en el mes de su emisión; después se corrige con la nota de crédito registrada (6.10). Emitir notas de crédito desde SyncTaller queda para cuando SIFEN sea obligatorio o se decida.</li>
         <li><b>Implementación:</b> entrega propia, después de M8 y antes de cerrar M9 (la corrección de repartos facturados la necesita). Tablas, códigos de error, anulación de un registro mal cargado y efectos en reportes se diseñan al iniciarla.</li>
-        <li><span class="tag u">Pendiente</span> V18 (cuál es el procedimiento autorizado y si el plazo de un año es para emitir la nota) y V19 (si se puede anular una factura que la aseguradora todavía no recibió). Aprobar P10 no las resuelve.</li>
+        <li><span class="tag h">Resueltas</span> V18 (2026-11-25, historial 2.87): el timbrado de la nota registrada es obligatorio y el plazo «antes del cierre del ejercicio» es una recomendación que no se valida. V19 (2026-11-25, historial 2.88): se anula solo una factura emitida en el mes en curso; después corresponde una nota de crédito.</li>
       </ul></li>
     <li><b>Sin siniestro, o sin líneas a cargo de la aseguradora:</b> no se genera reparto. Se usa el flujo actual.</li>
   </ul>

@@ -35,7 +35,7 @@ su carpeta.
 
 ## Cobertura por carpeta
 
-Contado el 2026-11-25: 496 tests (sin el `ExampleTest` de la plantilla, que se quitó al crear el monorepo). La relación con cada módulo está en [`modules/README.md`](../modules/README.md).
+Contado el 2026-11-25: 498 tests (sin el `ExampleTest` de la plantilla, que se quitó al crear el monorepo). La relación con cada módulo está en [`modules/README.md`](../modules/README.md).
 
 | Carpeta | Tests | Carpeta | Tests |
 |---|---|---|---|
@@ -50,7 +50,7 @@ Contado el 2026-11-25: 496 tests (sin el `ExampleTest` de la plantilla, que se q
 | `Http` | 6 | `Reports` | 11 |
 | `Insurers` | 7 | `Roles` | 2 |
 | `Inventory` | 25 | `Seeders` | 1 |
-| `Invoices` | 25 | `Services` | 23 |
+| `Invoices` | 27 | `Services` | 23 |
 | `Settings` | 32 | `Vehicles` | 6 |
 | `WorkOrderParts` | 33 | `WorkOrders` | 19 |
 | `Unit` | 1 | | |

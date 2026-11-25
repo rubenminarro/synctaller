@@ -169,6 +169,15 @@ class Invoice extends Model
     }
 
     /**
+     * Plazo de anulación (V19): una factura emitida se anula solo en el mes de su emisión, antes de declararla. Después
+     * corresponde una nota de crédito. El mes es el de la zona de la aplicación (APP_TIMEZONE).
+     */
+    public function isWithinCancellationPeriod(): bool
+    {
+        return $this->issue_date !== null && $this->issue_date->isSameMonth(now());
+    }
+
+    /**
      * Total cobrado (pagos no anulados). Usa paid_total si vino de withSum
      * o la relación si está cargada.
      */

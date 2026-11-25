@@ -17,6 +17,7 @@ function invoice(suggestion: string | null): Invoice {
     condition: { value: 'credit', label: 'Crédito' },
     issue_date: '2026-11-24',
     due_date: '2026-12-24',
+    is_cancellable: true,
     totals: { exempt: '0', taxed_5: '0', taxed_10: '1100000', iva_5: '0', iva_10: '100000', iva_total: '100000', discount: '0', total: '1100000' },
     payment_summary: {
       paid_total: '0.00',

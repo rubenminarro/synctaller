@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\InvoiceStatus;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -41,6 +42,8 @@ class ShowInvoiceResource extends JsonResource
             ],
             'issue_date' => $this->issue_date?->toDateString(),
             'due_date' => $this->due_date?->toDateString(),
+            // Emitida y dentro del mes de emisión (V19). Pagos, notas de crédito y retenciones vigentes bloquean aparte.
+            'is_cancellable' => $this->status === InvoiceStatus::ISSUED && $this->isWithinCancellationPeriod(),
             'items' => InvoiceItemResource::collection($this->whenLoaded('items')),
             'totals' => [
                 'exempt' => $this->total_exempt,

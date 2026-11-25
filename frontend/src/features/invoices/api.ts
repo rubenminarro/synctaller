@@ -76,6 +76,8 @@ export interface Invoice {
   condition: { value: InvoiceCondition; label: string }
   issue_date: string | null
   due_date: string | null
+  /** Emitida y dentro del mes de emisión (V19); después solo admite notas de crédito. */
+  is_cancellable: boolean
   items?: InvoiceItem[]
   totals: {
     exempt: string

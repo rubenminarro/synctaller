@@ -249,6 +249,11 @@ Cada cambio de regla actualiza este documento en la misma rama.
   activo y vigente con `lockForUpdate` (`001-001-0000001`); números no se reutilizan. Emitida es inmutable
   (`INVOICE_NOT_EDITABLE`). Con pagos vigentes no se anula (`INVOICE_HAS_PAYMENTS`), ni con notas de crédito
   vigentes (`INVOICE_HAS_CREDIT_NOTES`, 6.28), ni con retenciones vigentes (`INVOICE_HAS_WITHHOLDINGS`, 6.33).
+* **Plazo de anulación (V19, 2026-11-25):** una factura emitida se anula solo en el **mes de su emisión**
+  (`issue_date`, en la zona de la aplicación, `America/Asuncion`): todavía no se declaró. Después corresponde una nota de
+  crédito (6.28): `INVOICE_CANCELLATION_PERIOD_CLOSED`, 422. Sin excepciones por rol y para todas las facturas, también
+  las del reparto (6.29). El detalle trae `is_cancellable` (emitida y dentro del mes; los pagos, las notas de crédito y
+  las retenciones vigentes bloquean aparte) y el frontend ofrece "Anular" o avisa que corresponde la nota de crédito.
 * **Datos del cliente (V10, 2026-11-24):** al crear el borrador, los dos flujos (OT particular y reparto, 6.29) copian
   del cliente nombre, RUC/CI, dirección, teléfono y correo (`customer_name`, `customer_tax_id`, `customer_address`,
   `customer_phone`, `customer_email`); en borrador se editan por `PATCH invoices/{id}` (teléfono y correo con el formato
