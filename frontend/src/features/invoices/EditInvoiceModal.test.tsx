@@ -16,6 +16,7 @@ const draft: Invoice = {
   condition: { value: 'cash', label: 'Contado' },
   issue_date: null,
   due_date: null,
+  is_cancellable: false,
   totals: { exempt: '0', taxed_5: '0', taxed_10: '110000', iva_5: '0', iva_10: '10000', iva_total: '10000', discount: '0', total: '110000' },
   payment_summary: { paid_total: '0.00', credited_total: '0.00', withheld_total: '0.00', balance: '110000.00', status: null, vat_withholding_suggestion: null },
   issued_at: null,

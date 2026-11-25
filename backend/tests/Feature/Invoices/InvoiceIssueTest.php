@@ -4,6 +4,7 @@ namespace Tests\Feature\Invoices;
 
 use App\Exceptions\InvoiceException;
 use App\Models\Invoice;
+use Illuminate\Support\Carbon;
 
 class InvoiceIssueTest extends InvoiceTestCase
 {
@@ -130,6 +131,47 @@ class InvoiceIssueTest extends InvoiceTestCase
         $this->postJson("/api/invoices/{$new['id']}/issue")
             ->assertOk()
             ->assertJsonPath('data.number', '001-001-0000002');
+    }
+
+    /**
+     * V19: se anula solo en el mes de emisión (hora de Paraguay). El último minuto del mes todavía admite anular; el
+     * primero del mes siguiente, no. Instantes absolutos en UTC: Asunción está en UTC-3.
+     */
+    public function test_cancellation_only_within_the_month_of_issue(): void
+    {
+        $this->actingAsAdmin();
+
+        $this->travelTo(Carbon::parse('2026-11-30 12:00:00', 'UTC'));
+        $this->createStamp()->assertCreated();
+
+        $first = $this->readyInvoice();
+        $second = $this->readyInvoice();
+        $this->postJson("/api/invoices/{$first['id']}/issue")->assertOk()->assertJsonPath('data.issue_date', '2026-11-30');
+        $this->postJson("/api/invoices/{$second['id']}/issue")->assertOk()->assertJsonPath('data.is_cancellable', true);
+
+        // 23:59 del 30 de noviembre en Asunción: todavía es el mes de emisión.
+        $this->travelTo(Carbon::parse('2026-12-01 02:59:00', 'UTC'));
+        $this->getJson("/api/invoices/{$first['id']}")->assertJsonPath('data.is_cancellable', true);
+        $this->postJson("/api/invoices/{$first['id']}/cancel", ['reason' => 'RUC incorrecto'])
+            ->assertOk()
+            ->assertJsonPath('data.status.value', 'cancelled')
+            ->assertJsonPath('data.is_cancellable', false);
+
+        // 00:00 del 1 de diciembre en Asunción: el mes cerró y corresponde una nota de crédito.
+        $this->travelTo(Carbon::parse('2026-12-01 03:00:00', 'UTC'));
+        $this->getJson("/api/invoices/{$second['id']}")->assertJsonPath('data.is_cancellable', false);
+        $this->postJson("/api/invoices/{$second['id']}/cancel", ['reason' => 'RUC incorrecto'])
+            ->assertStatus(422)
+            ->assertJsonPath('error_code', 'INVOICE_CANCELLATION_PERIOD_CLOSED');
+
+        $this->getJson("/api/invoices/{$second['id']}")->assertJsonPath('data.status.value', 'issued');
+    }
+
+    public function test_draft_is_not_cancellable(): void
+    {
+        $this->actingAsAdmin();
+
+        $this->getJson('/api/invoices/'.$this->readyInvoice()['id'])->assertJsonPath('data.is_cancellable', false);
     }
 
     public function test_stamp_rules(): void

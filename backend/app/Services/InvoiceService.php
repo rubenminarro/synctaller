@@ -316,6 +316,15 @@ class InvoiceService
                 );
             }
 
+            // V19: pasado el mes de emisión la factura ya se declaró; se corrige con una nota de crédito.
+            if (! $invoice->isWithinCancellationPeriod()) {
+                throw new InvoiceException(
+                    'Solo se anula una factura emitida en el mes en curso. Corresponde una nota de crédito.',
+                    422,
+                    'INVOICE_CANCELLATION_PERIOD_CLOSED'
+                );
+            }
+
             if ($invoice->payments()->registered()->exists()) {
                 throw new InvoiceException(
                     'La factura tiene pagos registrados: anúlelos antes de anular la factura.',

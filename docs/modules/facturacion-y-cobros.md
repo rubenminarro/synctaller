@@ -31,12 +31,12 @@ Todos **COMPLETADOS** según el [criterio del índice](README.md#criterio). Hist
 | Campo | Detalle |
 |---|---|
 | Objetivo | Emitir facturas con timbrado |
-| Implementado | Timbrados, numeración, IVA con precios incluidos, contado o crédito, anulación, PDF sin valor fiscal, notas de crédito registradas y datos de contacto del cliente con aviso de los que faltan (V10) |
+| Implementado | Timbrados, numeración, IVA con precios incluidos, contado o crédito, anulación solo en el mes de emisión (V19), PDF sin valor fiscal, notas de crédito registradas y datos de contacto del cliente con aviso de los que faltan (V10) |
 | Pendiente | SIFEN y emisión de notas de crédito: fuera de alcance |
 | Reglas | `reglas-de-negocio.md` 6.10 y 6.28 |
 | Depende de | Cierre económico, clientes |
-| Tests | `InvoiceDraft` 7, `InvoiceIssue` 6, `CreditNote` 6, `WorkOrderSaleBreakdown` 1 |
-| Observaciones | La anulación vigente sigue igual hasta implementar V19, ya decidida (ver [aseguradoras](aseguradoras.md)) |
+| Tests | `InvoiceDraft` 7, `InvoiceIssue` 8, `CreditNote` 6, `WorkOrderSaleBreakdown` 1 |
+| Observaciones | Pasado el mes de emisión, una factura se corrige con una nota de crédito registrada (historial 2.88) |
 
 ## Pagos (FASE 16)
 

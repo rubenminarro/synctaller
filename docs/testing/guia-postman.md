@@ -2152,6 +2152,11 @@ Esperado: `200`, `status.value` `cancelled`, `number` `"001-001-0000002"` (se co
 | Sin motivo | `{}` | 422 | `VALIDATION_ERROR` (`errors.reason`) |
 | Anular otra vez | `{ "reason": "x" }` | 422 | `INVOICE_NOT_CANCELLABLE` |
 | Anular un borrador | sobre un borrador | 422 | `INVOICE_NOT_CANCELLABLE` |
+| Anular una factura emitida en un mes anterior (V19) | `{ "reason": "x" }` | 422 | `INVOICE_CANCELLATION_PERIOD_CLOSED` (corresponde una nota de crédito, 16.5.1) |
+
+El detalle (`GET {{base_url}}/invoices/{{invoice_id}}`) trae `is_cancellable`: `true` si está emitida y es del mes en curso
+(los pagos, notas de crédito y retenciones vigentes bloquean aparte, con sus errores); `false` en borrador, anulada o
+emitida en un mes anterior.
 
 Después de anular:
 1. `GET {{base_url}}/work-orders/{{work_order6_id}}` → `data.invoice` `null`.

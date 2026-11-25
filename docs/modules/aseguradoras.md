@@ -37,7 +37,6 @@ Orden y decisiones en el [historial](../decisions/historial.md), sección 2.83 (
 
 | Pendiente | Qué lo destraba |
 |---|---|
-| Anulación solo en el mes de emisión (V19) | Nada: decisión tomada |
 | Encender M10 | Implementar V16 (deducible facturado, como máximo lo cubierto); V21 ya se cumplió |
 | Avisos a la aseguradora | Decisión comercial (V7, cerrada por ahora como "sin recordatorios") |
 
