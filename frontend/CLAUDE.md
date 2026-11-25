@@ -7,7 +7,6 @@ Reglas para trabajar en `frontend/`. Las generales del monorepo (metodología, G
 |---|---|
 | [`docs/reglas-de-negocio.md`](../docs/reglas-de-negocio.md) | **Reglas de negocio detalladas** con sus `error_code` (numeración 6.N) |
 | [`backend/CLAUDE.md`](../backend/CLAUDE.md) | Convenciones de la API, contrato de respuesta y roles |
-| [`docs/testing/guia-postman.md`](../docs/testing/guia-postman.md) | Requests, bodies y respuestas esperadas de cada endpoint |
 | [`docs/decisions/historial.md`](../docs/decisions/historial.md) | Decisiones del frontend (parte 3) y del backend |
 
 Si una regla de este archivo contradice al código (del frontend o del backend), **el código manda**: avisar de la

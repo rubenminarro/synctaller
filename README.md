@@ -178,8 +178,7 @@ avisos a clientes en cada estado.
   conflictos) y nunca un `500`.
 * Precios internos (presupuesto, OT, cierre) **sin IVA**; facturas y compras **con IVA incluido**, en guaraníes enteros.
 
-Contrato y reglas: `backend/CLAUDE.md` y [`docs/reglas-de-negocio.md`](docs/reglas-de-negocio.md). Pruebas manuales con
-Postman: [`docs/testing/guia-postman.md`](docs/testing/guia-postman.md).
+Contrato y reglas: `backend/CLAUDE.md` y [`docs/reglas-de-negocio.md`](docs/reglas-de-negocio.md).
 
 ## Tests
 

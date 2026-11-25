@@ -61,7 +61,6 @@ Lo que no se pudo comprobar en esta auditoría.
 
 | Tema | Por qué |
 |---|---|
-| Guía de Postman completa | No se ejecutó. Faltan comprobar sus cadenas de requests contra la API actual |
 | Envío real de emails | En desarrollo el mailer es `log`; solo está probado con `Mail::fake()` |
 | Scheduler y cola en un proceso real | Los recordatorios están probados por comando y por test, no con un `schedule:run` sostenido |
 | Instalación desde cero | Esta auditoría no repitió el procedimiento en un equipo limpio |
