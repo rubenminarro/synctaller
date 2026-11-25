@@ -93,6 +93,8 @@ class InvoiceService
                 'customer_name' => $client->display_name,
                 'customer_tax_id' => $client->document_number,
                 'customer_address' => $client->address,
+                'customer_phone' => $client->phone,
+                'customer_email' => $client->email,
                 'condition' => $insurer ? InvoiceCondition::CREDIT : InvoiceCondition::CASH,
                 'due_date' => $insurer ? now()->addDays($insurer->payment_term_days ?? 30)->toDateString() : null,
                 'created_by' => $user->id,
@@ -166,6 +168,9 @@ class InvoiceService
                 'status' => InvoiceStatus::DRAFT,
                 'customer_name' => $client->display_name,
                 'customer_tax_id' => $client->document_number,
+                'customer_address' => $client->address,
+                'customer_phone' => $client->phone,
+                'customer_email' => $client->email,
                 'condition' => InvoiceCondition::CASH,
                 'created_by' => $user->id,
             ]);

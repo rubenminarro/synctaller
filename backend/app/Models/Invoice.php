@@ -41,6 +41,8 @@ class Invoice extends Model
         'customer_name',
         'customer_tax_id',
         'customer_address',
+        'customer_phone',
+        'customer_email',
         'condition',
         'due_date',
         'total_exempt',
@@ -149,6 +151,21 @@ class Invoice extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class)->orderBy('id');
+    }
+
+    /**
+     * Datos de contacto del cliente que la factura no tiene (V10): no bloquean la
+     * emisión, la API los informa para que el frontend avise. El RUC o CI no entra:
+     * su falta bloquea la emisión (INVOICE_CUSTOMER_TAX_ID_REQUIRED).
+     *
+     * @return list<string>
+     */
+    public function missingCustomerData(): array
+    {
+        return array_values(array_filter(
+            ['address', 'phone', 'email'],
+            fn (string $field) => blank($this->{'customer_'.$field})
+        ));
     }
 
     /**

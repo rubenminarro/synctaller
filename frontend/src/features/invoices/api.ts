@@ -23,6 +23,14 @@ export interface InvoiceItem {
   total: string
 }
 
+export type CustomerContactField = 'address' | 'phone' | 'email'
+
+export const CUSTOMER_CONTACT_FIELDS: Record<CustomerContactField, string> = {
+  address: 'dirección',
+  phone: 'teléfono',
+  email: 'correo',
+}
+
 /** `InvoiceResource` (listado). Importes en guaraníes, con IVA incluido. */
 export interface InvoiceSummary {
   id: number
@@ -53,7 +61,18 @@ export interface Invoice {
   work_order_code?: string
   client_id: number
   stamp: { id: number | null; stamp_number: string | null; valid_until: string | null }
-  customer: { name: string; tax_id: string | null; address: string | null }
+  /**
+   * Datos del cliente copiados al crear el borrador. `missing`: los de contacto que faltan (V10); no bloquean la
+   * emisión, solo se avisan. El RUC o CI no entra: su falta bloquea la emisión.
+   */
+  customer: {
+    name: string
+    tax_id: string | null
+    address: string | null
+    phone: string | null
+    email: string | null
+    missing: CustomerContactField[]
+  }
   condition: { value: InvoiceCondition; label: string }
   issue_date: string | null
   due_date: string | null
@@ -101,6 +120,8 @@ export interface InvoiceInput {
   customer_name: string
   customer_tax_id: string | null
   customer_address: string | null
+  customer_phone: string | null
+  customer_email: string | null
   condition: InvoiceCondition
   /** Solo a crédito; al contado el backend la vacía. */
   due_date: string | null

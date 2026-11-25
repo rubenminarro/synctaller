@@ -249,6 +249,14 @@ Cada cambio de regla actualiza este documento en la misma rama.
   activo y vigente con `lockForUpdate` (`001-001-0000001`); números no se reutilizan. Emitida es inmutable
   (`INVOICE_NOT_EDITABLE`). Con pagos vigentes no se anula (`INVOICE_HAS_PAYMENTS`), ni con notas de crédito
   vigentes (`INVOICE_HAS_CREDIT_NOTES`, 6.28), ni con retenciones vigentes (`INVOICE_HAS_WITHHOLDINGS`, 6.33).
+* **Datos del cliente (V10, 2026-11-24):** al crear el borrador, los dos flujos (OT particular y reparto, 6.29) copian
+  del cliente nombre, RUC/CI, dirección, teléfono y correo (`customer_name`, `customer_tax_id`, `customer_address`,
+  `customer_phone`, `customer_email`); en borrador se editan por `PATCH invoices/{id}` (teléfono y correo con el formato
+  del alta de clientes). La factura particular no copiaba la dirección hasta V10. Dirección, teléfono y correo **no
+  bloquean** la emisión (decisión del usuario): el detalle trae `customer.missing` con los que faltan
+  (`address|phone|email`) y el frontend avisa en el borrador. El RUC/CI sigue bloqueando
+  (`INVOICE_CUSTOMER_TAX_ID_REQUIRED`). Las facturas anteriores a V10 quedan sin teléfono ni correo (no se completan).
+  El PDF los muestra cuando están.
 * La OT de un siniestro que requiere reparto no se factura por `POST work-orders/{id}/invoice`
   (`WORK_ORDER_REQUIRES_ALLOCATION_INVOICING`, 422; 6.27): se factura por responsable desde su reparto (6.29).
 * Fuera de alcance hoy: SIFEN y la emisión de notas de crédito (las emitidas fuera se registran, 6.28). El PDF de la

@@ -37,7 +37,6 @@ Orden y decisiones en el [historial](../decisions/historial.md), sección 2.83 (
 
 | Pendiente | Qué lo destraba |
 |---|---|
-| Datos del cliente en la factura (V10) | Nada: sin bloqueo, con aviso |
 | Ajustes V18, V20 y V15 | Nada: timbrado obligatorio en la nota de crédito, tipos de documento nuevos, valor inicial del IVA del deducible |
 | Anulación solo en el mes de emisión (V19) | Nada: decisión tomada |
 | Encender M10 | Implementar V16 (deducible facturado, como máximo lo cubierto); V21 ya se cumplió |

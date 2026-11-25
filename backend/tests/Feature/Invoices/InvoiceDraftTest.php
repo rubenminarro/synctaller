@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Invoices;
 
+use App\Models\Reception;
+
 class InvoiceDraftTest extends InvoiceTestCase
 {
     public function test_draft_is_generated_from_what_was_actually_used(): void
@@ -113,6 +115,46 @@ class InvoiceDraftTest extends InvoiceTestCase
         $this->patchJson($url, ['condition' => 'otro', 'customer_tax_id' => 'RUC 800!'])
             ->assertStatus(422)
             ->assertJsonValidationErrors(['condition', 'customer_tax_id']);
+    }
+
+    public function test_draft_copies_customer_contact_and_reports_what_is_missing(): void
+    {
+        $this->actingAsAdmin();
+
+        // V10: el borrador copia dirección, teléfono y correo del cliente.
+        $workOrder = $this->completedWorkOrder();
+        $client = Reception::findOrFail($workOrder['reception_id'])->client;
+        $client->update(['address' => 'Mcal. López 456']);
+
+        $invoice = $this->generateInvoice($workOrder);
+        $url = "/api/invoices/{$invoice['id']}";
+
+        $this->assertSame('Mcal. López 456', $invoice['customer']['address']);
+        $this->assertSame($client->phone, $invoice['customer']['phone']);
+        $this->assertSame($client->email, $invoice['customer']['email']);
+        $this->assertSame([], $invoice['customer']['missing']);
+
+        // Editables en borrador; los vacíos se informan como faltantes.
+        $this->patchJson($url, [
+            'customer_address' => null,
+            'customer_phone' => '+595981123456',
+            'customer_email' => null,
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.customer.phone', '+595981123456')
+            ->assertJsonPath('data.customer.missing', ['address', 'email']);
+
+        $this->patchJson($url, ['customer_phone' => '12-34', 'customer_email' => 'NO-ES-CORREO'])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['customer_phone', 'customer_email']);
+
+        // No bloquean la emisión: solo el RUC o CI.
+        $this->createStamp()->assertCreated();
+        $this->patchJson($url, ['customer_tax_id' => '80012345-6'])->assertOk();
+        $this->postJson("{$url}/issue")
+            ->assertOk()
+            ->assertJsonPath('data.status.value', 'issued')
+            ->assertJsonPath('data.customer.missing', ['address', 'email']);
     }
 
     public function test_work_order_must_be_completed_and_not_already_invoiced(): void

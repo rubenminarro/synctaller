@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Claims;
 
+use App\Models\Client;
 use App\Models\Insurer;
 use App\Models\InvoiceItem;
 use App\Models\InvoiceStamp;
@@ -72,6 +73,13 @@ class AllocationInvoiceTest extends ClaimTestCase
             ->assertJsonPath('data.condition.value', 'cash')
             ->assertJsonPath('data.totals.total', '1067000.00')
             ->json('data');
+
+        // V10: las dos copian el teléfono y el correo de su cliente.
+        foreach ([[$insurer, $insurerClientId], [$owner, $ownerClientId]] as [$draft, $clientId]) {
+            $client = Client::findOrFail($clientId);
+            $this->assertSame($client->phone, $draft['customer']['phone']);
+            $this->assertSame($client->email, $draft['customer']['email']);
+        }
 
         $this->invoice($workOrder, $allocation, $ownerClientId)->assertStatus(409)->assertJsonPath('error_code', 'WORK_ORDER_ALREADY_INVOICED');
         $other = Reception::findOrFail($this->openReception()->id)->client_id;
