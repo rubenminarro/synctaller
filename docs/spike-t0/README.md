@@ -9,9 +9,12 @@ del producto: no se copia tal cual a T2.** Incluye marcas de tiempo y variantes 
 | `nginx.conf`, `up.sh` | Nginx y `php-cgi` propios por puerto, con OPcache, sin tocar Laragon. La ruta es un ejemplo |
 | `measure.php` | Cliente: intercala las variantes al azar en cada ciclo |
 | `analyze.php` | Resumen: p50, p95, diferencia pareada y etapas |
-| `resultado-limpio.txt` | Salida de la corrida que usa el informe |
+| `resultado-limpio.txt` | Salida de la corrida que usa el informe en la sección 8 (4.2.1, un taller) |
+| `resultado-4.2.3.txt` | Salida de la repetición con 4.2.3 y diez talleres (sección 9) |
 
-Para repetirla: dos copias de trabajo (`main` y la rama con el diff), una base por copia y la central, un token del
-administrador en `token-base.txt` y `token-spike.txt`, y `php measure.php <carpeta> 300`.
+Para repetirla: dos copias de trabajo (`main` y la rama con el diff), una base para `main`, diez para el spike (una por
+taller, con dominios `t1.localhost` a `t10.localhost` en la central), un token del administrador en `token-base.txt` y
+`token-spike.txt`, y `php measure.php <carpeta> 300`. Clonar las bases después de crear el token sirve el mismo token en
+todas. Desde el paso 1 de T2 el paquete y `config/multitenancy.php` ya están en `main`: el diff hay que adaptarlo.
 
 No medir dos variantes que compartan taller y cache si una de ellas borra la cache: una contamina a la otra.

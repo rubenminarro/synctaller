@@ -3,6 +3,47 @@
 use Illuminate\Support\Str;
 use Pdo\Mysql;
 
+/*
+ * Conexiones de la línea T (historial 2.90): `central` (registro de talleres) y `tenant` (plantilla de la base de cada
+ * taller; el paquete de multitenancy le fija la base al activar un taller). Usan el motor de DB_CONNECTION: MySQL en
+ * desarrollo y producción, SQLite en los tests. La conexión persistente va solo en la central (TD9): en las bases de
+ * taller nunca, porque una conexión reutilizada podría quedar apuntando a otro taller.
+ */
+$multitenancyConnection = function (?string $database, bool $persistent): array {
+    if (env('DB_CONNECTION', 'mysql') === 'sqlite') {
+        return [
+            'driver' => 'sqlite',
+            'database' => $database,
+            'prefix' => '',
+            'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
+            'busy_timeout' => null,
+            'journal_mode' => env('DB_SQLITE_JOURNAL_MODE'),
+            'synchronous' => env('DB_SQLITE_SYNCHRONOUS'),
+            'transaction_mode' => 'DEFERRED',
+        ];
+    }
+
+    return [
+        'driver' => 'mysql',
+        'host' => env('DB_HOST', '127.0.0.1'),
+        'port' => env('DB_PORT', '3306'),
+        'database' => $database,
+        'username' => env('DB_USERNAME', 'root'),
+        'password' => env('DB_PASSWORD', ''),
+        'unix_socket' => env('DB_SOCKET', ''),
+        'charset' => env('DB_CHARSET', 'utf8mb4'),
+        'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
+        'prefix' => '',
+        'prefix_indexes' => true,
+        'strict' => true,
+        'engine' => null,
+        'options' => extension_loaded('pdo_mysql') ? array_filter([
+            (PHP_VERSION_ID >= 80500 ? Mysql::ATTR_SSL_CA : PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
+            PDO::ATTR_PERSISTENT => $persistent ?: null,
+        ]) : [],
+    ];
+};
+
 return [
 
     /*
@@ -68,6 +109,12 @@ return [
                 (PHP_VERSION_ID >= 80500 ? Mysql::ATTR_SSL_CA : PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
         ],
+
+        // Base central (historial 2.90). Sus migraciones están en database/migrations/central.
+        'central' => $multitenancyConnection(env('DB_CENTRAL_DATABASE', 'synctaller_central'), persistent: true),
+
+        // Plantilla de la base de cada taller: sin base hasta que se activa uno (fallo cerrado, TD10).
+        'tenant' => $multitenancyConnection(null, persistent: false),
 
         'mariadb' => [
             'driver' => 'mariadb',

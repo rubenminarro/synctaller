@@ -1,5 +1,6 @@
 <?php
 // Paso 0: intercala las variantes al azar en cada ciclo; así el ruido las afecta a todas por igual.
+// Las variantes del spike rotan entre los talleres t1.localhost a t10.localhost (V9, sección 9 del informe).
 [$script, $dir, $cycles] = [$argv[0], $argv[1], (int) $argv[2]];
 
 $tokens = ['base' => trim(file_get_contents("$dir/token-base.txt")), 'spike' => trim(file_get_contents("$dir/token-spike.txt"))];
@@ -12,7 +13,7 @@ $endpoints = [
     'branding' => ['/api/branding', false],
 ];
 
-function call(int $port, string $path, ?string $token, array &$headers): array
+function call(int $port, string $path, ?string $token, array &$headers, string $host = "localhost"): array
 {
     $headers = [];
     $ch = curl_init("http://127.0.0.1:$port$path");
@@ -21,7 +22,7 @@ function call(int $port, string $path, ?string $token, array &$headers): array
         CURLOPT_FORBID_REUSE => true,
         CURLOPT_FRESH_CONNECT => true,
         CURLOPT_TIMEOUT => 30,
-        CURLOPT_HTTPHEADER => array_filter(['Host: localhost', 'Accept: application/json', $token ? "Authorization: Bearer $token" : null]),
+        CURLOPT_HTTPHEADER => array_filter(["Host: $host", 'Accept: application/json', $token ? "Authorization: Bearer $token" : null]),
         CURLOPT_HEADERFUNCTION => function ($c, $line) use (&$headers) {
             if (stripos($line, 'Server-Timing:') === 0) {
                 $headers['timing'] = trim(substr($line, 14));
@@ -47,10 +48,11 @@ for ($cycle = -10; $cycle < $cycles; $cycle++) {
         foreach ($order as $variant) {
             [$port, $tokenKey] = $variants[$variant];
             $headers = [];
-            [$status, $ms] = call($port, $path, $auth ? $tokens[$tokenKey] : null, $headers);
+            $host = $tokenKey === 'spike' ? 't' . ((($cycle % 10) + 10) % 10 + 1) . '.localhost' : 'localhost';
+            [$status, $ms] = call($port, $path, $auth ? $tokens[$tokenKey] : null, $headers, $host);
 
             if ($cycle >= 0) {
-                fwrite($out, json_encode(compact('cycle', 'name', 'variant', 'status', 'ms') + ['timing' => $headers['timing'] ?? null]) . "\n");
+                fwrite($out, json_encode(compact('cycle', 'name', 'variant', 'status', 'ms', 'host') + ['timing' => $headers['timing'] ?? null]) . "\n");
             }
         }
     }
