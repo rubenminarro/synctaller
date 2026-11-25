@@ -17,6 +17,8 @@
                 <div><span class="strong">Nombre o razón social:</span> {{ $invoice->customer_name }}</div>
                 <div><span class="strong">RUC / CI:</span> {{ $invoice->customer_tax_id ?? '—' }}</div>
                 @if ($invoice->customer_address)<div><span class="strong">Dirección:</span> {{ $invoice->customer_address }}</div>@endif
+                @if ($invoice->customer_phone)<div><span class="strong">Teléfono:</span> {{ $invoice->customer_phone }}</div>@endif
+                @if ($invoice->customer_email)<div><span class="strong">Correo:</span> {{ $invoice->customer_email }}</div>@endif
             </td>
             <td style="width: 40%;">
                 <div><span class="strong">Condición:</span> {{ $invoice->condition->label() }}</div>

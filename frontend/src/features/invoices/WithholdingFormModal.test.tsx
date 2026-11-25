@@ -13,7 +13,7 @@ function invoice(suggestion: string | null): Invoice {
     work_order_id: 1,
     client_id: 1,
     stamp: { id: 1, stamp_number: '12345678', valid_until: null },
-    customer: { name: 'Seguros del Sur S.A.', tax_id: '80012345-6', address: null },
+    customer: { name: 'Seguros del Sur S.A.', tax_id: '80012345-6', address: null, phone: null, email: null, missing: ['address', 'phone', 'email'] },
     condition: { value: 'credit', label: 'Crédito' },
     issue_date: '2026-11-24',
     due_date: '2026-12-24',

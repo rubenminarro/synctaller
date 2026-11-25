@@ -659,6 +659,24 @@ vigentes en [reglas de negocio](../reglas-de-negocio.md), 6.18.
 | Forma de pago | Se muestra la **condición de la factura** (siempre crédito: solo esas tienen recibo), además del medio de pago que ya estaba |
 | Siniestro | Número (con el código `SIN-`), póliza y aseguradora cuando la factura sale de un reparto (M9), sea la de la aseguradora o la del dueño. La factura en PDF sigue mostrándolo solo en la de la aseguradora |
 | Pruebas | `AllocationInvoiceTest` (recibo de la factura a la aseguradora con el siniestro) y `DocumentPdfTest` (factura particular, sin siniestro), sobre el HTML que recibe la vista |
+
+### 2.86 Datos del cliente en la factura (V10, 2026-11-24)
+
+Tercera entrega del orden de la sección 2.83. La contadora respondió (V10) que toda factura consigna dirección, teléfono
+y correo del cliente. Reglas vigentes en [reglas de negocio](../reglas-de-negocio.md), 6.10.
+
+| Tema | Decisión |
+|---|---|
+| Bloqueo | Decisión del usuario (2.83): dirección, teléfono y correo **no bloquean** la emisión. Solo el RUC/CI sigue bloqueando |
+| Copia | El borrador copia del cliente dirección, teléfono y correo; editables en borrador como el resto de la cabecera |
+| Factura particular | No copiaba la dirección (solo la del reparto lo hacía). Decisión del usuario: se corrige en esta entrega |
+| Facturas anteriores | Decisión del usuario: quedan sin teléfono ni correo. Una factura emitida conserva lo que se imprimió; no se completan con los datos actuales del cliente |
+| Contrato | Solo se agregan claves: `customer.phone`, `customer.email` y `customer.missing` (`address`, `phone`, `email`) en el detalle. El listado no cambia |
+| Validación | Teléfono y correo con el formato del alta de clientes; el correo hasta 255 caracteres (el tamaño de la columna) |
+| Migración | `000073` (`customer_phone` y `customer_email` en `invoices`), probada en MySQL con su `down` |
+| Frontend | Teléfono y correo en el detalle y en "Editar datos"; aviso en el borrador con los datos que faltan |
+| Pruebas | `InvoiceDraftTest` (copia, edición, validación, `missing` y emisión sin bloqueo), `AllocationInvoiceTest` (copia en el reparto), `DocumentPdfTest` (PDF) y `EditInvoiceModal.test.tsx` |
+| Pendiente | El dígito verificador del RUC (la otra parte de V10) sigue esperando la documentación de la SET |
 ---
 
 ## 3. Frontend
@@ -714,3 +732,11 @@ se retiró; queda lo que explica el código actual.
 | Ubicación | Tarjeta "Retenciones" en el detalle de la factura, debajo de las notas de crédito, y la fila "Retenido" en el cobro y en el resumen del siniestro |
 | Formulario | Arranca en IVA con la sugerencia del backend como importe; el texto de ayuda no repite el porcentaje (es configuración del backend) |
 | Reporte de ventas | Tarjeta "Retenciones" aparte de lo cobrado, solo si hubo retenciones en el período |
+
+### Datos del cliente en la factura (V10, 2026-11-24)
+
+| Tema | Decisión |
+|---|---|
+| Aviso | Alerta amarilla arriba del detalle, solo en el borrador, con los datos que trae `customer.missing`; no bloquea el botón "Emitir" (la regla la decide el backend, 2.86) |
+| Edición | Teléfono y correo en el modal "Editar datos", junto a la dirección; vacíos se mandan como `null` |
+| Detalle | Filas "Teléfono" y "Correo" en la tarjeta de la factura, con "—" cuando faltan (también en las facturas anteriores a V10) |

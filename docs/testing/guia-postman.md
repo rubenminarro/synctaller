@@ -2037,6 +2037,8 @@ Esperado: `201` → `invoice_id`.
 |---|---|
 | `status.value` / `number` | `draft` / `null` |
 | `customer.name` / `customer.tax_id` | `"Lucia Benitez"` / `"QA-1001"` (copiados del cliente) |
+| `customer.address` / `customer.phone` / `customer.email` | Copiados del cliente (V10); `null` si el cliente no los tiene |
+| `customer.missing` | Los datos de contacto que faltan, por ejemplo `["address"]`; no bloquean la emisión |
 | `condition.value` | `cash` |
 | Línea del servicio | `base_unit_price` `"120000.00"`, `tax_rate.value` `10`, `unit_price` `"132000.00"`, `total` `"132000.00"` |
 | Línea de mano de obra | `base_unit_price` `"200000.00"`, `unit_price` `"220000.00"`, `total` `"220000.00"` |
@@ -2101,6 +2103,10 @@ Esperado: `200`, `customer` actualizado.
 | Volver a contado | `{ "condition": "cash" }` | 200 | `due_date` `null` (se descarta) |
 | Condición inválida | `{ "condition": "otro" }` | 422 | `VALIDATION_ERROR` |
 | RUC con caracteres inválidos | `{ "customer_tax_id": "RUC 800!" }` | 422 | `VALIDATION_ERROR` |
+| Teléfono y correo (V10) | `{ "customer_phone": "+595981123456", "customer_email": null }` | 200 | `customer.phone` actualizado; `customer.missing` incluye `email` |
+| Teléfono o correo inválidos | `{ "customer_phone": "12-34", "customer_email": "NO-ES-CORREO" }` | 422 | `VALIDATION_ERROR` (`errors.customer_phone`, `errors.customer_email`) |
+
+> Dirección, teléfono y correo faltantes **no** impiden emitir (V10): solo el RUC/CI.
 
 ### 15.5 Emitir
 

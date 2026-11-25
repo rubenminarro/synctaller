@@ -87,7 +87,16 @@ class DocumentPdfTest extends InvoiceTestCase
 
         $this->createStamp()->assertCreated();
         $issued = $this->postJson("/api/invoices/{$draft['id']}/issue")->assertOk()->json('data');
+
+        // V10: la factura muestra el teléfono y el correo del cliente.
+        $data = null;
+        View::composer('pdf.invoice', function ($view) use (&$data) {
+            $data = $view->getData();
+        });
         $this->assertPdf($this->get("/api/invoices/{$issued['id']}/pdf"), "factura-{$issued['number']}.pdf");
+        $html = preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags(str_replace('<', ' <', view('pdf.invoice', $data)->render()))));
+        $this->assertStringContainsString("Teléfono: {$issued['customer']['phone']}", $html);
+        $this->assertStringContainsString("Correo: {$issued['customer']['email']}", $html);
 
         $this->postJson("/api/invoices/{$issued['id']}/cancel", ['reason' => 'Error de carga'])->assertOk();
         $this->assertPdf($this->get("/api/invoices/{$issued['id']}/pdf"), "factura-{$issued['number']}.pdf");

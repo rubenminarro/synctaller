@@ -11,7 +11,7 @@ import { PageBody, PageHeader } from '@/components/ui/Page'
 import { ErrorState, LoadingState } from '@/components/ui/States'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { useAuth } from '@/features/auth/useAuth'
-import { INVOICE_PAYMENT_STATUS, INVOICE_STATUS, invoicesApi, type Invoice, type InvoiceItem } from '@/features/invoices/api'
+import { CUSTOMER_CONTACT_FIELDS, INVOICE_PAYMENT_STATUS, INVOICE_STATUS, invoicesApi, type Invoice, type InvoiceItem } from '@/features/invoices/api'
 import { CreditNotesCard } from '@/features/invoices/CreditNotes'
 import { WithholdingsCard } from '@/features/invoices/Withholdings'
 import { EditInvoiceModal, InvoiceItemModal, IssueInvoiceModal } from '@/features/invoices/InvoiceModals'
@@ -110,6 +110,7 @@ function InvoiceDetail({ invoice }: { invoice: Invoice }) {
         }
       />
       <PageBody>
+        {draft && <MissingCustomerDataAlert invoice={invoice} />}
         <div className="row row-cards">
           <div className="col-12 col-lg-4">
             <InvoiceDataCard invoice={invoice} />
@@ -199,6 +200,22 @@ function InvoiceDetail({ invoice }: { invoice: Invoice }) {
   )
 }
 
+/** V10: la factura debe llevar todos los datos del cliente, pero los de contacto no bloquean la emisión. */
+function MissingCustomerDataAlert({ invoice }: { invoice: Invoice }) {
+  const missing = invoice.customer.missing
+  if (missing.length === 0) return null
+
+  const fields = missing.map((field) => CUSTOMER_CONTACT_FIELDS[field])
+  const list = fields.length > 1 ? `${fields.slice(0, -1).join(', ')} y ${fields[fields.length - 1]}` : fields[0]
+
+  return (
+    <div className="alert alert-warning" role="alert">
+      Faltan datos del cliente en la factura: <strong>{list}</strong>. Se puede emitir igual, pero conviene completarlos
+      con «Editar datos».
+    </div>
+  )
+}
+
 function InvoiceDataCard({ invoice }: { invoice: Invoice }) {
   const { can } = useAuth()
 
@@ -241,6 +258,10 @@ function InvoiceDataCard({ invoice }: { invoice: Invoice }) {
           <dd className="col-7">{invoice.customer.tax_id ?? <span className="text-warning">Sin informar</span>}</dd>
           <dt className="col-5">Dirección</dt>
           <dd className="col-7">{invoice.customer.address ?? '—'}</dd>
+          <dt className="col-5">Teléfono</dt>
+          <dd className="col-7">{invoice.customer.phone ?? '—'}</dd>
+          <dt className="col-5">Correo</dt>
+          <dd className="col-7 text-break">{invoice.customer.email ?? '—'}</dd>
           <dt className="col-5">Orden de trabajo</dt>
           <dd className="col-7">
             {can('work-orders.show') ? (

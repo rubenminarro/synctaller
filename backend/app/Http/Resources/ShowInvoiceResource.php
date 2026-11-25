@@ -30,6 +30,10 @@ class ShowInvoiceResource extends JsonResource
                 'name' => $this->customer_name,
                 'tax_id' => $this->customer_tax_id,
                 'address' => $this->customer_address,
+                'phone' => $this->customer_phone,
+                'email' => $this->customer_email,
+                // Datos que faltan (V10): address, phone o email. No bloquean la emisión.
+                'missing' => $this->missingCustomerData(),
             ],
             'condition' => [
                 'value' => $this->condition?->value,

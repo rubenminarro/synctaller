@@ -38,6 +38,19 @@ class UpdateInvoiceRequest extends FormRequest
                 'max:255',
                 'regex:/^[\pL\pN\s.,#\-\/°º&()\']+$/u',
             ],
+            // V10: teléfono y correo del cliente, con el formato del alta de clientes.
+            'customer_phone' => [
+                'sometimes',
+                'nullable',
+                'regex:/^\+?[1-9]\d{7,14}$/',
+            ],
+            'customer_email' => [
+                'sometimes',
+                'nullable',
+                config('validation.email_dns') ? 'email:rfc,dns' : 'email:rfc',
+                'max:255',
+                'lowercase',
+            ],
             'condition' => [
                 'sometimes',
                 Rule::enum(InvoiceCondition::class),
@@ -68,6 +81,14 @@ class UpdateInvoiceRequest extends FormRequest
                 'string' => 'La dirección debe ser un texto válido.',
                 'max' => 'La dirección no debe superar los 255 caracteres.',
                 'regex' => 'La dirección contiene caracteres no permitidos.',
+            ],
+            'customer_phone' => [
+                'regex' => 'El teléfono debe tener un formato válido (opcionalmente con un + al inicio, seguido de 8 a 15 dígitos).',
+            ],
+            'customer_email' => [
+                'email' => 'El correo debe tener el formato correcto.',
+                'max' => 'El correo no debe superar los 255 caracteres.',
+                'lowercase' => 'El correo debe estar en minúsculas.',
             ],
             'condition' => [
                 Enum::class => 'La condición debe ser cash (contado) o credit (crédito).',

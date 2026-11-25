@@ -17,6 +17,8 @@ export function EditInvoiceModal({ invoice, onClose }: { invoice: Invoice; onClo
   const [name, setName] = useState(invoice.customer.name)
   const [taxId, setTaxId] = useState(invoice.customer.tax_id ?? '')
   const [address, setAddress] = useState(invoice.customer.address ?? '')
+  const [phone, setPhone] = useState(invoice.customer.phone ?? '')
+  const [email, setEmail] = useState(invoice.customer.email ?? '')
   const [condition, setCondition] = useState<InvoiceCondition>(invoice.condition.value)
   const [dueDate, setDueDate] = useState(invoice.due_date ?? '')
 
@@ -26,6 +28,8 @@ export function EditInvoiceModal({ invoice, onClose }: { invoice: Invoice; onClo
         customer_name: name.trim(),
         customer_tax_id: nullIfEmpty(taxId),
         customer_address: nullIfEmpty(address),
+        customer_phone: nullIfEmpty(phone),
+        customer_email: nullIfEmpty(email),
         condition,
         due_date: condition === 'credit' ? nullIfEmpty(dueDate) : null,
       }),
@@ -67,6 +71,30 @@ export function EditInvoiceModal({ invoice, onClose }: { invoice: Invoice; onClo
         onChange={(event) => setAddress(event.target.value)}
         errors={errors}
       />
+      <div className="row">
+        <div className="col-md-6">
+          <TextField
+            label="Teléfono"
+            name="customer_phone"
+            type="tel"
+            maxLength={16}
+            value={phone}
+            onChange={(event) => setPhone(event.target.value)}
+            errors={errors}
+          />
+        </div>
+        <div className="col-md-6">
+          <TextField
+            label="Correo"
+            name="customer_email"
+            type="email"
+            maxLength={255}
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            errors={errors}
+          />
+        </div>
+      </div>
       <div className="row">
         <div className="col-md-6">
           <SelectField
