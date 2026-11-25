@@ -7,6 +7,7 @@ original y no se renumeran. El detalle por módulo está en [`modules/README.md`
 
 | Fecha | Backend | Frontend | Notas |
 |---|---|---|---|
+| 2026-11-25 | 508 tests en verde, 9007 aserciones (después de la deuda #19, con Laravel y Symfony actualizados); Pint sin pendientes | Sin corrida: el cambio no tocó el frontend (la CI lo omite por rutas) | Deuda #19 (historial 2.92). Corrida de la CI sobre `main` (`11cd48d`), no local |
 | 2026-11-25 | Tests puntuales en verde (131, 2087 aserciones): carpetas `Http`, `Auth`, `Access`, `Tenancy`, `Notifications`, `Documents`, `Invoices` y `Settings`; Pint sin pendientes; `composer audit` sin avisos | Sin corrida: el cambio no tocó el frontend | Deuda #19, actualización de dependencias (historial 2.92). Corrida local, sin la suite completa |
 | 2026-11-25 | 508 tests en verde, 9007 aserciones (antes de la deuda #19); Pint sin pendientes | Vitest en verde (51), ESLint y build | T2, paso 1 y guía de Postman quitada (historial 2.90 y 2.91). Corrida de la CI sobre `main` (`6b0ef8b`), no local |
 | 2026-11-25 | Tests puntuales en verde: `tests/Feature/Tenancy` (10, 20 aserciones, cada test comprobado contra su protección quitada) y las carpetas `Notifications`, `Auth`, `Access`, `Settings` y `Seeders` (78, 902 aserciones); Pint sin pendientes; migración central probada en MySQL (`synctaller_central`) | ESLint (sin cambios en el frontend) | T2, paso 1 (historial 2.90). Corrida local, sin la suite completa. Sin revisión en navegador: la API no cambia |
