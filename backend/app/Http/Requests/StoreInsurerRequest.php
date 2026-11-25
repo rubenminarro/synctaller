@@ -44,7 +44,7 @@ class StoreInsurerRequest extends FormRequest
                 'max:365',
             ],
             // M10: la copian sus siniestros al abrirse.
-            'deductible_billing_mode' => ['nullable', Rule::prohibitedIf(fn () => !config('insurer.deductible_net_mode')), Rule::enum(DeductibleBillingMode::class)],
+            'deductible_billing_mode' => ['nullable', Rule::prohibitedIf(fn () => ! config('insurer.deductible_net_mode')), Rule::enum(DeductibleBillingMode::class)],
             'notes' => [
                 'nullable',
                 'string',
@@ -58,7 +58,7 @@ class StoreInsurerRequest extends FormRequest
     {
         return [
             function (ValidatorInstance $validator) {
-                if (!is_array($this->input('client'))) {
+                if (! is_array($this->input('client'))) {
                     return;
                 }
 

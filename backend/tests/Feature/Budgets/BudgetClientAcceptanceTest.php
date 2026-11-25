@@ -87,7 +87,7 @@ class BudgetClientAcceptanceTest extends WorkOrderPartsTestCase
             ->assertJsonPath('data.client_acceptances.0.kind.value', 'rejection');
 
         $this->postJson("/api/budgets/{$budgetId}/reopen")->assertOk();
-        $this->patchJson("/api/budgets/{$budgetId}/items/" . BudgetClientAcceptance::sole()->budget->items()->sole()->id, [
+        $this->patchJson("/api/budgets/{$budgetId}/items/".BudgetClientAcceptance::sole()->budget->items()->sole()->id, [
             'unit_price' => 80000,
         ])->assertOk();
         $this->postJson("/api/budgets/{$budgetId}/send")->assertOk();

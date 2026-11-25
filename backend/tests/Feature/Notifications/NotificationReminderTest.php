@@ -159,8 +159,8 @@ class NotificationReminderTest extends InvoiceTestCase
     {
         $this->actingAsAdmin();
 
-        $brand = Brand::create(['name' => 'Marca ' . Str::random(6)]);
-        $model = VehicleModel::create(['brand_id' => $brand->id, 'name' => 'Modelo ' . Str::random(6)]);
+        $brand = Brand::create(['name' => 'Marca '.Str::random(6)]);
+        $model = VehicleModel::create(['brand_id' => $brand->id, 'name' => 'Modelo '.Str::random(6)]);
         $client = Client::create(['document_number' => 'QA-6001', 'first_name' => 'Ana', 'last_name' => 'Gomez', 'phone' => '0981123456', 'email' => 'ana@example.com']);
         $vehicle = Vehicle::create([
             'client_id' => $client->id,
@@ -191,10 +191,10 @@ class NotificationReminderTest extends InvoiceTestCase
     public function test_overdue_accounts_payable_notify_cashiers_once_a_day(): void
     {
         $cashier = User::create([
-            'name' => 'cajero_' . Str::random(6),
+            'name' => 'cajero_'.Str::random(6),
             'first_name' => 'Test',
             'last_name' => 'Cajero',
-            'email' => Str::random(10) . '@test.local',
+            'email' => Str::random(10).'@test.local',
             'password' => bcrypt('password'),
         ])->assignRole('cajero');
 

@@ -12,8 +12,9 @@ enum InsurerContactRole: string
     case ADJUSTER_COORDINATION = 'adjuster_coordination';
     case OTHER = 'other';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::CLAIMS => 'Siniestros',
             self::BILLING => 'Facturación',
             self::ADJUSTER_COORDINATION => 'Coordinación de peritos',

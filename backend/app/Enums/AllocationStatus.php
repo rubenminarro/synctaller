@@ -12,8 +12,9 @@ enum AllocationStatus: string
     case CONFIRMED = 'confirmed';
     case SUPERSEDED = 'superseded';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::DRAFT => 'Borrador',
             self::CONFIRMED => 'Confirmado',
             self::SUPERSEDED => 'Sustituido',

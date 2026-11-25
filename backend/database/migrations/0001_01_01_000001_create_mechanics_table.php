@@ -1,9 +1,9 @@
 <?php
 
+use App\Enums\MechanicStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Enums\MechanicStatus;
 
 return new class extends Migration
 {
@@ -18,8 +18,8 @@ return new class extends Migration
             $table->string('employee_code')->unique();
             $table->string('specialty')->nullable();
             $table->date('hire_date')->nullable();
-            $table->decimal('hour_cost',10,2)->default(0);
-            $table->decimal('commission_percentage',5,2)->default(0);
+            $table->decimal('hour_cost', 10, 2)->default(0);
+            $table->decimal('commission_percentage', 5, 2)->default(0);
             $table->string('status')->default(MechanicStatus::ACTIVE->value);
             $table->text('notes')->nullable();
             $table->timestamps();

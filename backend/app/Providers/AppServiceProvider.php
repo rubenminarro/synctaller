@@ -2,10 +2,6 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Queue;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use App\Models\Budget;
 use App\Models\Invoice;
 use App\Models\PurchaseItem;
@@ -16,6 +12,10 @@ use App\Models\WorkOrderAllocation;
 use App\Models\WorkOrderItem;
 use App\Models\WorkOrderPart;
 use App\Services\WorkshopSettingService;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {

@@ -15,7 +15,9 @@ use Tests\Feature\Invoices\InvoiceTestCase;
 class VehicleHistoryTest extends InvoiceTestCase
 {
     private Vehicle $vehicle;
+
     private array $firstWorkOrder;
+
     private array $secondWorkOrder;
 
     /**
@@ -141,7 +143,7 @@ class VehicleHistoryTest extends InvoiceTestCase
         $this->assertSame('paid', $workOrder['invoice']['payment_status']);
         $this->assertSame('255.00', bcsub($workOrder['economics']['sale_total'], '200000', 2));
 
-        $this->assertSame(2, $this->getJson($this->historyUrl() . '?per_page=1')->json('meta.pagination.lastPage'));
+        $this->assertSame(2, $this->getJson($this->historyUrl().'?per_page=1')->json('meta.pagination.lastPage'));
     }
 
     public function test_parts_used(): void
@@ -208,7 +210,7 @@ class VehicleHistoryTest extends InvoiceTestCase
 
         $this->actingAsAdmin();
         $this->getJson('/api/vehicles/999999/history')->assertNotFound()->assertJsonPath('error_code', 'RESOURCE_NOT_FOUND');
-        $this->getJson($this->historyUrl() . '?per_page=500')->assertStatus(422)->assertJsonPath('error_code', 'VALIDATION_ERROR');
+        $this->getJson($this->historyUrl().'?per_page=500')->assertStatus(422)->assertJsonPath('error_code', 'VALIDATION_ERROR');
     }
 
     public function test_vehicle_without_visits(): void

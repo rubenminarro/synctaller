@@ -55,10 +55,10 @@ class SupplierController extends Controller implements HasMiddleware
             200,
             [
                 'pagination' => [
-                    'total'       => $suppliers->total(),
-                    'perPage'     => $suppliers->perPage(),
+                    'total' => $suppliers->total(),
+                    'perPage' => $suppliers->perPage(),
                     'currentPage' => $suppliers->currentPage(),
-                    'lastPage'    => $suppliers->lastPage(),
+                    'lastPage' => $suppliers->lastPage(),
                 ],
             ]
         );

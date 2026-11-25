@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use App\Enums\ClientKind;
-use Illuminate\Database\Seeder;
 use App\Models\Client;
+use Illuminate\Database\Seeder;
 
 /**
  * Clientes de ejemplo, uno dado de baja de los avisos por email. Los emails usan

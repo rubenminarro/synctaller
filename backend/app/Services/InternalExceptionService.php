@@ -26,11 +26,10 @@ class InternalExceptionService
     public function __construct(
         protected OwnerShareService $ownerShare,
         protected ReceptionStatusService $receptionStatusService
-    ) {
-    }
+    ) {}
 
     /**
-     * @param array{type: string, subject_id: int, amount?: string|int|float|null, reason: string} $data
+     * @param  array{type: string, subject_id: int, amount?: string|int|float|null, reason: string}  $data
      */
     public function grant(array $data, User $user): InternalException
     {
@@ -78,7 +77,7 @@ class InternalExceptionService
     {
         $exception = InternalException::whereKey($id)->lockForUpdate()->first();
 
-        if (!$exception
+        if (! $exception
             || $exception->type !== InternalExceptionType::START_WITHOUT_AUTHORIZATION
             || $exception->subject_type !== $budget->getMorphClass()
             || (int) $exception->subject_id !== $budget->id) {
@@ -125,11 +124,11 @@ class InternalExceptionService
     {
         $budget = Budget::whereKey($budgetId)->lockForUpdate()->first();
 
-        if (!$budget) {
+        if (! $budget) {
             $this->invalidSubject('El presupuesto no existe.');
         }
 
-        if (!in_array($budget->status, [BudgetStatus::SENT, BudgetStatus::APPROVED], true)) {
+        if (! in_array($budget->status, [BudgetStatus::SENT, BudgetStatus::APPROVED], true)) {
             $this->invalidSubject('Solo se otorga sobre un presupuesto enviado o aprobado.');
         }
 
@@ -139,13 +138,13 @@ class InternalExceptionService
 
         $this->receptionStatusService->ensureOpen($budget->reception_id);
 
-        if (!$this->ownerShare->hasInsurerItems($budget)) {
+        if (! $this->ownerShare->hasInsurerItems($budget)) {
             $this->invalidSubject('El presupuesto no tiene líneas a cargo de la aseguradora.');
         }
 
         $claim = $this->ownerShare->openClaim($budget->reception_id);
 
-        if (!$claim) {
+        if (! $claim) {
             $this->invalidSubject('La recepción del presupuesto no tiene un siniestro abierto.');
         }
 
@@ -163,7 +162,7 @@ class InternalExceptionService
     {
         $workOrder = WorkOrder::whereKey($workOrderId)->lockForUpdate()->first();
 
-        if (!$workOrder) {
+        if (! $workOrder) {
             $this->invalidSubject('La orden de trabajo no existe.');
         }
 
@@ -171,7 +170,7 @@ class InternalExceptionService
             $this->invalidSubject('La orden de trabajo está cancelada.');
         }
 
-        if (!$this->ownerShare->hasInsurerItems($workOrder->budget) || !$this->ownerShare->openClaim($workOrder->reception_id)) {
+        if (! $this->ownerShare->hasInsurerItems($workOrder->budget) || ! $this->ownerShare->openClaim($workOrder->reception_id)) {
             $this->invalidSubject('La absorción del taller solo se otorga en una OT de un siniestro abierto con líneas a cargo de la aseguradora.');
         }
 

@@ -31,7 +31,7 @@ synctaller/
 | Frontend | React 19, TypeScript, Vite, Tabler UI (Bootstrap 5), React Router, TanStack Query, Axios, ApexCharts |
 | Base de datos | MySQL 8 (utf8mb4); SQLite en archivo para los tests del backend |
 | Tests | PHPUnit 12 (backend), Vitest + Testing Library (frontend) |
-| Calidad | ESLint (frontend). Pint está instalado en el backend, pero el código todavía no sigue su estilo |
+| Calidad | Pint (backend), ESLint (frontend) |
 
 Versiones y dependencias retenidas a propósito: [`docs/project/technology-stack.md`](docs/project/technology-stack.md).
 
@@ -82,10 +82,11 @@ Desde la raíz:
 | `npm run setup` | Instala las dependencias de las dos apps y crea sus `.env` si faltan |
 | `npm run dev` | Levanta la API (`artisan serve` en :8000), la cola (`queue:listen`) y Vite (:5173) |
 | `npm test` | Tests del backend (PHPUnit) y del frontend (Vitest) |
-| `npm run lint` | ESLint del frontend |
+| `npm run lint` | Pint en modo verificación (backend) y ESLint (frontend) |
 | `npm run build` | Comprobación de tipos y build de producción del frontend en `frontend/dist/` |
 
-Cada parte tiene su variante (`dev:api`, `dev:queue`, `dev:web`, `test:backend` y `test:frontend`).
+Cada parte tiene su variante (`dev:api`, `dev:queue`, `dev:web`, `test:backend`, `test:frontend`, `lint:backend` y
+`lint:frontend`). Para corregir el estilo del backend: `cd backend && vendor/bin/pint`.
 Dentro de cada carpeta siguen valiendo sus comandos propios: `php artisan …` y `composer test` en
 `backend/`; `npm run dev|build|lint|test` en `frontend/`.
 
@@ -194,7 +195,8 @@ su carpeta. Más en [`docs/development/testing.md`](docs/development/testing.md)
 ## Flujo de trabajo
 
 * No se trabaja en `main`: una rama por tarea (`feature/…`, `fix/…`, `docs/…`, `test/…`), integrada con merge.
-* Antes de dar un cambio por terminado: `npm test`, `npm run lint` y, si tocó el frontend, `npm run build`.
+* Antes de dar un cambio por terminado: los tests puntuales de lo que se tocó, `npm run lint` y, si tocó el frontend,
+  `npm run build`. La suite completa la corre la CI (ver `CLAUDE.md`, "Tests: baseline y uso diario").
 * Commits en español, explicando el porqué.
 * Cada cambio actualiza la documentación que le corresponde: [`docs/README.md`](docs/README.md), "Qué actualizar en cada cambio".
 

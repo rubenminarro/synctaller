@@ -23,8 +23,7 @@ class WorkOrderPartController extends Controller implements HasMiddleware
 
     public function __construct(
         protected WorkOrderPartService $workOrderPartService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {

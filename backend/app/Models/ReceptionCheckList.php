@@ -10,7 +10,7 @@ class ReceptionCheckList extends Model
 {
     protected $fillable = [
         'reception_id',
-        'status'
+        'status',
     ];
 
     public function reception(): BelongsTo

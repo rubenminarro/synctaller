@@ -35,8 +35,7 @@ class VehicleDeliveryService
         protected ClaimStatusService $claimStatusService,
         protected OwnerShareService $ownerShare,
         protected AllocationBillingService $allocationBilling
-    ) {
-    }
+    ) {}
 
     public function deliver(Reception $reception, array $data, ?UploadedFile $signature, User $user): VehicleDelivery
     {
@@ -86,7 +85,7 @@ class VehicleDeliveryService
                     'vehicle_id' => $reception->vehicle_id,
                     'client_id' => $reception->client_id,
                     'delivery_sequence' => $sequence,
-                    'delivery_number' => 'ENT-' . str_pad((string) $sequence, 6, '0', STR_PAD_LEFT),
+                    'delivery_number' => 'ENT-'.str_pad((string) $sequence, 6, '0', STR_PAD_LEFT),
                     'status' => VehicleDeliveryStatus::DELIVERED,
                     'delivered_at' => now(),
                     'delivered_by' => $user->id,
@@ -185,7 +184,7 @@ class VehicleDeliveryService
 
         if ($open->isNotEmpty()) {
             throw new VehicleDeliveryException(
-                'La recepción tiene órdenes de trabajo abiertas: ' . $open->pluck('code')->implode(', ') . '.',
+                'La recepción tiene órdenes de trabajo abiertas: '.$open->pluck('code')->implode(', ').'.',
                 422,
                 'DELIVERY_WORK_ORDERS_OPEN'
             );
@@ -218,6 +217,7 @@ class VehicleDeliveryService
         foreach ($completed as $workOrder) {
             if ($this->ownerShare->requiresAllocation($workOrder)) {
                 $this->ensureAllocationInvoiced($workOrder);
+
                 continue;
             }
 
@@ -247,7 +247,7 @@ class VehicleDeliveryService
      */
     private function ensureAllocationInvoiced(WorkOrder $workOrder): void
     {
-        if (!$this->allocationBilling->isFullyInvoiced($workOrder->confirmedAllocation()->first())) {
+        if (! $this->allocationBilling->isFullyInvoiced($workOrder->confirmedAllocation()->first())) {
             throw new VehicleDeliveryException(
                 "La orden de trabajo {$workOrder->code} no tiene facturadas y emitidas todas las partes de su reparto.",
                 422,

@@ -73,11 +73,11 @@ class InventoryStockController extends Controller implements HasMiddleware
             200,
             [
                 'pagination' => [
-                    'total'       => $stocks->total(),
-                    'perPage'     => $stocks->perPage(),
+                    'total' => $stocks->total(),
+                    'perPage' => $stocks->perPage(),
                     'currentPage' => $stocks->currentPage(),
-                    'lastPage'    => $stocks->lastPage(),
-                ]
+                    'lastPage' => $stocks->lastPage(),
+                ],
             ]
         );
     }

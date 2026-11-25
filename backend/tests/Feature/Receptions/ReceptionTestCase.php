@@ -14,9 +14,13 @@ use Tests\Feature\WorkOrderParts\WorkOrderPartsTestCase;
 abstract class ReceptionTestCase extends WorkOrderPartsTestCase
 {
     protected Client $client;
+
     protected Vehicle $vehicle;
+
     protected ServiceCategory $mechanical;
+
     protected ServiceCategory $electrical;
+
     protected ServiceCategory $tires;
 
     protected function setUp(): void
@@ -43,18 +47,18 @@ abstract class ReceptionTestCase extends WorkOrderPartsTestCase
     protected function makeClient(): Client
     {
         return Client::create([
-            'document_number' => 'DOC-' . Str::random(6),
+            'document_number' => 'DOC-'.Str::random(6),
             'first_name' => 'Ana',
             'last_name' => 'Gomez',
-            'phone' => '+595981' . random_int(100000, 999999),
-            'email' => Str::lower(Str::random(10)) . '@example.com',
+            'phone' => '+595981'.random_int(100000, 999999),
+            'email' => Str::lower(Str::random(10)).'@example.com',
         ]);
     }
 
     protected function makeVehicle(Client $client, string $plate): Vehicle
     {
-        $brand = Brand::create(['name' => 'Marca ' . Str::random(6)]);
-        $model = VehicleModel::create(['brand_id' => $brand->id, 'name' => 'Modelo ' . Str::random(6)]);
+        $brand = Brand::create(['name' => 'Marca '.Str::random(6)]);
+        $model = VehicleModel::create(['brand_id' => $brand->id, 'name' => 'Modelo '.Str::random(6)]);
 
         return Vehicle::create([
             'client_id' => $client->id,

@@ -8,8 +8,9 @@ enum BudgetItemType: string
     case PART = 'part';
     case SERVICE = 'service';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::LABOR => 'Trabajo',
             self::PART => 'Pieza',
             self::SERVICE => 'Servicio',

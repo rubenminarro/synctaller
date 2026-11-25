@@ -13,7 +13,7 @@ class Role extends SpatiePermission
     public const ADMINISTRATOR = 'administrador';
 
     protected $fillable = [
-        'name', 
+        'name',
         'guard_name',
         'description',
     ];

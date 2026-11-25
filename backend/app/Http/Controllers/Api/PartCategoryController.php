@@ -19,8 +19,7 @@ class PartCategoryController extends Controller implements HasMiddleware
 
     public function __construct(
         protected PartService $partService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {
@@ -54,11 +53,11 @@ class PartCategoryController extends Controller implements HasMiddleware
             200,
             [
                 'pagination' => [
-                    'total'       => $categories->total(),
-                    'perPage'     => $categories->perPage(),
+                    'total' => $categories->total(),
+                    'perPage' => $categories->perPage(),
                     'currentPage' => $categories->currentPage(),
-                    'lastPage'    => $categories->lastPage(),
-                ]
+                    'lastPage' => $categories->lastPage(),
+                ],
             ]
         );
     }

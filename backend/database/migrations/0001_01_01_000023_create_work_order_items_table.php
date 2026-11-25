@@ -1,9 +1,9 @@
 <?php
 
+use App\Enums\WorkOrderItemStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Enums\WorkOrderItemStatus;
 
 return new class extends Migration
 {

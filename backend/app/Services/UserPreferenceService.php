@@ -23,7 +23,7 @@ class UserPreferenceService
     }
 
     /**
-     * @param array<string, string> $changes
+     * @param  array<string, string>  $changes
      * @return array<string, string>
      */
     public function update(User $user, array $changes): array

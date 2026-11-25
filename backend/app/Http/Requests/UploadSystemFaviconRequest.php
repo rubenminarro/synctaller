@@ -35,7 +35,7 @@ class UploadSystemFaviconRequest extends FormRequest
             function (Validator $validator) {
                 $file = $this->file('favicon');
 
-                if ($validator->errors()->has('favicon') || !$file instanceof UploadedFile) {
+                if ($validator->errors()->has('favicon') || ! $file instanceof UploadedFile) {
                     return;
                 }
 
@@ -65,7 +65,7 @@ class UploadSystemFaviconRequest extends FormRequest
         }
 
         if ($width < self::MIN_SIZE || $width > self::MAX_SIZE) {
-            return 'El favicon debe medir entre ' . self::MIN_SIZE . ' y ' . self::MAX_SIZE . ' px de lado.';
+            return 'El favicon debe medir entre '.self::MIN_SIZE.' y '.self::MAX_SIZE.' px de lado.';
         }
 
         return null;
@@ -73,7 +73,7 @@ class UploadSystemFaviconRequest extends FormRequest
 
     private function svgError(string $content): ?string
     {
-        if (!str_contains($content, '<svg')) {
+        if (! str_contains($content, '<svg')) {
             return 'El favicon debe ser una imagen PNG, ICO o SVG válida.';
         }
 

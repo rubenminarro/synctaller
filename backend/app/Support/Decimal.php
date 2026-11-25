@@ -21,7 +21,7 @@ class Decimal
      */
     public static function round(string $value, int $scale): string
     {
-        $offset = '0.' . str_repeat('0', $scale) . '5';
+        $offset = '0.'.str_repeat('0', $scale).'5';
 
         return str_starts_with(ltrim($value), '-')
             ? bcsub($value, $offset, $scale)

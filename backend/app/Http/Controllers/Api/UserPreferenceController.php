@@ -18,8 +18,7 @@ class UserPreferenceController extends Controller
 
     public function __construct(
         private readonly UserPreferenceService $userPreferenceService
-    ) {
-    }
+    ) {}
 
     public function show(Request $request)
     {

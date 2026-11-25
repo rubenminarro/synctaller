@@ -2,14 +2,14 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\FuelLevel;
+use App\Enums\ReceptionStatus;
+use App\Models\Reception;
+use App\Models\Vehicle;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Validation\Validator;
-use App\Models\Reception;
-use App\Models\Vehicle;
-use App\Enums\FuelLevel;
-use App\Enums\ReceptionStatus;
 
 class StoreReceptionRequest extends FormRequest
 {
@@ -34,14 +34,14 @@ class StoreReceptionRequest extends FormRequest
             'service_category_ids' => [
                 'required',
                 'array',
-                'min:1'
+                'min:1',
             ],
             'service_category_ids.*' => [
                 'integer',
                 Rule::exists(
                     'service_categories',
                     'id'
-                )
+                ),
             ],
             'reception_date' => [
                 'required',
@@ -65,16 +65,16 @@ class StoreReceptionRequest extends FormRequest
                 Rule::enum(FuelLevel::class),
             ],
             'problem_description' => [
-                'nullable', 
-                'string', 
-                'max:500', 
-                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u'
+                'nullable',
+                'string',
+                'max:500',
+                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u',
             ],
             'observations' => [
-                'nullable', 
-                'string', 
-                'max:500', 
-                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u'
+                'nullable',
+                'string',
+                'max:500',
+                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u',
             ],
         ];
     }
@@ -85,18 +85,18 @@ class StoreReceptionRequest extends FormRequest
             'client_id' => [
                 'required' => 'El cliente es obligatorio.',
                 'integer' => 'El ID del cliente debe ser un número entero.',
-                'exists' => 'El cliente seleccionado no existe.'
+                'exists' => 'El cliente seleccionado no existe.',
             ],
             'vehicle_id' => [
                 'required' => 'El vehículo es obligatorio.',
                 'integer' => 'El ID del vehículo debe ser un número entero.',
-                'exists' => 'El vehículo seleccionado no existe.'
+                'exists' => 'El vehículo seleccionado no existe.',
             ],
             'service_category_ids.*' => [
                 'required' => 'Debes seleccionar al menos una categoría.',
-                'array'    => 'El formato de envío no es válido.',
+                'array' => 'El formato de envío no es válido.',
                 'integer' => 'Cada categoría seleccionada debe ser un número entero.',
-                'exists'  => 'Una o más categorías seleccionadas no existen en el sistema.',
+                'exists' => 'Una o más categorías seleccionadas no existen en el sistema.',
             ],
             'reception_date' => [
                 'required' => 'La fecha de recepción es obligatoria.',
@@ -131,11 +131,11 @@ class StoreReceptionRequest extends FormRequest
     public function withValidator(Validator $validator)
     {
         $validator->after(function ($validator) {
-            
+
             $clientId = $this->client_id;
             $vehicleId = $this->vehicle_id;
 
-            if (!$clientId || !$vehicleId) {
+            if (! $clientId || ! $vehicleId) {
                 return;
             }
 
@@ -162,7 +162,7 @@ class StoreReceptionRequest extends FormRequest
                     'El vehículo ya tiene una recepción activa.'
                 );
             }
-            
+
         });
     }
 }

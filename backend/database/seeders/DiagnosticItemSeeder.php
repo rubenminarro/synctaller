@@ -50,14 +50,14 @@ class DiagnosticItemSeeder extends Seeder
         foreach (ExampleScenarios::chronological() as $scenario) {
             $reception = ExampleScenarios::reception($scenario);
 
-            if (!$reception) {
+            if (! $reception) {
                 continue;
             }
 
             foreach ($scenario['diagnostics'] as [, , , $complaint, , , $items]) {
                 $diagnostic = Diagnostic::where('reception_id', $reception->id)->where('customer_complaint', $complaint)->first();
 
-                if (!$diagnostic) {
+                if (! $diagnostic) {
                     continue;
                 }
 

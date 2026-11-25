@@ -14,8 +14,9 @@ enum InventoryMovementType: string
     case WORK_ORDER_RETURN = 'work_order_return';
     case PURCHASE_CANCELLATION = 'purchase_cancellation';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::INITIAL => 'Stock inicial',
             self::PURCHASE => 'Compra',
             self::ADJUSTMENT_IN => 'Ajuste positivo',

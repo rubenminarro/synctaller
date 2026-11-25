@@ -24,8 +24,7 @@ class InvoiceCreditNoteController extends Controller implements HasMiddleware
 
     public function __construct(
         protected CreditNoteService $creditNoteService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {

@@ -16,8 +16,11 @@ use Tests\Feature\WorkOrderParts\WorkOrderPartsTestCase;
 class MaintenanceTest extends WorkOrderPartsTestCase
 {
     private Client $client;
+
     private Vehicle $vehicle;
+
     private array $oilService;
+
     private array $oilPlan;
 
     protected function setUp(): void

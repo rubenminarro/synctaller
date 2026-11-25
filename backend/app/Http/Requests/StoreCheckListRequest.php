@@ -2,10 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\CheckListType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
-use App\Enums\CheckListType;
 
 class StoreCheckListRequest extends FormRequest
 {
@@ -19,7 +19,7 @@ class StoreCheckListRequest extends FormRequest
         return [
             'name' => [
                 'required',
-                'string', 
+                'string',
                 'min:2',
                 'max:100',
                 'regex:/^[a-zA-Z\sñÑáéíóúÁÉÍÓÚ]+$/u',
@@ -46,15 +46,15 @@ class StoreCheckListRequest extends FormRequest
         return [
             'name' => [
                 'required' => 'El nombre del checklist es obligatorio.',
-                'string'   => 'El nombre del checklist debe tener el formato correcto.',
-                'min'      => 'El nombre del checklist debe tener al menos 2 caracteres.',
-                'max'      => 'El nombre del checklist no debe tener más de 100 caracteres.',
-                'regex'    => 'El nombre del checklist solo puede contener letras y espacios.',
-                'unique'   => 'Este checklist ya existe en el sistema.',
+                'string' => 'El nombre del checklist debe tener el formato correcto.',
+                'min' => 'El nombre del checklist debe tener al menos 2 caracteres.',
+                'max' => 'El nombre del checklist no debe tener más de 100 caracteres.',
+                'regex' => 'El nombre del checklist solo puede contener letras y espacios.',
+                'unique' => 'Este checklist ya existe en el sistema.',
             ],
             'type' => [
                 'required' => 'El tipo del checklist es obligatorio.',
-                'string'   => 'El tipo del checklist debe tener el formato correcto.',
+                'string' => 'El tipo del checklist debe tener el formato correcto.',
                 Enum::class => 'El tipo del checklist seleccionado no es válido.',
             ],
             // Claves con punto: un bloque 'required' => [...] choca con la regla

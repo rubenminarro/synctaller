@@ -20,8 +20,7 @@ class BudgetItemController extends Controller implements HasMiddleware
 
     public function __construct(
         protected BudgetService $budgetService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {
@@ -44,7 +43,7 @@ class BudgetItemController extends Controller implements HasMiddleware
         );
     }
 
-    public function store(StoreBudgetItemRequest $request, Budget $budget) 
+    public function store(StoreBudgetItemRequest $request, Budget $budget)
     {
 
         $this->budgetService->ensureEditable($budget);
@@ -73,16 +72,16 @@ class BudgetItemController extends Controller implements HasMiddleware
 
     public function show(Budget $budget, BudgetItem $item)
     {
-        
+
         return $this->successResponse(
             'El item del presupuesto recuperado exitosamente.',
             new BudgetItemResource($item->load(['part', 'service']))
         );
     }
 
-    public function update(UpdateBudgetItemRequest $request, Budget $budget, BudgetItem $item) 
+    public function update(UpdateBudgetItemRequest $request, Budget $budget, BudgetItem $item)
     {
-        
+
         $this->budgetService->ensureEditable($budget);
 
         $data = $this->budgetService->prepareCatalogItem($request->validated(), $item);
@@ -106,7 +105,7 @@ class BudgetItemController extends Controller implements HasMiddleware
         );
     }
 
-    public function destroy(Budget $budget, BudgetItem $item) 
+    public function destroy(Budget $budget, BudgetItem $item)
     {
         $this->budgetService->ensureEditable($budget);
 
@@ -119,5 +118,4 @@ class BudgetItemController extends Controller implements HasMiddleware
             null
         );
     }
-
 }

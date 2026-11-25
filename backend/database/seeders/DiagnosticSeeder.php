@@ -20,7 +20,7 @@ class DiagnosticSeeder extends Seeder
         foreach (ExampleScenarios::chronological() as $scenario) {
             $reception = ExampleScenarios::reception($scenario);
 
-            if (!$reception) {
+            if (! $reception) {
                 continue;
             }
 

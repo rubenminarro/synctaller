@@ -3,21 +3,21 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Reception;
-use App\Models\ReceptionCheckList;
-use App\Http\Resources\ReceptionResource;
+use App\Http\Requests\CancelReceptionRequest;
 use App\Http\Requests\StoreReceptionRequest;
 use App\Http\Requests\UpdateReceptionRequest;
+use App\Http\Resources\ReceptionResource;
 use App\Http\Resources\ShowReceptionResource;
-use App\Traits\ApiResponse;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use App\Models\Reception;
+use App\Models\ReceptionCheckList;
 use App\Services\ReceptionChecklistService;
 use App\Services\ReceptionStatusService;
-use App\Http\Requests\CancelReceptionRequest;
+use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ReceptionController extends Controller implements HasMiddleware
 {
@@ -100,11 +100,11 @@ class ReceptionController extends Controller implements HasMiddleware
             200,
             [
                 'pagination' => [
-                    'total'       => $receptions->total(),
-                    'perPage'     => $receptions->perPage(),
+                    'total' => $receptions->total(),
+                    'perPage' => $receptions->perPage(),
                     'currentPage' => $receptions->currentPage(),
-                    'lastPage'    => $receptions->lastPage(),
-                ]
+                    'lastPage' => $receptions->lastPage(),
+                ],
             ]
         );
     }

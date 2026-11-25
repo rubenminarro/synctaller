@@ -23,8 +23,7 @@ class WorkOrderItemMechanicController extends Controller implements HasMiddlewar
 
     public function __construct(
         protected WorkOrderCommissionService $commissionService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {
@@ -46,7 +45,7 @@ class WorkOrderItemMechanicController extends Controller implements HasMiddlewar
         Mechanic $mechanic
     ) {
         if (
-            !$request->user()->can('work-order-item-mechanics.log-hours-any') &&
+            ! $request->user()->can('work-order-item-mechanics.log-hours-any') &&
             (int) $mechanic->user_id !== (int) $request->user()->id
         ) {
             return $this->errorResponse(

@@ -8,8 +8,9 @@ enum PartStatus: string
     case INACTIVE = 'inactive';
     case DISCONTINUED = 'discontinued';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::ACTIVE => 'Activo',
             self::INACTIVE => 'Inactivo',
             self::DISCONTINUED => 'Descontinuado',
@@ -18,7 +19,7 @@ enum PartStatus: string
 
     public function canTransitionTo(self $status): bool
     {
-        return match($this) {
+        return match ($this) {
             self::ACTIVE => in_array($status, [self::INACTIVE, self::DISCONTINUED], true),
             self::INACTIVE => in_array($status, [self::ACTIVE, self::DISCONTINUED], true),
             self::DISCONTINUED => false,

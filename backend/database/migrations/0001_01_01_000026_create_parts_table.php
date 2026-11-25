@@ -1,10 +1,10 @@
 <?php
 
+use App\Enums\PartStatus;
+use App\Enums\PartUnit;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Enums\PartStatus;
-use App\Enums\PartUnit;
 
 return new class extends Migration
 {

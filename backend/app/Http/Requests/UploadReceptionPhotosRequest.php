@@ -15,19 +15,19 @@ class UploadReceptionPhotosRequest extends FormRequest
     {
         return [
             'photos' => [
-                'required', 
+                'required',
                 'array',
-                'min:1'
+                'min:1',
             ],
             'photos.*.file' => [
-                'required', 
+                'required',
                 'image',
                 'mimes:jpg,jpeg,png,webp',
-                'max:5120'
+                'max:5120',
             ],
             'photos.*.description' => [
-                'nullable', 
-                'string'
+                'nullable',
+                'string',
             ],
         ];
     }
@@ -38,7 +38,7 @@ class UploadReceptionPhotosRequest extends FormRequest
             'photos' => [
                 'required' => 'Se requiere al menos una foto.',
                 'array' => 'El campo de fotos debe ser un arreglo.',
-                'min:1' => 'Se requiere al menos una foto.'
+                'min:1' => 'Se requiere al menos una foto.',
             ],
             'photos.*.file' => [
                 'required' => 'Cada foto debe tener un archivo.',

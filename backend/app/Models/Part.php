@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use App\Traits\Auditable;
 use App\Enums\PartStatus;
 use App\Enums\PartUnit;
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;

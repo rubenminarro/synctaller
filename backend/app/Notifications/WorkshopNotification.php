@@ -12,15 +12,14 @@ use Illuminate\Notifications\Notification;
 class WorkshopNotification extends Notification
 {
     /**
-     * @param array{type: string, id: int, code: ?string}|null $subject
+     * @param  array{type: string, id: int, code: ?string}|null  $subject
      */
     public function __construct(
         public readonly InternalNotificationType $type,
         public readonly string $title,
         public readonly string $message,
         public readonly ?array $subject = null
-    ) {
-    }
+    ) {}
 
     public function via(object $notifiable): array
     {

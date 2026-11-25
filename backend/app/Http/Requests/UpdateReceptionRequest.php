@@ -2,14 +2,14 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\FuelLevel;
+use App\Enums\ReceptionStatus;
+use App\Models\Reception;
+use App\Models\Vehicle;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Validation\Validator;
-use App\Models\Reception;
-use App\Models\Vehicle;
-use App\Enums\FuelLevel;
-use App\Enums\ReceptionStatus;
 
 class UpdateReceptionRequest extends FormRequest
 {
@@ -88,11 +88,11 @@ class UpdateReceptionRequest extends FormRequest
         return [
             'client_id' => [
                 'integer' => 'El ID del cliente debe ser un número entero.',
-                'exists' => 'El cliente seleccionado no existe.'
+                'exists' => 'El cliente seleccionado no existe.',
             ],
             'vehicle_id' => [
                 'integer' => 'El ID del vehículo debe ser un número entero.',
-                'exists' => 'El vehículo seleccionado no existe.'
+                'exists' => 'El vehículo seleccionado no existe.',
             ],
             'service_category_ids' => [
                 'array' => 'El formato de categorías no es válido.',
@@ -137,7 +137,7 @@ class UpdateReceptionRequest extends FormRequest
 
             $reception = $this->route('reception');
 
-            if (!$reception) {
+            if (! $reception) {
                 return;
             }
 
@@ -149,7 +149,7 @@ class UpdateReceptionRequest extends FormRequest
                 ->where('client_id', $clientId)
                 ->exists();
 
-            if (!$vehicleBelongsToClient) {
+            if (! $vehicleBelongsToClient) {
                 $validator->errors()->add(
                     'vehicle_id',
                     'El vehículo seleccionado no pertenece al cliente indicado.'
@@ -171,5 +171,4 @@ class UpdateReceptionRequest extends FormRequest
             }
         });
     }
-
 }

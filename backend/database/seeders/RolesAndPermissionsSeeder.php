@@ -3,18 +3,19 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class RolesAndPermissionsSeeder extends Seeder
 {
     public function run(): void
     {
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         $admin = Role::firstOrCreate([
             'name' => 'administrador',
-            'guard_name' => 'api'
+            'guard_name' => 'api',
         ]);
 
         $mecanico = Role::firstOrCreate([
@@ -23,7 +24,7 @@ class RolesAndPermissionsSeeder extends Seeder
         ]);
 
         $permissions = [
-            
+
             /* users permissions */
             'users.index',
             'users.store',
@@ -360,47 +361,47 @@ class RolesAndPermissionsSeeder extends Seeder
         );
 
         $mechanicPermissions = [
-            'vehicles.index', 
+            'vehicles.index',
             'vehicles.show',
-            
-            'receptions.index', 
-            'receptions.show', 
+
+            'receptions.index',
+            'receptions.show',
             'receptions.update',
-            
-            'reception-check-lists.show', 
+
+            'reception-check-lists.show',
             'reception-check-lists.update',
-            
-            'receptions-photos.index', 
-            'receptions-photos.store', 
+
+            'receptions-photos.index',
+            'receptions-photos.store',
             'receptions-photos.destroy',
 
-            'diagnostics.index', 
-            'diagnostics.store', 
-            'diagnostics.show', 
+            'diagnostics.index',
+            'diagnostics.store',
+            'diagnostics.show',
             'diagnostics.update',
-            
-            'diagnostic-items.index', 
-            'diagnostic-items.store', 
-            'diagnostic-items.show', 
-            'diagnostic-items.update', 
+
+            'diagnostic-items.index',
+            'diagnostic-items.store',
+            'diagnostic-items.show',
+            'diagnostic-items.update',
             'diagnostic-items.destroy',
 
-            'diagnostic-item-photos.index', 
-            'diagnostic-item-photos.store', 
-            'diagnostic-item-photos.update', 
+            'diagnostic-item-photos.index',
+            'diagnostic-item-photos.store',
+            'diagnostic-item-photos.update',
             'diagnostic-item-photos.destroy',
 
             'diagnostic-item-templates.index',
             'diagnostic-item-templates.show',
 
             'work-orders.index',
-            'work-orders.show', 
-            
-            'work-orders.start', 
-            'work-orders.pause', 
-            'work-orders.resume', 
+            'work-orders.show',
+
+            'work-orders.start',
+            'work-orders.pause',
+            'work-orders.resume',
             'work-orders.complete',
-            
+
             'work-order-items.start',
             'work-order-items.complete',
 

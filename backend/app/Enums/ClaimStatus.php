@@ -12,8 +12,9 @@ enum ClaimStatus: string
     case CLOSED = 'closed';
     case CANCELLED = 'cancelled';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::OPEN => 'Abierto',
             self::CLOSED => 'Cerrado',
             self::CANCELLED => 'Cancelado',

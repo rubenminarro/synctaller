@@ -25,7 +25,7 @@ class ReceivablesReportRequest extends ReportRequest
     {
         return [
             ...parent::messages(),
-            'recipient_type.' . Enum::class => 'El tipo de destinatario debe ser insurer o customer.',
+            'recipient_type.'.Enum::class => 'El tipo de destinatario debe ser insurer o customer.',
             'client_id.integer' => 'El cliente no es válido.',
         ];
     }

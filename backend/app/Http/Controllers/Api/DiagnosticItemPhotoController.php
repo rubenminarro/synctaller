@@ -3,17 +3,17 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpdateDiagnosticItemPhotoRequest;
+use App\Http\Requests\UploadDiagnosticItemPhotosRequest;
+use App\Http\Resources\DiagnosticItemPhotoResource;
 use App\Models\DiagnosticItem;
 use App\Models\DiagnosticItemPhoto;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\DB;
-use App\Http\Requests\UploadDiagnosticItemPhotosRequest;
-use App\Http\Requests\UpdateDiagnosticItemPhotoRequest;
-use App\Http\Resources\DiagnosticItemPhotoResource;
 use App\Services\DiagnosticService;
 use App\Traits\ApiResponse;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class DiagnosticItemPhotoController extends Controller implements HasMiddleware
 {
@@ -31,12 +31,12 @@ class DiagnosticItemPhotoController extends Controller implements HasMiddleware
 
     public function index(DiagnosticItem $diagnosticItem)
     {
-        
+
         $photos = $diagnosticItem
             ->photos()
             ->latest()
             ->get();
-    
+
         return $this->successResponse(
             'Fotos obtenidas correctamente.',
             DiagnosticItemPhotoResource::collection($photos)
@@ -101,8 +101,8 @@ class DiagnosticItemPhotoController extends Controller implements HasMiddleware
         $data = $request->validated();
 
         if (
-            !array_key_exists('file', $data) &&
-            !array_key_exists('description', $data)
+            ! array_key_exists('file', $data) &&
+            ! array_key_exists('description', $data)
         ) {
             return $this->errorResponse(
                 'No se proporcionaron datos para actualizar.',

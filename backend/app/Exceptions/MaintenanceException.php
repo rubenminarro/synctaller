@@ -2,6 +2,4 @@
 
 namespace App\Exceptions;
 
-class MaintenanceException extends AppException
-{
-}
+class MaintenanceException extends AppException {}

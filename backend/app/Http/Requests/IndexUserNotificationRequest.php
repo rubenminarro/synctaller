@@ -30,7 +30,7 @@ class IndexUserNotificationRequest extends FormRequest
                 'boolean' => 'El filtro de no leídas debe ser verdadero o falso.',
             ],
             'type' => [
-                Enum::class => 'El tipo debe ser ' . implode(', ', InternalNotificationType::values()) . '.',
+                Enum::class => 'El tipo debe ser '.implode(', ', InternalNotificationType::values()).'.',
             ],
             'per_page' => [
                 'integer' => 'La cantidad por página debe ser un número entero.',

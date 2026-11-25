@@ -14,8 +14,9 @@ enum InternalNotificationType: string
     case EXTRA_PART_AWAITING_APPROVAL = 'extra_part_awaiting_approval';
     case ACCOUNTS_PAYABLE_OVERDUE = 'accounts_payable_overdue';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::BUDGET_APPROVED => 'Presupuesto aprobado',
             self::BUDGET_REJECTED => 'Presupuesto rechazado',
             self::WORK_ORDER_COMPLETED => 'Orden de trabajo completada',

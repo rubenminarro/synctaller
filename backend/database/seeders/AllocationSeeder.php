@@ -23,7 +23,7 @@ class AllocationSeeder extends Seeder
         foreach (ExampleScenarios::chronological() as $scenario) {
             $workOrder = isset($scenario['work_order']) ? BudgetSeeder::of($scenario)?->workOrder : null;
 
-            if (!$workOrder instanceof WorkOrder || !$workOrder->closing || $workOrder->allocations()->exists() || !$ownerShare->requiresAllocation($workOrder)) {
+            if (! $workOrder instanceof WorkOrder || ! $workOrder->closing || $workOrder->allocations()->exists() || ! $ownerShare->requiresAllocation($workOrder)) {
                 continue;
             }
 

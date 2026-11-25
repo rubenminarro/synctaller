@@ -35,8 +35,9 @@ Las siglas se conservan tal como se usaron en el proyecto. Ojo: `D` (decisión d
 | Actualización de dependencias y licencia de ApexCharts | 2.77 |
 | Configuración del taller | 2.78 |
 | Hora de Paraguay | 2.79 |
+| Monorepo, Pint y baseline de tests | 2.82 |
 
-Las secciones están en el [historial de decisiones](historial.md), que se completa con cada entrega nueva (la siguiente es la 2.82).
+Las secciones están en el [historial de decisiones](historial.md), que se completa con cada entrega nueva (la siguiente es la 2.83).
 
 ## Decisiones técnicas que hay que tener presentes
 
@@ -50,4 +51,4 @@ Las secciones están en el [historial de decisiones](historial.md), que se compl
 | Deducible mayor a 0 | Implementado detrás de `INSURER_DEDUCTIBLE_NET_MODE`. No se enciende sin la confirmación escrita del contador |
 | Notas de crédito | SyncTaller las registra, no las emite (P10) |
 | Documentos de siniestros | Disco privado sin URL; toda descarga pasa por la API y se audita |
-| Monorepo | Desde el 2026-11-24, `backend/` y `frontend/` en un solo repositorio, sin el historial de Git anterior. Cada app conserva sus dependencias y su configuración; la raíz solo orquesta |
+| Monorepo | Desde el 2026-11-24, `backend/` y `frontend/` en un solo repositorio, sin el historial de Git anterior. Cada app conserva sus dependencias y su configuración; la raíz solo orquesta (historial 2.82) |

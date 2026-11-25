@@ -34,12 +34,27 @@ Desde la raíz:
 npm run setup        # dependencias de las dos apps y sus .env
 npm run dev          # API :8000 + cola + Vite :5173
 npm test             # PHPUnit y Vitest (test:backend, test:frontend)
-npm run lint         # ESLint del frontend
+npm run lint         # Pint --test y ESLint (lint:backend, lint:frontend)
 npm run build        # tsc -b y build del frontend
 ```
 
 En `backend/`: `php artisan test [--filter=…]` (unos 6 minutos la suite completa; no correr dos a la vez: comparten
-`database/testing.sqlite`). En `frontend/`: `npm run lint`, `npm run build` y `npm test`.
+`database/testing.sqlite`) y `vendor/bin/pint` para corregir el estilo. En `frontend/`: `npm run lint`, `npm run build`
+y `npm test`.
+
+## Tests: baseline y uso diario
+
+**Baseline inicial (2026-11-24, después de aplicar Pint):** corrida completa en verde. Backend: 488 tests y 8560 aserciones (6,8 min) y
+Pint sin pendientes. Frontend: ESLint sin errores, Vitest 43 de 43 y build correcto. Es la referencia: todo lo que venga
+después parte de un estado verde.
+
+En el trabajo diario:
+
+* Correr **solo los tests puntuales** de lo que se toca: `php artisan test --filter=…` o la carpeta del módulo en el
+  backend, `npx vitest run <archivo>` en el frontend. Más `npm run lint` y, si cambió el frontend, `npm run build`.
+* **No correr la suite completa** (`npm test`, `php artisan test` sin filtro) salvo que el usuario lo pida. La CI la
+  corre en cada push y pull request.
+* Si un test puntual falla por algo ajeno al cambio, informarlo; no ampliar la corrida por cuenta propia.
 
 ## Metodología
 
@@ -50,7 +65,8 @@ Antes de implementar cualquier cambio:
 2. Identificar las reglas de negocio y los módulos afectados.
 3. Proponer el cambio mínimo y explicar su motivo. **Las decisiones de negocio se consultan, no se suponen.**
 4. Implementar solo el alcance autorizado. No modificar una app desde una tarea de la otra sin una necesidad identificada.
-5. Correr los tests de lo que cambió (y la suite completa del backend antes de cerrar) y, en el frontend, lint y build.
+5. Correr los tests puntuales de lo que cambió y `npm run lint`; si cambió el frontend, también el build (ver
+   "Tests: baseline y uso diario").
 6. Verificar que no cambien contratos, permisos, `error_code` ni códigos HTTP existentes.
 7. Verificar en el navegador las pantallas tocadas, con un usuario de cada rol involucrado.
 8. Informar archivos modificados, comprobaciones ejecutadas y resultados. No declarar nada cerrado sin evidencia.

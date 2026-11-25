@@ -12,8 +12,9 @@ enum InvoiceRecipientType: string
     case INSURER = 'insurer';
     case CUSTOMER = 'customer';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::INSURER => 'Aseguradora',
             self::CUSTOMER => 'Cliente',
         };

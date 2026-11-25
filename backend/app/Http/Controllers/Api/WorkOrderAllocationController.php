@@ -27,8 +27,7 @@ class WorkOrderAllocationController extends Controller implements HasMiddleware
 
     public function __construct(
         protected AllocationService $allocationService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {

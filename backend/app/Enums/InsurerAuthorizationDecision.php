@@ -11,8 +11,9 @@ enum InsurerAuthorizationDecision: string
     case PARTIAL = 'partial';
     case NOT_COVERED = 'not_covered';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::AUTHORIZED => 'Autorizada',
             self::PARTIAL => 'Parcial',
             self::NOT_COVERED => 'No cubierta',

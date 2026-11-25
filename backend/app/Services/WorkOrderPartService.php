@@ -26,8 +26,7 @@ class WorkOrderPartService
     public function __construct(
         protected InventoryService $inventoryService,
         protected InternalNotificationService $internalNotificationService
-    ) {
-    }
+    ) {}
 
     /**
      * Crea la línea de un ítem presupuestado con repuesto vinculado.
@@ -371,7 +370,7 @@ class WorkOrderPartService
 
     private function ensurePartsEditable(WorkOrder $workOrder): void
     {
-        if (!in_array($workOrder->status, [
+        if (! in_array($workOrder->status, [
             WorkOrderStatus::PENDING,
             WorkOrderStatus::IN_PROGRESS,
             WorkOrderStatus::PAUSED,
@@ -397,7 +396,7 @@ class WorkOrderPartService
 
     private function ensureStatus(WorkOrderPart $line, array $allowed, string $action): void
     {
-        if (!in_array($line->status, $allowed, true)) {
+        if (! in_array($line->status, $allowed, true)) {
             throw new WorkOrderPartException(
                 "El repuesto en estado {$line->status->label()} no puede {$action}.",
                 422,
@@ -456,7 +455,7 @@ class WorkOrderPartService
 
     private function ensurePartUsable(Part $part): void
     {
-        if (!$part->isUsable()) {
+        if (! $part->isUsable()) {
             throw new PartException(
                 'El repuesto está inactivo y no puede utilizarse.',
                 422,

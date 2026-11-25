@@ -24,8 +24,7 @@ class ClientVehicleController extends Controller implements HasMiddleware
 
     public function __construct(
         protected VehicleService $vehicleService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {
@@ -64,11 +63,11 @@ class ClientVehicleController extends Controller implements HasMiddleware
             200,
             [
                 'pagination' => [
-                    'total'       => $vehicles->total(),
-                    'perPage'     => $vehicles->perPage(),
+                    'total' => $vehicles->total(),
+                    'perPage' => $vehicles->perPage(),
                     'currentPage' => $vehicles->currentPage(),
-                    'lastPage'    => $vehicles->lastPage(),
-                ]
+                    'lastPage' => $vehicles->lastPage(),
+                ],
             ]
         );
     }

@@ -10,8 +10,9 @@ enum FuelLevel: string
     case THREE_QUARTERS = 'three_quarters';
     case FULL = 'full';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::EMPTY => 'Vacio',
             self::QUARTER => 'Un cuarto',
             self::HALF => 'La mitad',

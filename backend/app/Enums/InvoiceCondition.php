@@ -7,8 +7,9 @@ enum InvoiceCondition: string
     case CASH = 'cash';
     case CREDIT = 'credit';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::CASH => 'Contado',
             self::CREDIT => 'Crédito',
         };

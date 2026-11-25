@@ -20,8 +20,7 @@ class ServiceController extends Controller implements HasMiddleware
 
     public function __construct(
         protected ServiceCatalogService $serviceCatalogService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {
@@ -66,11 +65,11 @@ class ServiceController extends Controller implements HasMiddleware
             200,
             [
                 'pagination' => [
-                    'total'       => $services->total(),
-                    'perPage'     => $services->perPage(),
+                    'total' => $services->total(),
+                    'perPage' => $services->perPage(),
                     'currentPage' => $services->currentPage(),
-                    'lastPage'    => $services->lastPage(),
-                ]
+                    'lastPage' => $services->lastPage(),
+                ],
             ]
         );
     }

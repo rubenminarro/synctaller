@@ -27,8 +27,7 @@ class DiagnosticItemTemplateService
 
     public function __construct(
         protected DocumentSequenceService $documentSequences
-    ) {
-    }
+    ) {}
 
     public function create(array $data): DiagnosticItemTemplate
     {
@@ -83,7 +82,7 @@ class DiagnosticItemTemplateService
     {
         $template = DiagnosticItemTemplate::findOrFail($data['diagnostic_item_template_id']);
 
-        if (!$template->isUsable()) {
+        if (! $template->isUsable()) {
             throw new DiagnosticItemTemplateException(
                 'El ítem del catálogo está inactivo: no puede usarse en diagnósticos nuevos.',
                 422,
@@ -92,7 +91,7 @@ class DiagnosticItemTemplateService
         }
 
         foreach (self::COPIED_FIELDS as $field) {
-            if (!isset($data[$field])) {
+            if (! isset($data[$field])) {
                 $data[$field] = $template->{$field};
             }
         }
@@ -109,7 +108,7 @@ class DiagnosticItemTemplateService
 
             $template->refresh();
 
-            if (!$template->status->canTransitionTo($status)) {
+            if (! $template->status->canTransitionTo($status)) {
                 throw new DiagnosticItemTemplateException(
                     "El ítem del catálogo ya está {$this->lower($status)}.",
                     422,

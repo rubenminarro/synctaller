@@ -2,10 +2,10 @@
 
 namespace App\Http\Resources;
 
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
 use App\Enums\FuelLevel;
 use App\Enums\VehicleColor;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class ShowReceptionResource extends JsonResource
 {
@@ -28,7 +28,7 @@ class ShowReceptionResource extends JsonResource
             'mileage' => $this->mileage,
             'fuel' => [
                 'value' => $fuelEnum?->value,
-                'label' => $fuelEnum?->label()
+                'label' => $fuelEnum?->label(),
             ],
             'status' => [
                 'value' => $this->status?->value,

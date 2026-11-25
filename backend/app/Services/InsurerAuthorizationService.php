@@ -36,7 +36,7 @@ class InsurerAuthorizationService
 
             $budget = Budget::whereKey($budget->id)->lockForUpdate()->firstOrFail();
 
-            if (!in_array($budget->status, [BudgetStatus::SENT, BudgetStatus::APPROVED], true)) {
+            if (! in_array($budget->status, [BudgetStatus::SENT, BudgetStatus::APPROVED], true)) {
                 throw new InsurerAuthorizationException(
                     'Solo se registra la autorización de un presupuesto enviado o aprobado.',
                     422,
@@ -46,7 +46,7 @@ class InsurerAuthorizationService
 
             $claim = Claim::where('reception_id', $budget->reception_id)->where('status', ClaimStatus::OPEN)->first();
 
-            if (!$claim) {
+            if (! $claim) {
                 throw new InsurerAuthorizationException(
                     'La recepción del presupuesto no tiene un siniestro abierto.',
                     422,
@@ -129,7 +129,7 @@ class InsurerAuthorizationService
     /**
      * Una línea por cada ítem a cargo de la aseguradora, ni más ni menos, con los importes sin IVA.
      *
-     * @param Collection<int, BudgetItem> $insurerItems
+     * @param  Collection<int, BudgetItem>  $insurerItems
      * @return Collection<int, array<string, mixed>>
      */
     private function lines(array $data, Collection $insurerItems): Collection
@@ -193,7 +193,7 @@ class InsurerAuthorizationService
      */
     private function withoutTax(string $amount, bool $includesTax): string
     {
-        if (!$includesTax) {
+        if (! $includesTax) {
             return Decimal::of($amount, 2);
         }
 
@@ -203,7 +203,7 @@ class InsurerAuthorizationService
     }
 
     /**
-     * @param Collection<int, array<string, mixed>> $lines
+     * @param  Collection<int, array<string, mixed>>  $lines
      */
     private function result(Collection $lines): InsurerAuthorizationResult
     {
@@ -219,7 +219,7 @@ class InsurerAuthorizationService
     /**
      * Si alguna línea autoriza más que en la versión vigente (una línea nueva también cuenta).
      *
-     * @param Collection<int, array<string, mixed>> $lines
+     * @param  Collection<int, array<string, mixed>>  $lines
      */
     private function raisesAnyLine(InsurerAuthorization $previous, Collection $lines): bool
     {

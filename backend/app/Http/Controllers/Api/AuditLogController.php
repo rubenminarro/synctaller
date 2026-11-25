@@ -45,11 +45,11 @@ class AuditLogController extends Controller implements HasMiddleware
             200,
             [
                 'pagination' => [
-                    'total'       => $logs->total(),
-                    'perPage'     => $logs->perPage(),
+                    'total' => $logs->total(),
+                    'perPage' => $logs->perPage(),
                     'currentPage' => $logs->currentPage(),
-                    'lastPage'    => $logs->lastPage(),
-                ]
+                    'lastPage' => $logs->lastPage(),
+                ],
             ]
         );
     }

@@ -40,12 +40,12 @@ class StoreWorkOrderRequest extends FormRequest
             'budget_id' => [
                 'required' => 'El presupuesto es obligatorio.',
                 'integer' => 'El ID del presupuesto debe ser un número entero.',
-                'exists' => 'El presupuesto seleccionado no existe.'
+                'exists' => 'El presupuesto seleccionado no existe.',
             ],
             'mechanic_id' => [
                 'required' => 'El mecánico es obligatorio.',
                 'integer' => 'El ID del mecánico debe ser un número entero.',
-                'exists' => 'El mecánico seleccionado no existe.'
+                'exists' => 'El mecánico seleccionado no existe.',
             ],
             'internal_exception_id' => [
                 'integer' => 'El ID de la excepción debe ser un número entero.',

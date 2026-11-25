@@ -3,21 +3,20 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpdateReceptionPhotoRequest;
+use App\Http\Requests\UploadReceptionPhotosRequest;
+use App\Http\Resources\ReceptionPhotoResource;
 use App\Models\Reception;
 use App\Models\ReceptionPhoto;
-use Illuminate\Support\Facades\Storage;
-use App\Http\Requests\UploadReceptionPhotosRequest;
-use App\Http\Requests\UpdateReceptionPhotoRequest;
-use App\Http\Resources\ReceptionPhotoResource;
 use App\Services\ReceptionStatusService;
 use App\Traits\ApiResponse;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class ReceptionPhotoController extends Controller implements HasMiddleware
 {
-    
     use ApiResponse;
 
     public static function middleware(): array
@@ -29,7 +28,7 @@ class ReceptionPhotoController extends Controller implements HasMiddleware
             new Middleware('permission:receptions-photos.destroy', only: ['destroy']),
         ];
     }
-    
+
     public function index(Reception $reception)
     {
         return $this->successResponse(
@@ -52,7 +51,7 @@ class ReceptionPhotoController extends Controller implements HasMiddleware
         try {
             foreach ($data['photos'] as $photoData) {
                 $file = $photoData['file'];
-                
+
                 $path = $file->store('receptions', 'public');
                 $uploadedFiles[] = $path;
 
@@ -94,7 +93,7 @@ class ReceptionPhotoController extends Controller implements HasMiddleware
         if ($request->hasFile('file')) {
             $oldPath = $photo->path;
             $file = $request->file('file');
-            
+
             $photo->path = $file->store('receptions', 'public');
             $photo->original_name = $file->getClientOriginalName();
         }
@@ -130,5 +129,4 @@ class ReceptionPhotoController extends Controller implements HasMiddleware
             'Foto eliminada correctamente.'
         );
     }
-
 }

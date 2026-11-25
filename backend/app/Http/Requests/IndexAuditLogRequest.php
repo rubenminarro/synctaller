@@ -44,7 +44,7 @@ class IndexAuditLogRequest extends FormRequest
                 'min' => 'El ID del usuario debe ser mayor a 0.',
             ],
             'event' => [
-                Enum::class => 'El evento debe ser ' . implode(', ', AuditEvent::values()) . '.',
+                Enum::class => 'El evento debe ser '.implode(', ', AuditEvent::values()).'.',
             ],
             'date_from' => [
                 'date_format' => 'La fecha desde debe tener el formato AAAA-MM-DD.',

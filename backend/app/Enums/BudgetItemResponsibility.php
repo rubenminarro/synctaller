@@ -11,8 +11,9 @@ enum BudgetItemResponsibility: string
     case OWNER = 'owner';
     case INSURER = 'insurer';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::OWNER => 'Dueño',
             self::INSURER => 'Aseguradora',
         };

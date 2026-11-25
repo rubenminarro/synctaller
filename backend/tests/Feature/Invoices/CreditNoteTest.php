@@ -18,7 +18,7 @@ class CreditNoteTest extends InvoiceTestCase
      */
     private function issuedInvoice(): array
     {
-        if (!InvoiceStamp::exists()) {
+        if (! InvoiceStamp::exists()) {
             $this->createStamp()->assertCreated();
         }
         $invoice = $this->readyInvoice();
@@ -29,7 +29,7 @@ class CreditNoteTest extends InvoiceTestCase
     private function body(array $invoice, array $lines, array $overrides = []): array
     {
         return [
-            'number' => '001-001-' . random_int(1000000, 9999999),
+            'number' => '001-001-'.random_int(1000000, 9999999),
             'stamp_number' => '12345678',
             'issue_date' => now()->toDateString(),
             'reason' => 'El cliente reclamó la mano de obra.',

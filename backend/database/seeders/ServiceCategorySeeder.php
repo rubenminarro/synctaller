@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\ServiceCategory;
+use Illuminate\Database\Seeder;
 
 class ServiceCategorySeeder extends Seeder
 {
@@ -13,26 +13,26 @@ class ServiceCategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-        [
-            'code' => 'general',
-            'name' => 'General',
-        ],
-        [
-            'code' => 'mechanical',
-            'name' => 'Mecánica',
-        ],
-        [
-            'code' => 'bodywork',
-            'name' => 'Chapería',
-        ],
-        [
-            'code' => 'electrical',
-            'name' => 'Electricidad',
-        ],
-        [
-            'code' => 'tires',
-            'name' => 'Neumáticos',
-        ],
+            [
+                'code' => 'general',
+                'name' => 'General',
+            ],
+            [
+                'code' => 'mechanical',
+                'name' => 'Mecánica',
+            ],
+            [
+                'code' => 'bodywork',
+                'name' => 'Chapería',
+            ],
+            [
+                'code' => 'electrical',
+                'name' => 'Electricidad',
+            ],
+            [
+                'code' => 'tires',
+                'name' => 'Neumáticos',
+            ],
         ];
 
         foreach ($categories as $category) {

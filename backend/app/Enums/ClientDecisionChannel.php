@@ -13,8 +13,9 @@ enum ClientDecisionChannel: string
     case EMAIL = 'email';
     case OTHER = 'other';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::PHONE => 'Teléfono',
             self::WHATSAPP => 'WhatsApp',
             self::IN_PERSON => 'Presencial',

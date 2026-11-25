@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\CheckListItem;
 use App\Models\ServiceCategory;
+use Illuminate\Database\Seeder;
 
 class CheckListItemServiceCategorySeeder extends Seeder
 {
@@ -51,7 +51,7 @@ class CheckListItemServiceCategorySeeder extends Seeder
                 $itemName
             )->first();
 
-            if (!$item) {
+            if (! $item) {
                 continue;
             }
 

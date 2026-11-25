@@ -2,22 +2,22 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Part;
-use App\Models\Service;
 use App\Enums\BudgetItemResponsibility;
 use App\Enums\BudgetItemType;
-use App\Enums\ClientDecisionChannel;
 use App\Enums\ClaimDocumentType;
+use App\Enums\ClientDecisionChannel;
 use App\Enums\InsurerAuthorizationDecision;
+use App\Enums\InternalExceptionType;
 use App\Models\Budget;
 use App\Models\Claim;
+use App\Models\Part;
+use App\Models\Service;
 use App\Models\User;
 use App\Services\BudgetService;
 use App\Services\ClaimDocumentService;
 use App\Services\InsurerAuthorizationService;
 use App\Services\InternalExceptionService;
-use App\Enums\InternalExceptionType;
+use Illuminate\Database\Seeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 
@@ -51,7 +51,7 @@ class BudgetItemSeeder extends Seeder
             $budget = isset($scenario['budget']) ? BudgetSeeder::of($scenario) : null;
 
             // Idempotente: solo carga ítems (y mueve el estado) si el presupuesto sigue vacío.
-            if (!$budget || $budget->items()->exists()) {
+            if (! $budget || $budget->items()->exists()) {
                 continue;
             }
 
@@ -179,7 +179,7 @@ class BudgetItemSeeder extends Seeder
             ], $user);
         });
 
-        if (!$approve) {
+        if (! $approve) {
             return false;
         }
 

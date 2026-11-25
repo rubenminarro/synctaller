@@ -2,6 +2,4 @@
 
 namespace App\Exceptions;
 
-class AuditException extends AppException
-{
-}
+class AuditException extends AppException {}

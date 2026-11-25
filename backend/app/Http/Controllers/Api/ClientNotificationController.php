@@ -20,8 +20,7 @@ class ClientNotificationController extends Controller implements HasMiddleware
 
     public function __construct(
         protected ClientNotificationService $clientNotificationService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {
@@ -50,11 +49,11 @@ class ClientNotificationController extends Controller implements HasMiddleware
             200,
             [
                 'pagination' => [
-                    'total'       => $notifications->total(),
-                    'perPage'     => $notifications->perPage(),
+                    'total' => $notifications->total(),
+                    'perPage' => $notifications->perPage(),
                     'currentPage' => $notifications->currentPage(),
-                    'lastPage'    => $notifications->lastPage(),
-                ]
+                    'lastPage' => $notifications->lastPage(),
+                ],
             ]
         );
     }
@@ -71,11 +70,11 @@ class ClientNotificationController extends Controller implements HasMiddleware
             200,
             [
                 'pagination' => [
-                    'total'       => $notifications->total(),
-                    'perPage'     => $notifications->perPage(),
+                    'total' => $notifications->total(),
+                    'perPage' => $notifications->perPage(),
                     'currentPage' => $notifications->currentPage(),
-                    'lastPage'    => $notifications->lastPage(),
-                ]
+                    'lastPage' => $notifications->lastPage(),
+                ],
             ]
         );
     }

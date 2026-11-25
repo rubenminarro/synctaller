@@ -22,8 +22,7 @@ class WorkOrderClosingService
 {
     public function __construct(
         protected WorkOrderCommissionService $commissionService
-    ) {
-    }
+    ) {}
 
     /**
      * Congela el cierre y las comisiones. Se ejecuta dentro de la transacción
@@ -81,7 +80,7 @@ class WorkOrderClosingService
             if ($item->isCommissionable()) {
                 $budgetedLabor = bcadd($budgetedLabor, $itemTotal, 2);
 
-                if (!$isCancelled) {
+                if (! $isCancelled) {
                     $saleLabor = bcadd($saleLabor, $itemTotal, 2);
                 }
 
@@ -92,7 +91,7 @@ class WorkOrderClosingService
 
             // Repuesto fuera de catálogo: no tiene línea de consumo; se vende
             // lo presupuestado y su costo es desconocido.
-            if (!$isCancelled && $item->budgetItem?->part_id === null) {
+            if (! $isCancelled && $item->budgetItem?->part_id === null) {
                 $saleParts = bcadd($saleParts, $itemTotal, 2);
                 $partsWithoutCost++;
             }

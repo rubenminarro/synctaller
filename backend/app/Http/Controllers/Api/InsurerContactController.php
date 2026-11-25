@@ -21,8 +21,7 @@ class InsurerContactController extends Controller implements HasMiddleware
 
     public function __construct(
         protected InsurerService $insurerService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {

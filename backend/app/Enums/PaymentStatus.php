@@ -7,8 +7,9 @@ enum PaymentStatus: string
     case REGISTERED = 'registered';
     case CANCELLED = 'cancelled';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::REGISTERED => 'Registrado',
             self::CANCELLED => 'Anulado',
         };

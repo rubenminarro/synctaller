@@ -18,8 +18,7 @@ class InventoryOperationController extends Controller implements HasMiddleware
 
     public function __construct(
         protected InventoryService $inventoryService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {

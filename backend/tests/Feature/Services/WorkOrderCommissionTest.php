@@ -319,7 +319,7 @@ class WorkOrderCommissionTest extends WorkOrderPartsTestCase
     private function completeItems(array $workOrder, array $types): void
     {
         foreach ($workOrder['items'] as $item) {
-            if (!in_array($item['type']['value'], $types, true)) {
+            if (! in_array($item['type']['value'], $types, true)) {
                 continue;
             }
 

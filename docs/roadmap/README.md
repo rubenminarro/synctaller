@@ -7,7 +7,8 @@ original y no se renumeran. El detalle por módulo está en [`modules/README.md`
 
 | Fecha | Backend | Frontend | Notas |
 |---|---|---|---|
-| 2026-11-24 | 488 tests en verde, 8560 aserciones | Vitest en verde (43), lint y build | Commit inicial del monorepo. La API no se probó contra MySQL (estaba detenido) |
+| 2026-11-24 | 488 tests en verde, 8560 aserciones; Pint sin pendientes | Vitest en verde (43), ESLint y build | **Baseline** (historial 2.82): después de aplicar Pint a todo el backend. Desde acá, tests puntuales salvo pedido del usuario |
+| 2026-11-24 | 488 tests en verde, 8560 aserciones | Vitest en verde (43), lint y build | Commit inicial del monorepo |
 
 ## Próximas tareas
 

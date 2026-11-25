@@ -19,20 +19,20 @@ abstract class WorkOrderPartsTestCase extends InventoryTestCase
     /**
      * Crea un presupuesto en borrador con sus ítems cargados por API.
      *
-     * @param array<int, array<string, mixed>> $items
+     * @param  array<int, array<string, mixed>>  $items
      */
     protected function createBudgetWithItems(array $items): int
     {
         $user = User::first();
 
-        $brand = Brand::create(['name' => 'Marca ' . Str::random(6)]);
-        $model = VehicleModel::create(['brand_id' => $brand->id, 'name' => 'Modelo ' . Str::random(6)]);
+        $brand = Brand::create(['name' => 'Marca '.Str::random(6)]);
+        $model = VehicleModel::create(['brand_id' => $brand->id, 'name' => 'Modelo '.Str::random(6)]);
         $client = Client::create([
-            'document_number' => 'QA-' . random_int(100000, 999999),
+            'document_number' => 'QA-'.random_int(100000, 999999),
             'first_name' => 'Ana',
             'last_name' => 'Gomez',
-            'phone' => '0981' . random_int(100000, 999999),
-            'email' => 'qa-' . random_int(100000, 999999) . '@example.com',
+            'phone' => '0981'.random_int(100000, 999999),
+            'email' => 'qa-'.random_int(100000, 999999).'@example.com',
         ]);
         $vehicle = Vehicle::create([
             'client_id' => $client->id,
@@ -64,10 +64,10 @@ abstract class WorkOrderPartsTestCase extends InventoryTestCase
     protected function createMechanic(array $attributes = []): Mechanic
     {
         $user = User::create([
-            'name' => 'mec_' . Str::random(6),
+            'name' => 'mec_'.Str::random(6),
             'first_name' => 'Juan',
             'last_name' => 'Mecanico',
-            'email' => Str::random(10) . '@test.local',
+            'email' => Str::random(10).'@test.local',
             'password' => bcrypt('password'),
         ]);
 
@@ -75,7 +75,7 @@ abstract class WorkOrderPartsTestCase extends InventoryTestCase
 
         return Mechanic::create([
             'user_id' => $user->id,
-            'employee_code' => 'EMP-' . Str::upper(Str::random(5)),
+            'employee_code' => 'EMP-'.Str::upper(Str::random(5)),
             ...$attributes,
         ]);
     }

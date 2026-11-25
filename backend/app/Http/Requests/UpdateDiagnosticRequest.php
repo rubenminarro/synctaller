@@ -2,10 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\DiagnosticStatus;
+use App\Enums\Priority;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Enums\Priority;
-use App\Enums\DiagnosticStatus;
 use Illuminate\Validation\Rules\Enum;
 
 class UpdateDiagnosticRequest extends FormRequest
@@ -20,34 +20,34 @@ class UpdateDiagnosticRequest extends FormRequest
         return [
             'reception_id' => [
                 'sometimes',
-                Rule::exists('receptions', 'id')
+                Rule::exists('receptions', 'id'),
             ],
             // Los opcionales del alta (nullable) también se pueden vaciar al editar.
             'mechanic_id' => [
                 'sometimes',
                 'nullable',
-                Rule::exists('mechanics', 'id')->withoutTrashed()
+                Rule::exists('mechanics', 'id')->withoutTrashed(),
             ],
             'customer_complaint' => [
                 'sometimes',
                 'nullable',
                 'string',
                 'max:1000',
-                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u'
+                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u',
             ],
             'diagnosis' => [
                 'sometimes',
                 'nullable',
                 'string',
                 'max:1000',
-                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u'
+                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u',
             ],
             'recommendation' => [
                 'sometimes',
                 'nullable',
                 'string',
                 'max:1000',
-                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u'
+                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u',
             ],
             // priority no admite null en la base (default medium).
             'priority' => [
@@ -57,19 +57,19 @@ class UpdateDiagnosticRequest extends FormRequest
             ],
             'status' => [
                 'sometimes',
-                Rule::enum(DiagnosticStatus::class)
+                Rule::enum(DiagnosticStatus::class),
             ],
             'requires_parts' => [
                 'sometimes',
-                'boolean'
+                'boolean',
             ],
             'requires_repair' => [
                 'sometimes',
-                'boolean'
+                'boolean',
             ],
             'diagnosed_at' => [
                 'sometimes',
-                'date'
+                'date',
             ],
         ];
     }

@@ -2,10 +2,10 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 use App\Enums\BudgetItemResponsibility;
 use App\Enums\BudgetItemType;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
 class UpdateBudgetItemRequest extends FormRequest
@@ -20,7 +20,7 @@ class UpdateBudgetItemRequest extends FormRequest
         return [
             'type' => [
                 'sometimes',
-                Rule::enum(BudgetItemType::class)
+                Rule::enum(BudgetItemType::class),
             ],
             // Quién paga la línea; sin enviarlo, el dueño. 'insurer' exige un siniestro abierto (BudgetService).
             'responsibility' => [
@@ -44,7 +44,7 @@ class UpdateBudgetItemRequest extends FormRequest
                 'string',
                 'max:255',
                 // Mismos caracteres que el alta (incluye %).
-                'regex:/^[\pL\pN\s.,;:()\-#@!?%]*$/u'
+                'regex:/^[\pL\pN\s.,;:()\-#@!?%]*$/u',
             ],
             'quantity' => [
                 'sometimes',
@@ -74,13 +74,13 @@ class UpdateBudgetItemRequest extends FormRequest
                 'nullable',
                 'string',
                 'max:500',
-                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u'
+                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u',
             ],
         ];
     }
 
     public function messages(): array
-    {        
+    {
         return [
             'type' => [
                 Enum::class => 'El tipo debe ser un valor válido.',

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Receptions;
 
+use App\Enums\ReceptionStatus;
 use App\Models\Budget;
 use App\Models\Reception;
 use App\Models\ServiceCategory;
@@ -202,7 +203,7 @@ class ReceptionStatusTest extends WorkOrderPartsTestCase
         $reception = $this->receptionOf($budgetId);
 
         // Cerrada por fuera del flujo (p. ej. entregada con un borrador complementario sin enviar).
-        $reception->update(['status' => \App\Enums\ReceptionStatus::DELIVERED]);
+        $reception->update(['status' => ReceptionStatus::DELIVERED]);
 
         $this->patchJson("/api/budgets/{$budgetId}", ['notes' => 'Cambio'])->assertStatus(422)->assertJsonPath('error_code', 'RECEPTION_CLOSED');
         $this->postJson("/api/budgets/{$budgetId}/items", $this->labor())->assertStatus(422)->assertJsonPath('error_code', 'RECEPTION_CLOSED');

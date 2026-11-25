@@ -18,8 +18,7 @@ class SendClientNotification implements ShouldQueue
 
     public function __construct(
         public readonly int $clientNotificationId
-    ) {
-    }
+    ) {}
 
     public function handle(ClientNotificationService $service): void
     {

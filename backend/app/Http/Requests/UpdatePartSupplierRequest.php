@@ -11,7 +11,7 @@ class UpdatePartSupplierRequest extends AttachPartSupplierRequest
 
     public function rules(): array
     {
-        
+
         return [
             // Igual que al vincular: código y último costo se pueden vaciar; el costo con los mismos límites.
             'supplier_part_code' => [

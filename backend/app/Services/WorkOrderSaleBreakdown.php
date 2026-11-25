@@ -33,7 +33,7 @@ class WorkOrderSaleBreakdown
             }
 
             // Los repuestos de catálogo se venden por lo consumido (abajo).
-            if (!$item->isCommissionable() && $budgetItem->part_id !== null) {
+            if (! $item->isCommissionable() && $budgetItem->part_id !== null) {
                 continue;
             }
 

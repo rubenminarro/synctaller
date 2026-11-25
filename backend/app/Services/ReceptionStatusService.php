@@ -31,8 +31,7 @@ class ReceptionStatusService
         protected ClientNotificationService $clientNotificationService,
         protected ClaimStatusService $claimStatusService,
         protected InsurerAuthorizationService $insurerAuthorizationService
-    ) {
-    }
+    ) {}
 
     /**
      * Recalcula el estado. Llamar dentro de la transacción del evento

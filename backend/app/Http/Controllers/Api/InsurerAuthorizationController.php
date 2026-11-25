@@ -23,8 +23,7 @@ class InsurerAuthorizationController extends Controller implements HasMiddleware
 
     public function __construct(
         protected InsurerAuthorizationService $authorizationService
-    ) {
-    }
+    ) {}
 
     public static function middleware(): array
     {

@@ -29,8 +29,7 @@ class DocumentPdfService
 {
     public function __construct(
         private readonly BrandingService $brandingService
-    ) {
-    }
+    ) {}
 
     /**
      * @return array{filename: string, content: string}
@@ -206,12 +205,12 @@ class DocumentPdfService
      */
     private function signature(?string $path): ?string
     {
-        if ($path === null || !Storage::disk('public')->exists($path)) {
+        if ($path === null || ! Storage::disk('public')->exists($path)) {
             return null;
         }
 
         $mime = Storage::disk('public')->mimeType($path) ?: 'image/png';
 
-        return "data:{$mime};base64," . base64_encode(Storage::disk('public')->get($path));
+        return "data:{$mime};base64,".base64_encode(Storage::disk('public')->get($path));
     }
 }

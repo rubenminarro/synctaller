@@ -11,8 +11,9 @@ enum DiagnosticItemStatus: string
     case REPLACE_REQUIRED = 'replace_required';
     case NOT_APPLICABLE = 'not_applicable';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::PENDING => 'Pendiente',
             self::OK => 'OK',
             self::OBSERVATION => 'Observación',

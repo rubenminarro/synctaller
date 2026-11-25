@@ -20,10 +20,10 @@ class InternalNotificationTest extends InvoiceTestCase
     private function userWithRole(string $role): User
     {
         $user = User::create([
-            'name' => $role . '_' . Str::random(6),
+            'name' => $role.'_'.Str::random(6),
             'first_name' => 'Test',
             'last_name' => ucfirst($role),
-            'email' => Str::random(10) . '@test.local',
+            'email' => Str::random(10).'@test.local',
             'password' => bcrypt('password'),
         ]);
 

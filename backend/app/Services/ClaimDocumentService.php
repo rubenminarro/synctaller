@@ -26,8 +26,7 @@ class ClaimDocumentService
 
     public function __construct(
         protected AuditLogger $auditLogger
-    ) {
-    }
+    ) {}
 
     /**
      * Ruta interna del archivo. T4 (storage por taller) cambiará solo la raíz del disco.
@@ -41,7 +40,7 @@ class ClaimDocumentService
     {
         // Extensión según el tipo real del contenido (no la del nombre que mandó el cliente).
         $extension = $file->extension() === 'jpeg' ? 'jpg' : $file->extension();
-        $path = self::pathFor($claim, Str::uuid() . ".{$extension}");
+        $path = self::pathFor($claim, Str::uuid().".{$extension}");
         $stored = false;
 
         try {
@@ -91,7 +90,7 @@ class ClaimDocumentService
     {
         $disk = Storage::disk(self::DISK);
 
-        if (!$disk->exists($document->path)) {
+        if (! $disk->exists($document->path)) {
             throw new ClaimException(
                 'El archivo del documento no está disponible.',
                 404,

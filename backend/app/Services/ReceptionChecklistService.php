@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\CheckListItem;
 use App\Models\ReceptionCheckList;
 use App\Models\ReceptionCheckListItem;
-use App\Models\CheckListItem;
 
 class ReceptionChecklistService
 {
@@ -15,15 +15,15 @@ class ReceptionChecklistService
             'serviceCategories',
             fn ($query) => $query->whereIn('service_categories.id', $serviceCategoryIds)
         )
-        ->distinct()
-        ->get();
+            ->distinct()
+            ->get();
 
         foreach ($items as $item) {
             ReceptionCheckListItem::create([
                 'reception_check_list_id' => $checkList->id,
-                'check_list_item_id'      => $item->id,
-                'value'                   => null,
-                'observation'             => null,
+                'check_list_item_id' => $item->id,
+                'value' => null,
+                'observation' => null,
             ]);
         }
     }

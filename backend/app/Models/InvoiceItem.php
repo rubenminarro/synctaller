@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use App\Traits\Auditable;
 use App\Enums\TaxRate;
 use App\Support\Decimal;
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;

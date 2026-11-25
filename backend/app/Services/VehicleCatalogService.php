@@ -35,7 +35,7 @@ class VehicleCatalogService
             }
 
             // El nombre queda libre para otra marca.
-            $brand->name = $brand->name . '//deleted_' . now()->timestamp;
+            $brand->name = $brand->name.'//deleted_'.now()->timestamp;
             $brand->save();
 
             $brand->delete();
@@ -55,7 +55,7 @@ class VehicleCatalogService
             }
 
             // El nombre queda libre para otro modelo.
-            $vehicleModel->name = $vehicleModel->name . '//deleted_' . now()->timestamp;
+            $vehicleModel->name = $vehicleModel->name.'//deleted_'.now()->timestamp;
             $vehicleModel->save();
 
             $vehicleModel->delete();

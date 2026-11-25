@@ -6,7 +6,7 @@ Desde la raíz:
 
 ```bash
 npm test               # backend y frontend
-npm run lint           # ESLint del frontend
+npm run lint           # Pint (--test) y ESLint
 npm run build          # tsc -b y build del frontend
 ```
 

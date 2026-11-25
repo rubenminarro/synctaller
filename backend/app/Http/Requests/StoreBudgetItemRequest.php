@@ -2,10 +2,10 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 use App\Enums\BudgetItemResponsibility;
 use App\Enums\BudgetItemType;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
 class StoreBudgetItemRequest extends FormRequest
@@ -20,7 +20,7 @@ class StoreBudgetItemRequest extends FormRequest
         return [
             'type' => [
                 'required',
-                Rule::enum(BudgetItemType::class)
+                Rule::enum(BudgetItemType::class),
             ],
             // Quién paga la línea; sin enviarlo, el dueño. 'insurer' exige un siniestro abierto (BudgetService).
             'responsibility' => [
@@ -43,7 +43,7 @@ class StoreBudgetItemRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                'regex:/^[\pL\pN\s.,;:()\-#@!?%]*$/u'
+                'regex:/^[\pL\pN\s.,;:()\-#@!?%]*$/u',
             ],
             'quantity' => [
                 'required',
@@ -54,7 +54,7 @@ class StoreBudgetItemRequest extends FormRequest
             ],
             'unit_price' => [
                 // Un servicio del catálogo toma su precio estándar si no se informa.
-                Rule::requiredIf(fn () => !(
+                Rule::requiredIf(fn () => ! (
                     $this->input('type') === BudgetItemType::SERVICE->value && $this->filled('service_id')
                 )),
                 'nullable',
@@ -75,7 +75,7 @@ class StoreBudgetItemRequest extends FormRequest
                 'nullable',
                 'string',
                 'max:500',
-                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u'
+                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u',
             ],
 
         ];

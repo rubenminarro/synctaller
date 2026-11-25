@@ -130,7 +130,7 @@ class VehicleHistoryService
                 'mileage' => (int) $r->mileage,
                 'source' => 'reception',
                 'reference_id' => $r->id,
-                'order' => $r->reception_date->toDateString() . ' ' . $r->created_at?->format('H:i:s') . ' 0',
+                'order' => $r->reception_date->toDateString().' '.$r->created_at?->format('H:i:s').' 0',
             ]);
 
         $deliveries = VehicleDelivery::query()
@@ -142,7 +142,7 @@ class VehicleHistoryService
                 'mileage' => (int) $d->final_mileage,
                 'source' => 'delivery',
                 'reference_id' => $d->id,
-                'order' => $d->delivered_at->format('Y-m-d H:i:s') . ' 1',
+                'order' => $d->delivered_at->format('Y-m-d H:i:s').' 1',
             ]);
 
         $previous = null;

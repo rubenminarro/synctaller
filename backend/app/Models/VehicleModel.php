@@ -9,12 +9,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class VehicleModel extends Model
 {
-    
     use SoftDeletes;
 
     protected $fillable = [
-        'brand_id', 
-        'name'
+        'brand_id',
+        'name',
     ];
 
     public function brand(): BelongsTo

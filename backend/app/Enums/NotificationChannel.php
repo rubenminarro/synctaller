@@ -9,8 +9,9 @@ enum NotificationChannel: string
 {
     case MAIL = 'mail';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::MAIL => 'Email',
         };
     }

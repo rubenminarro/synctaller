@@ -2,6 +2,4 @@
 
 namespace App\Exceptions;
 
-class InventoryException extends AppException
-{
-}
+class InventoryException extends AppException {}

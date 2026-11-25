@@ -2,6 +2,4 @@
 
 namespace App\Exceptions;
 
-class VehicleDeliveryException extends AppException
-{
-}
+class VehicleDeliveryException extends AppException {}

@@ -11,8 +11,9 @@ enum ClientNotificationType: string
     case MAINTENANCE_DUE_SOON = 'maintenance_due_soon';
     case MAINTENANCE_OVERDUE = 'maintenance_overdue';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::BUDGET_SENT => 'Presupuesto enviado',
             self::VEHICLE_READY => 'Vehículo listo',
             self::INVOICE_DUE_SOON => 'Factura por vencer',

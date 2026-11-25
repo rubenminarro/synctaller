@@ -33,17 +33,18 @@ use Illuminate\Support\Collection;
 class ClaimSummaryService
 {
     public const BUDGETS = 'budgets';
+
     public const ALLOCATIONS = 'allocations';
+
     public const BILLING = 'billing';
 
     public function __construct(
         protected OwnerShareService $ownerShare,
         protected AllocationBillingService $allocationBilling
-    ) {
-    }
+    ) {}
 
     /**
-     * @param string[] $blocks bloques visibles (BUDGETS, ALLOCATIONS, BILLING)
+     * @param  string[]  $blocks  bloques visibles (BUDGETS, ALLOCATIONS, BILLING)
      */
     public function summary(Claim $claim, array $blocks): array
     {
@@ -228,7 +229,7 @@ class ClaimSummaryService
                 'owner_amount' => $this->sum($rows->pluck('owner_amount')),
                 'workshop_amount' => $this->sum($rows->pluck('workshop_amount')),
                 'deductible_amount' => $deductible,
-                'deductible_fiscal_pending' => bccomp($deductible, '0', 2) > 0 && !$this->allocationBilling->deductibleInvoiced($claim),
+                'deductible_fiscal_pending' => bccomp($deductible, '0', 2) > 0 && ! $this->allocationBilling->deductibleInvoiced($claim),
             ],
             'work_orders' => $rows->values(),
         ];
@@ -311,7 +312,7 @@ class ClaimSummaryService
             if ($claim->deductible_amount === null) {
                 $alerts[] = 'El deducible del siniestro es desconocido: el reparto no se confirma y la recepción no se entrega hasta informarlo.';
             } elseif (bccomp((string) $claim->deductible_amount, '0', 2) > 0) {
-                if (!$this->allocationBilling->netMode($claim)) {
+                if (! $this->allocationBilling->netMode($claim)) {
                     $alerts[] = 'El deducible del siniestro es mayor a 0 y no tiene la modalidad neta: no se factura ni se entrega por el flujo habitual (decisión A).';
                 } elseif ($claim->deductible_includes_tax === null) {
                     $alerts[] = 'Indique si el deducible del siniestro incluye el IVA: sin eso no se reparte ni se factura.';
@@ -320,17 +321,17 @@ class ClaimSummaryService
         }
 
         foreach ($workOrders as $workOrder) {
-            if ($workOrder->status !== WorkOrderStatus::COMPLETED || !$workOrder->budget || !$this->ownerShare->hasInsurerItems($workOrder->budget)) {
+            if ($workOrder->status !== WorkOrderStatus::COMPLETED || ! $workOrder->budget || ! $this->ownerShare->hasInsurerItems($workOrder->budget)) {
                 continue;
             }
 
             $allocation = $this->confirmedAllocation($workOrder, $claim);
 
-            if (!$allocation) {
+            if (! $allocation) {
                 if (in_array(self::ALLOCATIONS, $blocks, true)) {
                     $alerts[] = "La OT {$workOrder->code} no tiene un reparto confirmado.";
                 }
-            } elseif (in_array(self::BILLING, $blocks, true) && !$this->allocationBilling->isFullyInvoiced($allocation)) {
+            } elseif (in_array(self::BILLING, $blocks, true) && ! $this->allocationBilling->isFullyInvoiced($allocation)) {
                 $alerts[] = "Al reparto de la OT {$workOrder->code} le faltan porciones por facturar o emitir.";
             }
         }

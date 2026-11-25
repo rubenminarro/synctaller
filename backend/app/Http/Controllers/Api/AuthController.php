@@ -4,24 +4,22 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\AuditEvent;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\LoginRequest;
+use App\Http\Resources\UserResource;
 use App\Models\Permission;
 use App\Services\AuditLogger;
 use App\Services\UserPreferenceService;
-use Illuminate\Http\Request;
-use App\Http\Requests\LoginRequest;
-use Illuminate\Support\Facades\Auth;
 use App\Traits\ApiResponse;
-use App\Http\Resources\UserResource;
-
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    
     use ApiResponse;
-    
+
     public function login(LoginRequest $request, AuditLogger $auditLogger)
     {
-        if (!Auth::attempt($request->validated())) {
+        if (! Auth::attempt($request->validated())) {
             // Sin usuario: se guarda el email intentado.
             $auditLogger->record(AuditEvent::LOGIN_FAILED, null, null, ['email' => $request->input('email')]);
 
@@ -35,7 +33,7 @@ class AuthController extends Controller
             );
         }
 
-        $user  = Auth::user();
+        $user = Auth::user();
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -45,7 +43,7 @@ class AuthController extends Controller
             'Inicio de sesión exitoso.',
             [
                 'token' => $token,
-                'user'  => new UserResource($user->load('roles'))
+                'user' => new UserResource($user->load('roles')),
             ]
         );
     }
@@ -65,12 +63,12 @@ class AuthController extends Controller
         return $this->successResponse(
             'Usuario autenticado.',
             [
-                'user'        => new UserResource($user->load('roles')),
+                'user' => new UserResource($user->load('roles')),
                 'permissions' => $permissions->sort()->values(),
-                'mechanic'    => $mechanic ? [
-                    'id'            => $mechanic->id,
+                'mechanic' => $mechanic ? [
+                    'id' => $mechanic->id,
                     'employee_code' => $mechanic->employee_code,
-                    'full_name'     => $mechanic->fullName(),
+                    'full_name' => $mechanic->fullName(),
                 ] : null,
                 // Preferencias visuales completas: el frontend las aplica al hidratar la sesión.
                 'preferences' => $userPreferenceService->get($user),

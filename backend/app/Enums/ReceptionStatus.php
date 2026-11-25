@@ -11,9 +11,9 @@ enum ReceptionStatus: string
     case DELIVERED = 'delivered';
     case CANCELLED = 'cancelled';
 
-
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::PENDING => 'Pendiente',
             self::IN_PROGRESS => 'En proceso',
             self::REPAIR => 'En reparación',
@@ -42,7 +42,7 @@ enum ReceptionStatus: string
      */
     public function isClosed(): bool
     {
-        return !$this->isOpen();
+        return ! $this->isOpen();
     }
 
     /**

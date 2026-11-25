@@ -244,6 +244,6 @@ class SupplierPaymentService
     {
         $nextId = (SupplierPayment::lockForUpdate()->max('id') ?? 0) + 1;
 
-        return 'PAG-' . str_pad($nextId, 6, '0', STR_PAD_LEFT);
+        return 'PAG-'.str_pad($nextId, 6, '0', STR_PAD_LEFT);
     }
 }

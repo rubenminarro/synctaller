@@ -3,20 +3,19 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Http\Requests\StoreVehicleModelRequest;
-use App\Http\Resources\ShowVehicleModelResource;
 use App\Http\Requests\UpdateVehicleModelRequest;
+use App\Http\Resources\ShowVehicleModelResource;
 use App\Http\Resources\VehicleModelResource;
 use App\Models\VehicleModel;
 use App\Services\VehicleCatalogService;
 use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
 class VehicleModelController extends Controller implements HasMiddleware
 {
-    
     use ApiResponse;
 
     public static function middleware(): array
@@ -32,28 +31,28 @@ class VehicleModelController extends Controller implements HasMiddleware
 
     public function index(Request $request)
     {
-        
-        $vehicleModels = VehicleModel::query()
-        ->with(['brand'])
-        ->when($request->filled('brand_id'), function ($query) use ($request) {
-            $query->where('brand_id', $request->brand_id);
-        })
-        ->when($request->filled('search'), function ($query) use ($request) {
-            
-            $search = $request->search;
 
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhereHas('brand', function ($q2) use ($search) {
-                        $q2->where('name', 'like', "%{$search}%");
-                    }
-                );
-            });
-        })
-        ->latest()
-        ->paginate(
-            $request->per_page ?? 10
-        );
+        $vehicleModels = VehicleModel::query()
+            ->with(['brand'])
+            ->when($request->filled('brand_id'), function ($query) use ($request) {
+                $query->where('brand_id', $request->brand_id);
+            })
+            ->when($request->filled('search'), function ($query) use ($request) {
+
+                $search = $request->search;
+
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhereHas('brand', function ($q2) use ($search) {
+                            $q2->where('name', 'like', "%{$search}%");
+                        }
+                        );
+                });
+            })
+            ->latest()
+            ->paginate(
+                $request->per_page ?? 10
+            );
 
         return $this->successResponse(
             'Modelos de vehículo obtenidos correctamente.',
@@ -61,11 +60,11 @@ class VehicleModelController extends Controller implements HasMiddleware
             200,
             [
                 'pagination' => [
-                    'total'       => $vehicleModels->total(),
-                    'perPage'     => $vehicleModels->perPage(),
+                    'total' => $vehicleModels->total(),
+                    'perPage' => $vehicleModels->perPage(),
                     'currentPage' => $vehicleModels->currentPage(),
-                    'lastPage'    => $vehicleModels->lastPage(),
-                ]
+                    'lastPage' => $vehicleModels->lastPage(),
+                ],
             ]
         );
     }
@@ -86,7 +85,7 @@ class VehicleModelController extends Controller implements HasMiddleware
     public function show(VehicleModel $vehicleModel)
     {
         return $this->successResponse(
-            'Modelo de vehículo encontrado.', 
+            'Modelo de vehículo encontrado.',
             new ShowVehicleModelResource($vehicleModel),
             200
         );

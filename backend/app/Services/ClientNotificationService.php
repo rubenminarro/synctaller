@@ -32,8 +32,7 @@ class ClientNotificationService
 {
     public function __construct(
         protected DocumentPdfService $documentPdfService
-    ) {
-    }
+    ) {}
 
     /**
      * Registra un aviso automático. Con clave de deduplicación, un aviso ya
@@ -87,7 +86,7 @@ class ClientNotificationService
                 );
             }
 
-            if (!$client->notifications_enabled) {
+            if (! $client->notifications_enabled) {
                 throw new NotificationException(
                     'El cliente desactivó los avisos.',
                     422,
@@ -181,7 +180,7 @@ class ClientNotificationService
         ?string $skipReason = null
     ): ClientNotification {
         $skipReason ??= match (true) {
-            !$client->notifications_enabled => 'El cliente desactivó los avisos.',
+            ! $client->notifications_enabled => 'El cliente desactivó los avisos.',
             blank($client->email) => 'El cliente no tiene email registrado.',
             default => null,
         };
@@ -265,8 +264,8 @@ class ClientNotificationService
 
         $plan = $maintenance->plan->name;
         $due = collect([
-            $maintenance->next_due_at ? 'el ' . $maintenance->next_due_at->format('d/m/Y') : null,
-            $maintenance->next_due_mileage !== null ? 'a los ' . number_format($maintenance->next_due_mileage, 0, ',', '.') . ' km' : null,
+            $maintenance->next_due_at ? 'el '.$maintenance->next_due_at->format('d/m/Y') : null,
+            $maintenance->next_due_mileage !== null ? 'a los '.number_format($maintenance->next_due_mileage, 0, ',', '.').' km' : null,
         ])->filter()->implode(' o ');
 
         return [
@@ -275,7 +274,7 @@ class ClientNotificationService
                 ($overdue
                     ? "El mantenimiento \"{$plan}\" de su vehículo {$this->vehicleLabel($maintenance->vehicle)} está vencido"
                     : "El mantenimiento \"{$plan}\" de su vehículo {$this->vehicleLabel($maintenance->vehicle)} está próximo a vencer")
-                    . ($due !== '' ? " (vence {$due})." : '.'),
+                    .($due !== '' ? " (vence {$due})." : '.'),
                 'Comuníquese con el taller para agendar el servicio.',
             ],
         ];
@@ -290,7 +289,7 @@ class ClientNotificationService
         $name = trim("{$vehicle->brand?->name} {$vehicle->vehicleModel?->name}");
         $identifier = $vehicle->plate ?: $vehicle->chassis;
 
-        return trim($name . ($identifier ? " ({$identifier})" : ''));
+        return trim($name.($identifier ? " ({$identifier})" : ''));
     }
 
     private function money(int|float|string|null $amount): string

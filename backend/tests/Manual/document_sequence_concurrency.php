@@ -19,9 +19,9 @@ use App\Services\DocumentSequenceService;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\DB;
 
-require __DIR__ . '/../../vendor/autoload.php';
+require __DIR__.'/../../vendor/autoload.php';
 
-$app = require __DIR__ . '/../../bootstrap/app.php';
+$app = require __DIR__.'/../../bootstrap/app.php';
 $app->make(Kernel::class)->bootstrap();
 
 $series = DocumentSeries::SERVICE;
@@ -46,7 +46,7 @@ if (($argv[1] ?? null) === '--child') {
 }
 
 if (DB::connection()->getDriverName() !== 'mysql') {
-    fwrite(STDERR, "Esta prueba es para MySQL (conexión actual: " . DB::connection()->getDriverName() . ").\n");
+    fwrite(STDERR, 'Esta prueba es para MySQL (conexión actual: '.DB::connection()->getDriverName().").\n");
     exit(1);
 }
 
@@ -55,8 +55,8 @@ $perProcess = (int) ($argv[2] ?? 25);
 
 $original = DB::table('document_sequences')->where('key', $series->value)->first();
 
-echo "Serie {$series->value}: " . ($original ? "next_value {$original->next_value}" : 'sin fila (se prueba también el primer uso)') . PHP_EOL;
-echo "{$processes} procesos × {$perProcess} códigos" . PHP_EOL;
+echo "Serie {$series->value}: ".($original ? "next_value {$original->next_value}" : 'sin fila (se prueba también el primer uso)').PHP_EOL;
+echo "{$processes} procesos × {$perProcess} códigos".PHP_EOL;
 
 $handles = [];
 
@@ -95,17 +95,17 @@ if ($original === null) {
     DB::table('document_sequences')->where('key', $series->value)->update(['next_value' => $original->next_value]);
 }
 
-echo 'Códigos obtenidos: ' . count($codes) . ' (esperados ' . ($processes * $perProcess) . ')' . PHP_EOL;
-echo 'Repetidos: ' . count($duplicates) . ($duplicates ? ' → ' . implode(', ', array_slice($duplicates, 0, 10)) : '') . PHP_EOL;
-echo 'Errores: ' . count($errors) . PHP_EOL;
+echo 'Códigos obtenidos: '.count($codes).' (esperados '.($processes * $perProcess).')'.PHP_EOL;
+echo 'Repetidos: '.count($duplicates).($duplicates ? ' → '.implode(', ', array_slice($duplicates, 0, 10)) : '').PHP_EOL;
+echo 'Errores: '.count($errors).PHP_EOL;
 
 foreach (array_slice($errors, 0, 5) as $error) {
-    echo "  {$error}" . PHP_EOL;
+    echo "  {$error}".PHP_EOL;
 }
 
-echo 'Contador restaurado.' . PHP_EOL;
+echo 'Contador restaurado.'.PHP_EOL;
 
-$ok = !$duplicates && !$errors && count($codes) === $processes * $perProcess;
-echo $ok ? 'OK' . PHP_EOL : 'FALLA' . PHP_EOL;
+$ok = ! $duplicates && ! $errors && count($codes) === $processes * $perProcess;
+echo $ok ? 'OK'.PHP_EOL : 'FALLA'.PHP_EOL;
 
 exit($ok ? 0 : 1);

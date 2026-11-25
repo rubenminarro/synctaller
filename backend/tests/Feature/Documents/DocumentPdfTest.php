@@ -40,7 +40,7 @@ class DocumentPdfTest extends InvoiceTestCase
     {
         $invoice = $this->readyInvoice();
 
-        if (!InvoiceStamp::exists()) {
+        if (! InvoiceStamp::exists()) {
             $this->createStamp()->assertCreated();
         }
 

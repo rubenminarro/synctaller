@@ -34,7 +34,7 @@ class IndexClientNotificationRequest extends FormRequest
                 'integer' => 'El ID del cliente debe ser un número entero.',
             ],
             'type' => [
-                Enum::class => 'El tipo debe ser ' . implode(', ', ClientNotificationType::values()) . '.',
+                Enum::class => 'El tipo debe ser '.implode(', ', ClientNotificationType::values()).'.',
             ],
             'status' => [
                 Enum::class => 'El estado debe ser pending, sent, failed o skipped.',

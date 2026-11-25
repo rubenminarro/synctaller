@@ -43,7 +43,7 @@ class ServiceSeeder extends Seeder
 
             $category = ServiceCategory::where('code', $data['category'])->first();
 
-            if (!$category) {
+            if (! $category) {
                 continue;
             }
 

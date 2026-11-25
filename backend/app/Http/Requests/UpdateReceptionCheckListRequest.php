@@ -2,11 +2,11 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\CheckListValue;
+use App\Models\ReceptionCheckListItem;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Models\ReceptionCheckListItem;
 use Illuminate\Validation\Rules\Enum;
-use App\Enums\CheckListValue;
 
 class UpdateReceptionCheckListRequest extends FormRequest
 {
@@ -17,7 +17,7 @@ class UpdateReceptionCheckListRequest extends FormRequest
 
     public function rules(): array
     {
-        
+
         $rules = [
             'items' => [
                 'required',
@@ -25,27 +25,27 @@ class UpdateReceptionCheckListRequest extends FormRequest
                 'min:1',
             ],
             'items.*.id' => [
-                'required', 
-                Rule::exists('reception_check_list_items', 'id')
+                'required',
+                Rule::exists('reception_check_list_items', 'id'),
             ],
             'items.*.observation' => [
-                'nullable', 
-                'string', 
-                'max:500', 
-                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u'
+                'nullable',
+                'string',
+                'max:500',
+                'regex:/^[\pL\pN\s.,;:()\-#@!?]*$/u',
             ],
         ];
-        
+
         $typeRules = [
             'boolean' => 'boolean',
-            'number'  => 'numeric',
-            'text'    => 'string',
+            'number' => 'numeric',
+            'text' => 'string',
         ];
 
         $pivotIds = collect($this->input('items'))->pluck('id')->filter()->toArray();
 
-        if (!empty($pivotIds)) {
-            
+        if (! empty($pivotIds)) {
+
             $receptionItems = ReceptionCheckListItem::with('checkListItem')
                 ->whereIn('id', $pivotIds)
                 ->get()
@@ -56,7 +56,7 @@ class UpdateReceptionCheckListRequest extends FormRequest
                 $receptionItem = $receptionItems->get($pivotId);
 
                 $dbType = $receptionItem?->checkListItem?->type;
-                
+
                 if ($dbType) {
                     $valueRules = ['nullable'];
 

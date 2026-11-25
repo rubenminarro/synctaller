@@ -22,7 +22,7 @@ class InventorySeeder extends Seeder
         $user = User::where('email', 'deposito1@mail.com.py')->first()
             ?? User::where('email', 'admin@mail.com.py')->first();
 
-        if (!$user) {
+        if (! $user) {
             return;
         }
 
@@ -48,7 +48,7 @@ class InventorySeeder extends Seeder
         foreach ($initialStock as $sku => $quantity) {
             $part = Part::where('sku', $sku)->first();
 
-            if (!$part || $part->status === PartStatus::DISCONTINUED || $part->movements()->exists()) {
+            if (! $part || $part->status === PartStatus::DISCONTINUED || $part->movements()->exists()) {
                 continue;
             }
 

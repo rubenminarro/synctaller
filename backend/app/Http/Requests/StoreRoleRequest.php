@@ -11,14 +11,14 @@ class StoreRoleRequest extends FormRequest
     {
         return true;
     }
-    
+
     public function rules(): array
     {
         return [
             'name' => [
-                'required', 
+                'required',
                 'string',
-                'alpha_dash', 
+                'alpha_dash',
                 'lowercase',
                 'min:4',
                 'max:200',
@@ -26,10 +26,10 @@ class StoreRoleRequest extends FormRequest
             ],
             'description' => [
                 'required',
-                'string', 
-                'min:10', 
-                'max:100', 
-                'regex:/^[a-zA-Z\sñÑáéíóúÁÉÍÓÚ]+$/u'
+                'string',
+                'min:10',
+                'max:100',
+                'regex:/^[a-zA-Z\sñÑáéíóúÁÉÍÓÚ]+$/u',
             ],
             'guard_name' => [
                 'required',

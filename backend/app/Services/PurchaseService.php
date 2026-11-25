@@ -29,8 +29,7 @@ class PurchaseService
     public function __construct(
         protected InventoryService $inventoryService,
         protected DocumentSequenceService $documentSequences
-    ) {
-    }
+    ) {}
 
     public function create(array $data, User $user): Purchase
     {
@@ -269,7 +268,7 @@ class PurchaseService
      */
     private function ensureReceivableDocument(Purchase $purchase): void
     {
-        if (!$purchase->supplier_document_number || !$purchase->supplier_document_date) {
+        if (! $purchase->supplier_document_number || ! $purchase->supplier_document_date) {
             throw new PurchaseException(
                 'Para recibir la compra se requieren el número y la fecha de la factura del proveedor.',
                 422,
@@ -278,7 +277,7 @@ class PurchaseService
         }
 
         if ($purchase->condition === InvoiceCondition::CREDIT) {
-            if (!$purchase->due_date || $purchase->due_date->lt($purchase->supplier_document_date)) {
+            if (! $purchase->due_date || $purchase->due_date->lt($purchase->supplier_document_date)) {
                 throw new PurchaseException(
                     'Una compra a crédito requiere un vencimiento igual o posterior a la fecha de la factura.',
                     422,
@@ -379,7 +378,7 @@ class PurchaseService
     {
         $supplier = Supplier::findOrFail($supplierId);
 
-        if (!$supplier->is_active) {
+        if (! $supplier->is_active) {
             throw new SupplierException(
                 'El proveedor seleccionado está inactivo.',
                 422,

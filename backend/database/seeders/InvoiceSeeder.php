@@ -23,7 +23,7 @@ class InvoiceSeeder extends Seeder
             $workOrder = isset($scenario['billing']) ? BudgetSeeder::of($scenario)?->workOrder : null;
 
             // Idempotente: una OT ya facturada (aun con la factura anulada) no se vuelve a facturar.
-            if (!$workOrder || Invoice::where('work_order_id', $workOrder->id)->exists()) {
+            if (! $workOrder || Invoice::where('work_order_id', $workOrder->id)->exists()) {
                 continue;
             }
 

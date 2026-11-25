@@ -28,11 +28,11 @@ class ClientKindTest extends PartsTestCase
     private function personPayload(array $overrides = []): array
     {
         return [
-            'document_number' => 'CI-' . Str::random(6),
+            'document_number' => 'CI-'.Str::random(6),
             'first_name' => 'Ana',
             'last_name' => 'Gomez',
-            'email' => Str::lower(Str::random(8)) . '@example.com',
-            'phone' => '+595981' . random_int(100000, 999999),
+            'email' => Str::lower(Str::random(8)).'@example.com',
+            'phone' => '+595981'.random_int(100000, 999999),
             ...$overrides,
         ];
     }
@@ -41,10 +41,10 @@ class ClientKindTest extends PartsTestCase
     {
         return [
             'kind' => 'company',
-            'document_number' => '80012345-' . random_int(1, 9),
+            'document_number' => '80012345-'.random_int(1, 9),
             'business_name' => 'Seguros del Sur S.A.',
-            'email' => Str::lower(Str::random(8)) . '@example.com',
-            'phone' => '+595211' . random_int(100000, 999999),
+            'email' => Str::lower(Str::random(8)).'@example.com',
+            'phone' => '+595211'.random_int(100000, 999999),
             'address' => 'Av. Mcal. López 1234, Asunción',
             ...$overrides,
         ];
@@ -52,12 +52,12 @@ class ClientKindTest extends PartsTestCase
 
     private function vehicleOf(Client $client): Vehicle
     {
-        $brand = Brand::create(['name' => 'Marca ' . Str::random(6)]);
+        $brand = Brand::create(['name' => 'Marca '.Str::random(6)]);
 
         return Vehicle::create([
             'client_id' => $client->id,
             'brand_id' => $brand->id,
-            'vehicle_model_id' => VehicleModel::create(['brand_id' => $brand->id, 'name' => 'Modelo ' . Str::random(6)])->id,
+            'vehicle_model_id' => VehicleModel::create(['brand_id' => $brand->id, 'name' => 'Modelo '.Str::random(6)])->id,
             'plate' => Str::upper(Str::random(7)),
         ]);
     }
@@ -198,7 +198,7 @@ class ClientKindTest extends PartsTestCase
         ] as $attributes) {
             try {
                 DB::table('clients')->insert($row + $attributes + ['created_at' => now(), 'updated_at' => now()]);
-                $this->fail('La base aceptó ' . json_encode($attributes));
+                $this->fail('La base aceptó '.json_encode($attributes));
             } catch (QueryException) {
                 $this->assertDatabaseMissing('clients', ['document_number' => $attributes['document_number'] ?? 'x', 'email' => $attributes['email'] ?? 'x']);
             }

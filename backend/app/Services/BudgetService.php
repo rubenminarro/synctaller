@@ -2,26 +2,26 @@
 
 namespace App\Services;
 
-use App\Models\Budget;
-use App\Models\BudgetClientAcceptance;
-use App\Models\BudgetItem;
-use App\Models\Diagnostic;
-use App\Models\Part;
-use App\Models\Service;
-use App\Enums\BudgetItemType;
 use App\Enums\BudgetItemResponsibility;
+use App\Enums\BudgetItemType;
 use App\Enums\BudgetStatus;
 use App\Enums\ClaimStatus;
 use App\Enums\ClientAcceptanceKind;
-use App\Models\Claim;
-use App\Models\User;
-use App\Enums\DiagnosticStatus;
-use App\Enums\WorkOrderStatus;
-use App\Enums\DocumentSeries;
 use App\Enums\ClientNotificationType;
+use App\Enums\DiagnosticStatus;
+use App\Enums\DocumentSeries;
+use App\Enums\WorkOrderStatus;
 use App\Exceptions\BudgetException;
 use App\Exceptions\PartException;
 use App\Exceptions\ServiceException;
+use App\Models\Budget;
+use App\Models\BudgetClientAcceptance;
+use App\Models\BudgetItem;
+use App\Models\Claim;
+use App\Models\Diagnostic;
+use App\Models\Part;
+use App\Models\Service;
+use App\Models\User;
 use App\Support\Decimal;
 use Illuminate\Support\Facades\DB;
 
@@ -34,8 +34,7 @@ class BudgetService
         protected DocumentSequenceService $documentSequences,
         protected InsurerAuthorizationService $insurerAuthorizationService,
         protected OwnerShareService $ownerShare
-    ) {
-    }
+    ) {}
 
     /** Mayor importe que entra en las columnas decimal(14,2) del presupuesto y sus ítems. */
     public const MAX_AMOUNT = '999999999999.99';
@@ -90,7 +89,7 @@ class BudgetService
             ->where('status', ClaimStatus::OPEN)
             ->exists();
 
-        if (!$hasOpenClaim) {
+        if (! $hasOpenClaim) {
             throw new BudgetException(
                 'Solo se puede cargar una línea a la aseguradora si la recepción tiene un siniestro abierto.',
                 422,
@@ -126,7 +125,7 @@ class BudgetService
 
         $this->receptionStatusService->ensureEditable($budget->reception_id);
 
-        if (!$budget->items()->exists()) {
+        if (! $budget->items()->exists()) {
             throw new BudgetException(
                 'No se puede enviar un presupuesto sin ítems.',
                 422,
@@ -142,8 +141,8 @@ class BudgetService
 
         if ($openDiagnostics->isNotEmpty()) {
             throw new BudgetException(
-                'La recepción tiene diagnósticos sin terminar (' . $openDiagnostics->map(fn ($id) => "#{$id}")->implode(', ')
-                    . '): termínelos o cancélelos antes de enviar el presupuesto.',
+                'La recepción tiene diagnósticos sin terminar ('.$openDiagnostics->map(fn ($id) => "#{$id}")->implode(', ')
+                    .'): termínelos o cancélelos antes de enviar el presupuesto.',
                 422,
                 'BUDGET_DIAGNOSTICS_PENDING'
             );
@@ -166,7 +165,7 @@ class BudgetService
     }
 
     /**
-     * @param array{channel?: string|null, contact?: string|null, notes?: string|null} $decision
+     * @param  array{channel?: string|null, contact?: string|null, notes?: string|null}  $decision
      */
     public function approve(Budget $budget, User $user, array $decision = []): Budget
     {
@@ -205,7 +204,7 @@ class BudgetService
     }
 
     /**
-     * @param array{channel?: string|null, contact?: string|null, notes?: string|null} $decision
+     * @param  array{channel?: string|null, contact?: string|null, notes?: string|null}  $decision
      */
     public function reject(Budget $budget, User $user, array $decision = []): Budget
     {
@@ -238,7 +237,7 @@ class BudgetService
      * completada también: es la salida del Ejemplo 2 cuando el reparto supera lo aceptado (R5, M8). La recepción
      * cerrada la impide. No exige que el importe haya subido y no cambia el estado del presupuesto.
      *
-     * @param array{channel: string, contact?: string|null, notes?: string|null} $decision
+     * @param  array{channel: string, contact?: string|null, notes?: string|null}  $decision
      */
     public function reaccept(Budget $budget, User $user, array $decision): BudgetClientAcceptance
     {
@@ -387,13 +386,13 @@ class BudgetService
     {
         $serviceId = array_key_exists('service_id', $data) ? $data['service_id'] : $item?->service_id;
 
-        if (!$serviceId) {
+        if (! $serviceId) {
             return $data;
         }
 
         $service = Service::findOrFail($serviceId);
 
-        if (!$service->isUsable()) {
+        if (! $service->isUsable()) {
             throw new ServiceException(
                 'El servicio está inactivo y no puede presupuestarse.',
                 422,
@@ -403,7 +402,7 @@ class BudgetService
 
         $serviceChanged = $item === null || (int) $item->service_id !== (int) $serviceId;
 
-        if (!isset($data['unit_price']) && $serviceChanged) {
+        if (! isset($data['unit_price']) && $serviceChanged) {
             $data['unit_price'] = $service->standard_price;
         }
 
@@ -413,7 +412,7 @@ class BudgetService
             && ($item === null || bccomp((string) $data['quantity'], (string) $item->quantity, 2) !== 0);
 
         if (
-            !array_key_exists('estimated_hours', $data) &&
+            ! array_key_exists('estimated_hours', $data) &&
             ($serviceChanged || $quantityChanged) &&
             $service->estimated_hours !== null
         ) {
@@ -429,13 +428,13 @@ class BudgetService
     {
         $partId = array_key_exists('part_id', $data) ? $data['part_id'] : $item?->part_id;
 
-        if (!$partId) {
+        if (! $partId) {
             return $data;
         }
 
         $part = Part::findOrFail($partId);
 
-        if (!$part->isUsable()) {
+        if (! $part->isUsable()) {
             throw new PartException(
                 'El repuesto está inactivo y no puede presupuestarse.',
                 422,
@@ -445,7 +444,7 @@ class BudgetService
 
         $quantity = (string) ($data['quantity'] ?? $item?->quantity);
 
-        if (!$part->unit->allowsFractions() && Decimal::hasFraction(Decimal::of($quantity, 3))) {
+        if (! $part->unit->allowsFractions() && Decimal::hasFraction(Decimal::of($quantity, 3))) {
             throw new BudgetException(
                 "El repuesto se mide en {$part->unit->label()} y no admite cantidades fraccionadas.",
                 422,

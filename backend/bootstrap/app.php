@@ -1,21 +1,26 @@
 <?php
 
+use App\Exceptions\AppException;
+use App\Http\Middleware\ApplyWorkshopSettings;
+use App\Http\Middleware\EnsureJsonResponse;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use App\Exceptions\AppException;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Auth\AuthenticationException;
-use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
+use Spatie\Permission\Middleware\PermissionMiddleware;
+use Spatie\Permission\Middleware\RoleMiddleware;
+use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\UnsupportedMediaTypeHttpException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotAcceptableHttpException;
-use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
+use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
+use Symfony\Component\HttpKernel\Exception\UnsupportedMediaTypeHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -27,14 +32,14 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
 
         // Global (antes del ruteo) para que también los 404/405 de /api respondan JSON.
-        $middleware->prepend(\App\Http\Middleware\EnsureJsonResponse::class);
+        $middleware->prepend(EnsureJsonResponse::class);
 
-        $middleware->api(prepend: [\App\Http\Middleware\ApplyWorkshopSettings::class]);
+        $middleware->api(prepend: [ApplyWorkshopSettings::class]);
 
         $middleware->alias([
-            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
-            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
-            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+            'role' => RoleMiddleware::class,
+            'permission' => PermissionMiddleware::class,
+            'role_or_permission' => RoleOrPermissionMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
@@ -64,7 +69,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 ], 422);
             }
         });
-        
+
         $exceptions->render(function (AppException $e, Request $request) {
             if ($request->expectsJson()) {
                 return response()->json([
@@ -78,8 +83,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        $exceptions->render(function (ModelNotFoundException $e, Request $request) 
-        {
+        $exceptions->render(function (ModelNotFoundException $e, Request $request) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
@@ -92,8 +96,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        $exceptions->render(function (NotFoundHttpException $e, Request $request) 
-        {
+        $exceptions->render(function (NotFoundHttpException $e, Request $request) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
@@ -106,8 +109,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        $exceptions->render(function (MethodNotAllowedHttpException $e, Request $request) 
-        {
+        $exceptions->render(function (MethodNotAllowedHttpException $e, Request $request) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
@@ -133,8 +135,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        $exceptions->render(function (BadRequestHttpException $e, Request $request) 
-        {
+        $exceptions->render(function (BadRequestHttpException $e, Request $request) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
@@ -147,8 +148,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        $exceptions->render(function (UnsupportedMediaTypeHttpException $e, Request $request) 
-        {
+        $exceptions->render(function (UnsupportedMediaTypeHttpException $e, Request $request) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
@@ -161,8 +161,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        $exceptions->render(function (NotAcceptableHttpException $e, Request $request) 
-        {
+        $exceptions->render(function (NotAcceptableHttpException $e, Request $request) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
@@ -175,8 +174,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        $exceptions->render(function (TooManyRequestsHttpException $e, Request $request) 
-        {
+        $exceptions->render(function (TooManyRequestsHttpException $e, Request $request) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
@@ -189,8 +187,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        $exceptions->render(function (ServiceUnavailableHttpException $e, Request $request) 
-        {
+        $exceptions->render(function (ServiceUnavailableHttpException $e, Request $request) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
@@ -203,8 +200,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        $exceptions->render(function (Throwable $e, Request $request) 
-        {
+        $exceptions->render(function (Throwable $e, Request $request) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,

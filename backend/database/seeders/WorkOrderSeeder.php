@@ -7,7 +7,6 @@ use App\Enums\WorkOrderItemType;
 use App\Enums\WorkOrderPartStatus;
 use App\Models\Part;
 use App\Models\WorkOrder;
-use App\Models\WorkOrderItem;
 use App\Models\WorkOrderPart;
 use App\Services\WorkOrderCommissionService;
 use App\Services\WorkOrderPartService;
@@ -33,8 +32,7 @@ class WorkOrderSeeder extends Seeder
         private readonly WorkOrderService $workOrderService,
         private readonly WorkOrderPartService $workOrderPartService,
         private readonly WorkOrderCommissionService $commissionService
-    ) {
-    }
+    ) {}
 
     public function run(): void
     {
@@ -42,7 +40,7 @@ class WorkOrderSeeder extends Seeder
             $budget = isset($scenario['work_order']) ? BudgetSeeder::of($scenario) : null;
 
             // Idempotente: un presupuesto con OT ya no se vuelve a procesar.
-            if (!$budget || $budget->workOrder()->exists()) {
+            if (! $budget || $budget->workOrder()->exists()) {
                 continue;
             }
 
@@ -110,7 +108,7 @@ class WorkOrderSeeder extends Seeder
     /**
      * Repuestos extra: los agrega depósito y la respuesta del cliente la registra la recepcionista.
      *
-     * @param array<int, array{0: string, 1: int|float, 2: string}> $extras [SKU, cantidad, approve|reject|pending]
+     * @param  array<int, array{0: string, 1: int|float, 2: string}>  $extras  [SKU, cantidad, approve|reject|pending]
      */
     private function extras(array $scenario, WorkOrder $workOrder, array $extras): void
     {

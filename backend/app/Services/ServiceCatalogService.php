@@ -16,8 +16,7 @@ class ServiceCatalogService
 {
     public function __construct(
         protected DocumentSequenceService $documentSequences
-    ) {
-    }
+    ) {}
 
     public function create(array $data): Service
     {
@@ -98,7 +97,7 @@ class ServiceCatalogService
 
             $service->refresh();
 
-            if (!$service->status->canTransitionTo($status)) {
+            if (! $service->status->canTransitionTo($status)) {
                 throw new ServiceException(
                     "El servicio ya está {$status->label()}.",
                     422,

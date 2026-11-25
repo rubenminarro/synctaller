@@ -44,7 +44,7 @@ class UpdateWorkOrderAllocationRequest extends FormRequest
             'lines.*.source_id.integer' => 'El concepto no es válido.',
             'lines.*.source_id.min' => 'El concepto no es válido.',
             'lines.*.portion_type.required' => 'Cada porción debe indicar su tipo.',
-            'lines.*.portion_type.' . Enum::class => 'El tipo debe ser insurer_covered, owner_responsibility, owner_uncovered o workshop_absorbed.',
+            'lines.*.portion_type.'.Enum::class => 'El tipo debe ser insurer_covered, owner_responsibility, owner_uncovered o workshop_absorbed.',
             'lines.*.amount.required' => 'Cada porción debe indicar su importe.',
             'lines.*.amount.numeric' => 'El importe debe ser un número.',
             'lines.*.amount.decimal' => 'El importe admite como máximo 2 decimales.',

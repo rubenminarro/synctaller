@@ -2,19 +2,18 @@
 
 namespace App\Models;
 
+use App\Enums\BudgetStatus;
+use App\Enums\InsurerAuthorizationStatus;
+use App\Support\Decimal;
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Enums\BudgetStatus;
-use App\Enums\InsurerAuthorizationStatus;
-use App\Support\Decimal;
-use App\Traits\Auditable;
 
 class Budget extends Model
 {
-
     use Auditable, SoftDeletes;
 
     protected $fillable = [
@@ -36,7 +35,7 @@ class Budget extends Model
         'total' => 'decimal:2',
         'approved_at' => 'datetime',
     ];
-    
+
     /**
      * Tasa de IVA con la que se calculó: sale de los importes guardados, no de la
      * configuración, que pudo cambiar después (el presupuesto no guarda la tasa).
@@ -93,5 +92,4 @@ class Budget extends Model
     {
         return $this->hasMany(BudgetClientAcceptance::class)->orderBy('decided_at')->orderBy('id');
     }
-
 }

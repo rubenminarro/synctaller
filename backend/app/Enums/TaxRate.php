@@ -11,8 +11,9 @@ enum TaxRate: int
     case FIVE = 5;
     case TEN = 10;
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::EXEMPT => 'Exenta',
             self::FIVE => 'IVA 5%',
             self::TEN => 'IVA 10%',
@@ -24,7 +25,7 @@ enum TaxRate: int
      */
     public function liquidationDivisor(): ?string
     {
-        return match($this) {
+        return match ($this) {
             self::EXEMPT => null,
             self::FIVE => '21',
             self::TEN => '11',

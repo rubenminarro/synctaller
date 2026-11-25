@@ -595,6 +595,14 @@ indican qué leer, no las repiten.
 | Local | `.claude/settings.local.json` queda fuera de Git |
 | `medir-tenancy` | Sin crear: se decide al arrancar T2, con un caso real que medir |
 
+### 2.82 Monorepo, estilo con Pint y baseline de tests (2026-11-24)
+
+| Tema | Decisión |
+|---|---|
+| Monorepo | Decisión del usuario: `synctaller-backend` y `synctaller-frontend` se unen en `rubenminarro/synctaller` sin su historial de Git. Cada app conserva sus dependencias, lock y `.env`; la raíz orquesta (`package.json`) y valida (CI con filtro por carpeta) |
+| Estilo | Decisión del usuario: se aplicó `vendor/bin/pint` con su configuración por defecto (preset de Laravel) a todo el backend, en un cambio solo de formato (389 archivos), aprovechando el arranque del monorepo. Resuelve la deuda #18. Desde entonces `pint --test` corre en `npm run lint` y en la CI |
+| Baseline | La corrida completa posterior (tests del backend, ESLint, Vitest y build) quedó en verde y es la línea base, registrada en `CLAUDE.md` y en la última verificación del roadmap |
+| Tests en el día a día | Decisión del usuario: solo tests puntuales de lo que se toca; la suite completa, a pedido del usuario. La CI la corre en cada push y pull request |
 
 ---
 

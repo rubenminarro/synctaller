@@ -35,8 +35,7 @@ class InvoiceService
         protected WorkOrderSaleBreakdown $saleBreakdown,
         protected OwnerShareService $ownerShare,
         protected AllocationBillingService $allocationBilling
-    ) {
-    }
+    ) {}
 
     /**
      * Factura de un responsable desde el reparto confirmado (M9): una línea por porción suya con algo pendiente (porción
@@ -73,11 +72,11 @@ class InvoiceService
             }
 
             $billed = $this->allocationBilling->billedByLine($allocation);
-            $concepts = $this->saleBreakdown->concepts($workOrder)->keyBy(fn (array $c) => $c['source_type'] . ':' . $c['source_id']);
+            $concepts = $this->saleBreakdown->concepts($workOrder)->keyBy(fn (array $c) => $c['source_type'].':'.$c['source_id']);
             $lines = $portions
                 ->map(fn ($portion) => ['portion' => $portion, 'pending' => bcsub(Decimal::of($portion->amount, 2), $billed[$portion->id] ?? '0.00', 2)])
                 ->filter(fn (array $row) => bccomp($row['pending'], '0', 2) > 0)
-                ->map(fn (array $row) => $this->lineFromPortion($row['portion'], $row['pending'], $concepts[$row['portion']->source_type . ':' . $row['portion']->source_id] ?? null, $claim));
+                ->map(fn (array $row) => $this->lineFromPortion($row['portion'], $row['pending'], $concepts[$row['portion']->source_type.':'.$row['portion']->source_id] ?? null, $claim));
 
             if ($lines->isEmpty()) {
                 throw new AllocationException('El cliente no tiene nada pendiente de facturar en este reparto.', 422, 'ALLOCATION_NOTHING_TO_INVOICE');
@@ -119,7 +118,7 @@ class InvoiceService
 
             $workOrder = WorkOrder::whereKey($workOrder->id)->lockForUpdate()->firstOrFail();
 
-            if ($workOrder->status !== WorkOrderStatus::COMPLETED || !$workOrder->closing) {
+            if ($workOrder->status !== WorkOrderStatus::COMPLETED || ! $workOrder->closing) {
                 throw new InvoiceException(
                     'Solo puede facturarse una orden de trabajo completada.',
                     422,
@@ -363,7 +362,7 @@ class InvoiceService
                 'source_type' => $portion->source_type,
                 'source_id' => $portion->source_id,
                 'allocation_line_id' => $portion->id,
-                'description' => 'Deducible de siniestro N.º ' . ($claim->claim_number ?? $claim->code),
+                'description' => 'Deducible de siniestro N.º '.($claim->claim_number ?? $claim->code),
                 'quantity' => '1',
                 'base_unit_price' => $amount,
                 'base_total' => $amount,
@@ -378,7 +377,7 @@ class InvoiceService
             'allocation_line_id' => $portion->id,
             'description' => $whole
                 ? $portion->description
-                : mb_substr($portion->description . ' (parte; cantidad real ' . Format::quantity($concept['quantity'] ?? '1') . ')', 0, 255),
+                : mb_substr($portion->description.' (parte; cantidad real '.Format::quantity($concept['quantity'] ?? '1').')', 0, 255),
             'quantity' => $whole ? $concept['quantity'] : '1',
             'base_unit_price' => $whole ? $concept['base_unit_price'] : $amount,
             'base_total' => $amount,

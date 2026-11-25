@@ -2,9 +2,8 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateVehicleModelRequest extends FormRequest
 {
@@ -23,7 +22,7 @@ class UpdateVehicleModelRequest extends FormRequest
                 'sometimes',
                 'min:2',
                 'max:100',
-                'string', 
+                'string',
                 'regex:/^[\pL\pN\s-]+$/u',
                 Rule::unique('vehicle_models', 'name')->ignore($idVehicleModel),
             ],
@@ -39,15 +38,15 @@ class UpdateVehicleModelRequest extends FormRequest
     {
         return [
             'name' => [
-                'string'   => 'El nombre del modelo de vehículo debe tener el formato correcto.',
-                'min'      => 'El nombre del modelo de vehículo debe tener al menos 2 caracteres.',
-                'max'      => 'El nombre del modelo de vehículo no debe tener más de 100 caracteres.',
-                'regex'    => 'El nombre del modelo de vehículo solo puede contener letras, números y guiones.',
-                'unique'   => 'Este modelo de vehículo ya existe en el sistema.',
+                'string' => 'El nombre del modelo de vehículo debe tener el formato correcto.',
+                'min' => 'El nombre del modelo de vehículo debe tener al menos 2 caracteres.',
+                'max' => 'El nombre del modelo de vehículo no debe tener más de 100 caracteres.',
+                'regex' => 'El nombre del modelo de vehículo solo puede contener letras, números y guiones.',
+                'unique' => 'Este modelo de vehículo ya existe en el sistema.',
             ],
             'brand_id' => [
-                'integer'  => 'El ID de la marca debe ser un número entero.',
-                'exists'   => 'La marca seleccionada no existe.',
+                'integer' => 'El ID de la marca debe ser un número entero.',
+                'exists' => 'La marca seleccionada no existe.',
             ],
         ];
     }

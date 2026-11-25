@@ -20,7 +20,8 @@ discrepancia en lugar de "corregir" por cuenta propia. Ante dudas sobre un endpo
 
 * **Antes de implementar:** inspeccionar el código relacionado (componentes, servicios, rutas, tipos) y el endpoint que se
   consume (ruta, Request, Resource y permiso en `backend/`). Antes de crear un componente, revisar `src/components/ui` y `src/lib`.
-* **Antes de dar algo por terminado:** `npm run lint`, `npm run build` (incluye `tsc -b`) y `npm test`, y verificar las
+* **Antes de dar algo por terminado:** `npm run lint`, `npm run build` (incluye `tsc -b`) y los tests puntuales
+  (`npx vitest run <archivo>`; la suite completa solo si el usuario la pide, ver el `CLAUDE.md` de la raíz), y verificar las
   pantallas en el navegador con un usuario de cada rol involucrado (no solo el administrador).
 * **Estructura de un módulo:** `src/features/<módulo>/api.ts` (tipos según el Resource, etiquetas de enums, `xxxApi` con
   `getPage`/`postData`/…), páginas `XxxPage.tsx` con `DataTable` + `useListParams`, formularios en `FormModal` con

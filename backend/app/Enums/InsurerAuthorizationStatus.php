@@ -11,8 +11,9 @@ enum InsurerAuthorizationStatus: string
     case SUPERSEDED = 'superseded';
     case INVALIDATED = 'invalidated';
 
-    public function label(): string {
-        return match($this) {
+    public function label(): string
+    {
+        return match ($this) {
             self::CURRENT => 'Vigente',
             self::SUPERSEDED => 'Sustituida',
             self::INVALIDATED => 'Invalidada',

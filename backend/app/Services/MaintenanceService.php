@@ -24,8 +24,7 @@ class MaintenanceService
 {
     public function __construct(
         protected VehicleHistoryService $historyService
-    ) {
-    }
+    ) {}
 
     public function createPlan(array $data): MaintenancePlan
     {
@@ -81,7 +80,7 @@ class MaintenanceService
      */
     public function recordDone(Vehicle $vehicle, MaintenancePlan $plan, array $data): VehicleMaintenance
     {
-        if (!$plan->is_active) {
+        if (! $plan->is_active) {
             throw new MaintenanceException(
                 'El plan de mantenimiento está inactivo.',
                 422,
@@ -331,7 +330,7 @@ class MaintenanceService
         $maintenance = $this->lockOrNew($vehicle, $plan);
 
         if ($maintenance->last_done_at && $doneAt->copy()->startOfDay()->lt($maintenance->last_done_at)) {
-            if (!$strict) {
+            if (! $strict) {
                 return $maintenance;
             }
 

@@ -31,10 +31,10 @@ class UserNotificationController extends Controller
             200,
             [
                 'pagination' => [
-                    'total'       => $notifications->total(),
-                    'perPage'     => $notifications->perPage(),
+                    'total' => $notifications->total(),
+                    'perPage' => $notifications->perPage(),
                     'currentPage' => $notifications->currentPage(),
-                    'lastPage'    => $notifications->lastPage(),
+                    'lastPage' => $notifications->lastPage(),
                 ],
                 'unread_count' => $user->unreadNotifications()->count(),
             ]
