@@ -7,7 +7,6 @@ Reglas para trabajar en `backend/`. Las generales del monorepo (metodología, Gi
 |---|---|
 | [`docs/reglas-de-negocio.md`](../docs/reglas-de-negocio.md) | **Reglas de negocio vigentes** con sus `error_code` (numeración 6.N) |
 | [`docs/roadmap/deuda-tecnica.md`](../docs/roadmap/deuda-tecnica.md) | Deuda técnica conocida y discrepancias |
-| [`docs/testing/guia-postman.md`](../docs/testing/guia-postman.md) | Pruebas manuales de la API, encadenadas por fase |
 | [`docs/decisions/historial.md`](../docs/decisions/historial.md) | Por qué se decidió cada cosa |
 
 Si una regla contradice al código, **el código manda**: registrar la discrepancia en la deuda técnica y avisar, en lugar de

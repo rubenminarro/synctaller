@@ -72,5 +72,3 @@ Contado el 2026-11-25: 508 tests (sin el `ExampleTest` de la plantilla, que se q
 | Concurrencia real | Solo en MySQL: `tests/Manual/document_sequence_concurrency.php` |
 | Migraciones en MySQL | A mano: los nombres de índices largos no fallan en SQLite |
 | Gráficos del frontend | Sin tests. Se revisan en un navegador |
-
-Pruebas manuales de la API: [`testing/guia-postman.md`](../testing/guia-postman.md).

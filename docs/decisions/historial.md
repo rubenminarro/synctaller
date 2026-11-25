@@ -728,6 +728,7 @@ Reemplaza el rechazo provisorio de la sección 2.75.
 | Datos de ejemplo | Decisión del usuario (recomendación): sin escenario nuevo; los siniestros de ejemplo no tienen modalidad y `DatabaseSeederTest` no cambia |
 | Frontend | El editor del reparto pierde la etiqueta de `deductible_covered` y muestra un aviso con el deducible no cobrado, en el borrador y en el confirmado, con el importe de la API |
 | Pruebas | `DeductibleNetModeTest`: el caso del deducible mayor que lo cubierto pasa a confirmarse (sin porciones de la aseguradora, `deductible_uncollected`, cancelación bloqueada, cambio del IVA sin otra versión, factura de la aseguradora rechazada, la del dueño de 3.047.000 y la entrega); el del interruptor apagado lo fija explícitamente |
+
 ### 2.90 T2, paso 1: base central, paquete y modelo `Tenant` (2026-11-25)
 
 Primer paso de T2 según el plan de la sección 2.80. Solo infraestructura: **la API no cambia**, porque todavía nada activa
@@ -745,6 +746,14 @@ un taller. La identificación por host es el paso 2.
 | Colas | `queues_are_tenant_aware_by_default = false` hasta T3. El paquete revisa todos los jobs: uno que considere del taller y no traiga taller lo borra y falla, y en este paso ningún job lleva taller |
 | Base local | Decisión del usuario: se crea `synctaller_central` en el MySQL de desarrollo y se migra. `synctaller` no se toca |
 | Pruebas | `tests/Feature/Tenancy` (10 tests), con la central en otro archivo SQLite (`database/testing-central.sqlite`) migrado una vez por ejecución (`Tests\Concerns\UsesCentralDatabase`). Se comprobó que cada test de las tareas falla al quitar su protección: la tarea de base, el prefijo propio, la tarea de permisos y las colas apagadas |
+
+### 2.91 Se quita la guía de Postman (2026-11-25)
+
+| Tema | Decisión |
+|---|---|
+| Guía | Decisión del usuario: se borra `docs/testing/guia-postman.md` con la carpeta `docs/testing/` y todas sus referencias (los `CLAUDE.md`, el `README.md`, el índice de `docs/`, `development/testing.md`, `modules/README.md` y la especificación). Ya figuraba como no ejecutada contra la API actual |
+| Contrato | Sin documento manual: el contrato es el código (`routes/api.php`, Form Requests y Resources), con el formato común de `backend/CLAUDE.md`, y lo cubren los tests de cada módulo |
+| Por cambio | "Cambiar la API" deja de pedir actualizar la guía en `docs/README.md` y en el `CLAUDE.md` de la raíz |
 
 ---
 

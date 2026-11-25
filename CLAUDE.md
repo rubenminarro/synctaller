@@ -84,7 +84,7 @@ empieza sin autorización del usuario.
 ### Documentación por cambio
 
 En la misma rama que el código, según [`docs/README.md`](docs/README.md), "Qué actualizar en cada cambio": reglas de
-negocio, una sección nueva del historial por decisión, guía de Postman si cambia la API, estado en módulos y roadmap.
+negocio, una sección nueva del historial por decisión, estado en módulos y roadmap.
 Para cerrar una entrega, la Skill `cerrar-entrega`; para auditar la documentación, `validar-docs`.
 
 ## Entorno (Windows / Laragon)
