@@ -604,6 +604,28 @@ indican qué leer, no las repiten.
 | Baseline | La corrida completa posterior (tests del backend, ESLint, Vitest y build) quedó en verde y es la línea base, registrada en `CLAUDE.md` y en la última verificación del roadmap |
 | Tests en el día a día | Decisión del usuario: solo tests puntuales de lo que se toca; la suite completa, a pedido del usuario. La CI la corre en cada push y pull request |
 
+### 2.83 Respuestas de la contadora y plan que sigue (2026-11-24)
+
+El cuestionario del 2026-10-29 volvió respondido por **una contadora** (confirmado por el usuario; el documento no trae los
+datos de quien responde). Transcripción y efectos en la [especificación](../especificacion-aseguradoras.html), §10.1
+("Respuestas de la contadora"). Ninguna regla vigente cambia hasta implementar cada entrega.
+
+| Tema | Decisión |
+|---|---|
+| V21 | Cumplida: es la confirmación escrita de un contador que pedían M10 y M12. Lo que valía como base (2.67) queda confirmado con los ajustes de abajo |
+| V16 | Respuesta: el dueño paga el valor real, nunca el deducible completo, y la aseguradora recibe factura. Decisión del usuario («lo más conveniente»): el deducible facturado en una OT es **como máximo lo cubierto** por la aseguradora en ella; lo que sobra no se cobra; la aseguradora se factura por lo que le quede y, si no le queda nada, no hay factura en cero. Reemplaza el rechazo de 2.75 (`ALLOCATION_DEDUCTIBLE_EXCEEDS_COVERED`) |
+| M10 | El interruptor se enciende después de implementar V16. Hasta entonces sigue apagado por defecto |
+| V17 y M12 | Rediseño (§9, versión 4): cualquier cliente puede retener; IVA o renta; número y timbrado del comprobante; un comprobante para varias facturas; solo facturas a crédito. Decisión del usuario: el **importe lo carga el cajero** tal como figura en el comprobante y, para el IVA, la API sugiere el 30 % del IVA. El monto mínimo para retener no se valida. Falta aprobar el diseño |
+| V19 | Decisión del usuario (la práctica general con cualquier empresa): se anula solo una factura **emitida en el mes en curso** (todavía no declarada), con el motivo de siempre; después corresponde una nota de crédito. Cambia la anulación vigente (6.10) al implementarse |
+| V10 | Decisión del usuario: los datos del cliente (dirección, teléfono y correo) **no bloquean** la emisión. La factura los guarda y los muestra, y la API informa los que faltan para que el frontend avise |
+| V11 | `REC-` ya cumple la numeración correlativa. El recibo agrega la condición de la factura y el siniestro con su póliza |
+| V18 | El timbrado de la nota de crédito registrada pasa a ser obligatorio. «Antes del cierre del ejercicio» es una recomendación: no se valida |
+| V15 y V20 | V15 confirma el diseño (el deducible no incluye IVA salvo que la póliza lo diga; 10 %). V20 suma dos tipos de documento al siniestro: contrato y cédula del declarante |
+| V22 | Anticipos sigue fuera del MVP; la factura a crédito con recibos ya cubre una de las dos formas |
+| V14 y G10 | Conservación: 5 años. Exportación antes de borrar y suspensión por etapas (aviso, gracia, solo lectura): revisan P9 en la línea T, decisión comercial pendiente |
+| Sin respuesta | V3 y V13 (talleres), V5 y la parte legal de V13 (asesor legal). No bloquean. Van en el [cuestionario pendiente](https://claude.ai/artifact/2APciv4PaFoKoPsDfAtJv1), junto con los términos comerciales de la suspensión (V14) y confirmaciones opcionales de la contadora sobre V16, V19, V10 y M12 |
+| Orden | 1) recibo completo (V11); 2) M12, si se aprueba el diseño; 3) datos del cliente en la factura (V10); 4) ajustes chicos (V18, V20, V15); 5) anulación (V19); 6) V16 y encender M10. Cada una en su rama |
+
 ---
 
 ## 3. Frontend
