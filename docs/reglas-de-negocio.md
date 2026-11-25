@@ -898,3 +898,31 @@ historial 2.83 y 2.84; `InvoiceWithholdingService`). Migración `000072`.
 * **Consulta:** `GET invoices/{invoice}/withholdings` y `GET …/{withholding}` (scoped) con `invoices.show`.
 * **Datos de ejemplo** (`WithholdingSeeder`): la factura de la aseguradora de C05 con su retención de IVA y una de renta
   anulada.
+
+## 6.34 Identificación del taller
+
+Entrega T2, paso 2, de `docs/especificacion-aseguradoras.html` (§3.2; historial 2.80 y 2.93; middleware `IdentifyTenant`).
+Sin migración: usa la tabla `tenants` de la base central (paso 1, 2.90).
+
+* **Por el host:** todo request a `api/*`, también `POST /login` y `GET /branding`, busca su taller en `tenants.domain` con
+  el host del request (en minúsculas y sin puerto) antes de autenticar. No hay cabecera `X-Tenant` (TD8). Quedan fuera
+  `/up` y las rutas web.
+* **Orden:** buscar el taller; revisar su estado y su mantenimiento sin tocar su base; activarlo y comprobar que su base
+  responde. Un taller suspendido y en mantenimiento responde como suspendido.
+* **Errores:**
+
+  | Caso | HTTP | `error_code` | Mensaje |
+  |---|---|---|---|
+  | Ningún taller con ese host | 404 | `TENANT_NOT_FOUND` | No se encontró el taller. |
+  | Taller suspendido | 403 | `TENANT_SUSPENDED` | El taller está suspendido. |
+  | Taller en mantenimiento (`tenants.maintenance`) | 503 | `TENANT_MAINTENANCE` | El taller está en mantenimiento. Intente más tarde. |
+  | La base del taller no responde | 503 | `TENANT_UNAVAILABLE` | El servicio del taller no está disponible. |
+
+  El detalle de una base que no responde va al log, con el id del taller, y nunca a la respuesta.
+* **Con el taller activo**, la conexión por defecto es la del taller (`tenant`): modelos, reglas `exists`/`unique` y SQL
+  crudo ven solo sus datos. Un token de otro taller no existe en este (401 `UNAUTHENTICATED`) y un id de otro taller
+  responde 404.
+* **Fuera de HTTP** todavía no hay taller: la consola, el worker y el scheduler usan `DB_CONNECTION` hasta T3, y los jobs
+  corren donde se procesan (un job `sync`, en el taller del request).
+* **Registro:** `php artisan tenants:register {name} {domain} {database}` crea la fila del taller (activo, sin
+  mantenimiento). El dominio es solo el host; dominio y base son únicos. No crea ni migra la base: eso es el alta de T5.

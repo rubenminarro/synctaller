@@ -9,24 +9,30 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\PermissionRegistrar;
-use Tests\Concerns\UsesCentralDatabase;
+use Tests\Concerns\UsesTenantDatabases;
 use Tests\TestCase;
 
 /**
- * Tareas al activar un taller (T2, paso 1; historial 2.90). Cada test falla si se quita la protección que cubre:
- * la tarea de base, el prefijo con separador, la tarea de permisos o las colas por taller apagadas.
+ * Tareas al activar un taller (T2, pasos 1 y 2; historial 2.90 y 2.93). Cada test falla si se quita la protección que
+ * cubre: la tarea de base, la conexión por defecto, el prefijo con separador, la tarea de permisos o las colas por taller
+ * apagadas.
+ *
+ * Estos tests cambian de taller, y cada cambio vuelve a conectar `tenant`. La transacción de RefreshDatabase y la cache
+ * van entonces en la conexión fija `sqlite`, la misma base de los tests, que ningún cambio de taller toca.
  */
 class SwitchTenantTest extends TestCase
 {
     use RefreshDatabase;
-    use UsesCentralDatabase;
+    use UsesTenantDatabases;
+
+    protected $connectionsToTransact = ['sqlite'];
 
     protected function setUp(): void
     {
         parent::setUp();
 
         // La cache de los tests es `array`, que no usa prefijo. La de base de datos sí, como en producción.
-        config(['cache.default' => 'database', 'cache.stores.database.connection' => null]);
+        config(['cache.default' => 'database', 'cache.stores.database.connection' => 'sqlite']);
     }
 
     protected function tearDown(): void
@@ -39,18 +45,34 @@ class SwitchTenantTest extends TestCase
     public function test_making_a_tenant_current_points_the_tenant_connection_to_its_database(): void
     {
         $tenant = $this->tenant(1, 'synctaller_a');
-        $default = config('database.default');
 
         $tenant->makeCurrent();
 
         $this->assertTrue(Tenant::current()->is($tenant));
         $this->assertSame('synctaller_a', DB::connection('tenant')->getDatabaseName());
-        $this->assertSame($default, config('database.default'), 'En el paso 1 la conexión por defecto no cambia.');
 
         Tenant::forgetCurrent();
 
         $this->assertNull(Tenant::current());
         $this->assertNull(config('database.connections.tenant.database'), 'Sin taller activo, la plantilla queda sin base.');
+    }
+
+    public function test_the_default_connection_is_the_tenant_one_while_a_tenant_is_current(): void
+    {
+        // El taller de prueba ya está activo (TestCase): se vuelve a la conexión de arranque para medir desde cero.
+        Tenant::forgetCurrent();
+        $original = DB::getDefaultConnection();
+
+        $this->tenant(1, 'synctaller_1')->makeCurrent();
+        $this->assertSame('tenant', DB::getDefaultConnection());
+
+        // Al cambiar de taller sigue siendo `tenant`, y al olvidarlo vuelve la de arranque, no la del taller anterior.
+        $this->tenant(10, 'synctaller_10')->makeCurrent();
+        $this->assertSame('tenant', DB::getDefaultConnection());
+
+        Tenant::forgetCurrent();
+        $this->assertSame($original, DB::getDefaultConnection());
+        $this->assertNotSame('tenant', $original);
     }
 
     public function test_cache_prefixes_of_tenants_1_and_10_do_not_collide(): void
@@ -73,6 +95,7 @@ class SwitchTenantTest extends TestCase
 
     public function test_forgetting_the_tenant_restores_the_original_cache_prefix(): void
     {
+        Tenant::forgetCurrent();
         $original = config('cache.prefix');
 
         $this->tenant(1, 'synctaller_a')->makeCurrent();
@@ -87,15 +110,20 @@ class SwitchTenantTest extends TestCase
         $registrar = app(PermissionRegistrar::class);
         $registrar->initializeCache();
 
-        $this->tenant(1, 'synctaller_1')->makeCurrent();
+        // Los permisos se leen de la base de cada taller, que tiene que existir y tener los roles sembrados. Se preparan
+        // antes de activar: el seeder vacía la cache de permisos del taller activo.
+        $tenant1 = $this->tenant(1, $this->tenantDatabase('a'));
+        $tenant10 = $this->tenant(10, $this->tenantDatabase('b'));
+
+        $tenant1->makeCurrent();
         $registrar->getPermissions();
 
-        $this->tenant(10, 'synctaller_10')->makeCurrent();
+        $tenant10->makeCurrent();
         $registrar->getPermissions();
 
         // Sin la tarea de permisos, el registro seguiría con la cache con la que arrancó y no aparecería ninguna de
         // estas claves: los dos talleres compartirían una sola.
-        $keys = DB::table('cache')->where('key', 'like', '%spatie.permission.cache')->pluck('key')->sort()->values()->all();
+        $keys = DB::connection('sqlite')->table('cache')->where('key', 'like', '%spatie.permission.cache')->pluck('key')->sort()->values()->all();
 
         $this->assertSame(['tenant:10:spatie.permission.cache', 'tenant:1:spatie.permission.cache'], $keys);
     }
@@ -108,6 +136,21 @@ class SwitchTenantTest extends TestCase
         JobWithoutTenant::dispatch();
 
         $this->assertTrue(JobWithoutTenant::$handled);
+    }
+
+    public function test_a_sync_job_runs_in_the_tenant_of_the_request_and_leaves_it_current(): void
+    {
+        // Con los listeners de colas del paquete, el job olvidaba el taller y al terminar lo volvía a activar, lo que
+        // reconectaba `tenant`: el resto del request quedaba fuera de su conexión (historial 2.93).
+        $tenant = Tenant::current();
+        $connection = DB::connection();
+
+        JobWithoutTenant::dispatch();
+
+        $this->assertSame($tenant->id, JobWithoutTenant::$tenantId);
+        $this->assertSame('tenant', JobWithoutTenant::$defaultConnection);
+        $this->assertTrue(Tenant::current()->is($tenant));
+        $this->assertSame($connection, DB::connection(), 'La conexión del request no se reconecta.');
     }
 
     private function tenant(int $id, string $database): Tenant
@@ -127,8 +170,14 @@ class JobWithoutTenant implements ShouldQueue
 
     public static bool $handled = false;
 
+    public static ?int $tenantId = null;
+
+    public static ?string $defaultConnection = null;
+
     public function handle(): void
     {
         self::$handled = true;
+        self::$tenantId = Tenant::current()?->id;
+        self::$defaultConnection = DB::getDefaultConnection();
     }
 }
