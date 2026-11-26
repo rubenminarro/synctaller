@@ -3,7 +3,7 @@ name: cerrar-entrega
 description: Actualiza la documentación de una entrega ya validada, según las reglas de docs/README.md.
 disable-model-invocation: true
 argument-hint: "[nombre de la entrega]"
-allowed-tools: Read Grep Glob Bash(git status *) Bash(git log *) Bash(git diff *) Bash(git branch --show-current) Bash(php .claude/skills/validar-docs/scripts/check-docs.php*)
+allowed-tools: Read Edit Grep Glob Bash(git fetch *) Bash(git status *) Bash(git log *) Bash(git diff *) Bash(git branch --show-current) Bash(php .claude/skills/validar-docs/scripts/check-docs.php*)
 ---
 
 # Cerrar una entrega
@@ -12,6 +12,12 @@ Entrega a cerrar: $ARGUMENTS
 
 Registrar en la documentación lo que realmente se hizo. **Solo documenta: no toca código, no corrige lo que encuentre y no hace commit,
 push ni merge.**
+
+Lugar en el flujo de una entrega:
+
+```text
+implementar → tests puntuales → /revisar-navegador → /validar-docs → /cerrar-entrega → commit y PR → CI → merge → /registrar-ci
+```
 
 ## 1. Comprobar que la entrega esté validada
 
@@ -22,15 +28,21 @@ Antes de editar, confirmar cada punto. Si alguno falta, **detenerse e informar q
   haya indicado (la suite completa solo si el usuario la pidió; la CI la corre en el pull request). No suponerlo ni
   deducirlo de los commits.
 * El usuario confirmó que la entrega está validada, si requiere revisión manual.
+* Si la entrega cambió pantallas: se hizo la revisión en el navegador (`revisar-navegador`), o el usuario la dio por innecesaria.
 
-Sin entrega indicada en los argumentos, preguntar cuál es.
+Los resultados pueden venir en los argumentos (por ejemplo, después de un `/clear`): se toman como indicados por el usuario.
+
+Sin entrega en los argumentos, deducirla del nombre de la rama (`feature/t4-storage` → T4) y confirmarla con el usuario.
+
+Si `docs/roadmap/README.md` ya tiene una fila local de esta entrega, es un cierre repetido: actualizar esa fila en lugar de agregar otra.
 
 ## 2. Reunir los hechos
 
 Leer `docs/README.md`, secciones **Fuente de verdad de cada tema** y **Qué actualizar en cada cambio**. Esas reglas mandan: esta Skill
 no las repite.
 
-Con `git log` y `git diff origin/main...HEAD`, y con los datos de la conversación, listar qué cambió, qué se decidió y quién lo decidió.
+Primero `git fetch origin`: sin él, el diff compara contra un `origin/main` viejo. Con `git log` y `git diff origin/main...HEAD`, y con los
+datos de la conversación, listar qué cambió, qué se decidió y quién lo decidió.
 
 ## 3. Definir qué actualizar
 
@@ -53,6 +65,16 @@ propuesta y qué es lo dudoso. No resolverlo por cuenta propia.
 | Reglas | `docs/reglas-de-negocio.md` y los `CLAUDE.md`, solo si cambió una regla, y solo esa regla |
 | Roadmap | Solo cambia el estado de lo entregado y la **Última verificación**. Sin fases nuevas sin aprobación |
 
+**Fila de Última verificación**: es la de la corrida local; la de la CI la agrega `registrar-ci` después del merge. Lleva las cifras y el
+alcance, no el relato. Lo que se probó a mano y las decisiones van en la sección `2.N` del historial.
+
+```text
+| <fecha> | Tests puntuales en verde (<N> tests, <A> aserciones): <carpetas o filtros>; Pint sin pendientes | <frontend> | <Entrega> (historial 2.N). Corrida local en la rama `<rama>`, sin la suite completa. <Roles revisados en el navegador, o por qué no se revisó> |
+```
+
+`<frontend>`: `Vitest (<archivos>), ESLint y build`, o `ESLint (sin cambios en el frontend)`. Un dato que no entra en una línea va en el
+historial.
+
 ## 5. Verificar
 
 Desde la raíz del monorepo:
@@ -67,3 +89,7 @@ Corregir los enlaces rotos que hayan causado estos cambios. Informar los demás 
 
 Mostrar los archivos modificados y qué cambió en cada uno, la evidencia usada, lo que quedó como `PENDIENTE DE VERIFICACIÓN` y el
 resultado de la verificación. Dejar los cambios sin commitear: el commit, el push y el merge los autoriza el usuario.
+
+Terminar con un mensaje de commit propuesto, en español y con el porqué. El título sigue el estilo de `git log` (por ejemplo `Guardar los
+archivos de cada taller en su propia carpeta (T4)`) y el cuerpo resume lo decidido y lo verificado. Recordar que, después del merge, sigue
+`/registrar-ci`.
