@@ -86,7 +86,8 @@ Si una regla contradice al código, **el código manda**: registrar la discrepan
 * **Seeders de ejemplo:** un seeder por módulo, registrados en `DatabaseSeeder`. El flujo del taller sale de
   `database/seeders/ExampleScenarios.php` (un escenario por recepción y su estado final); cada seeder recorre los
   escenarios y hace su parte **por los Services** (nunca `create()` directo de documentos), con el usuario del rol que
-  corresponde y el reloj en la fecha del evento (`ExampleScenarios::travel`). Reglas:
+  corresponde y el reloj en la fecha del evento (`ExampleScenarios::travel`). `DatabaseSeeder` corre todo en un taller
+  (`SeedingTenant`, reglas 6.34): un seeder no activa ni olvida talleres por su cuenta. Reglas:
   * Idempotentes: cada seeder omite lo que ya existe (`DatabaseSeederTest` siembra dos veces).
   * El kardex guarda el saldo acumulado y se lista por orden de carga: los movimientos de stock se siembran en orden
     cronológico (compras antes de los escenarios, ajustes al final).

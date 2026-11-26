@@ -61,9 +61,9 @@ CREATE DATABASE synctaller_central CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode
 
 ```bash
 cd backend
-php artisan migrate --seed     # solo sobre una base vacía; tarda unos 15 s
-php artisan migrate --database=central --path=database/migrations/central   # base central (línea T)
+php artisan migrate --database=central --path=database/migrations/central   # base central (línea T): primero
 php artisan tenants:register "Taller principal" 127.0.0.1 synctaller   # el taller del host de VITE_API_URL
+php artisan migrate --seed     # solo sobre una base vacía; siembra en el taller registrado; tarda unos 15 s
 php artisan storage:link       # fotos, firmas y logo
 cd ..
 npm run dev
@@ -150,7 +150,8 @@ hora de cada taller.
 ## Datos de prueba
 
 `php artisan migrate --seed` crea los datos de ejemplo **por los Services**, como si los cargaran los usuarios de cada rol,
-con fechas repartidas en los últimos tres meses. Ningún seeder envía emails.
+con fechas repartidas en los últimos tres meses. Ningún seeder envía emails. Siembra en el taller registrado con esa base
+(los archivos van a su carpeta, desde T4): sin taller registrado no siembra y el mensaje indica el `tenants:register` que falta.
 
 **Usuarios** (`@mail.com.py`). `admin` usa `ADMIN_PASSWORD`; el resto, `TEST_PASSWORD`. Qué puede hacer cada rol: `backend/CLAUDE.md`.
 

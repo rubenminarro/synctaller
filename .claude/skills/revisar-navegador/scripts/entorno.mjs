@@ -93,10 +93,8 @@ if (accion === 'preparar') {
 
   artisan(['migrate', '--database=central', '--path=database/migrations/central', '--force'])
   artisan(['tenants:register', 'Revisión', '127.0.0.1', `${carpeta}/taller.sqlite`])
-  artisan(['migrate', '--force'])
-
-  // La siembra escribe en los discos del taller: sin taller activo fallan (T4, historial 2.98).
-  if (!resto.includes('--sin-siembra')) artisan(['tenants:artisan', 'db:seed --force', '--tenant=1'])
+  // La siembra activa el taller registrado con esta base (historial 2.100): por eso va después del registro.
+  artisan(resto.includes('--sin-siembra') ? ['migrate', '--force'] : ['migrate', '--seed', '--force'])
 
   console.log(`\nEntorno listo en ${carpeta}. Contraseña de todos los usuarios: ${PASSWORD}`)
 } else if (accion === 'api') {

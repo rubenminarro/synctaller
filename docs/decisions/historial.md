@@ -888,6 +888,21 @@ vive en `.claude/`.
 | `cerrar-entrega` | Hace `git fetch` antes del diff, deduce la entrega de la rama y acepta los resultados de los tests como argumento. Define un formato breve para la fila local de **Última verificación** (el detalle va al historial) y termina proponiendo el mensaje de commit |
 | `.claude/settings.json` (nuevo) | Reglas `deny` para `migrate:fresh`, `migrate:refresh`, `migrate:reset`, `db:wipe`, `config:cache` y `npm install`, en Bash y PowerShell. Un hook `PreToolUse` (`.claude/hooks/proteger-main.mjs`) bloquea `git commit` y `git push` en `main`, y un push hacia `main` desde otra rama. Las reglas de `CLAUDE.md` pasan a ser obligatorias para Claude Code. Para el usuario no cambia nada |
 
+### 2.100 Deuda #23: la siembra activa su taller (2026-11-26)
+
+Decisión del usuario: la siembra activa el taller por su cuenta, en lugar de corregir solo la guía. Regla vigente en
+[reglas de negocio](../reglas-de-negocio.md), 6.34 (siembra de ejemplo). Sin migraciones ni cambios en el frontend;
+ninguna ruta, permiso, `error_code` ni código HTTP nuevo.
+
+| Tema | Decisión |
+|---|---|
+| Problema | Desde T4 (2.98) los seeders escriben en los discos del taller, que sin taller activo fallan (fallo cerrado). La guía sembraba con `migrate --seed` antes de migrar la central y registrar el taller, así que una instalación nueva quedaba sin datos de ejemplo. Los tests no lo veían porque corren dentro de un taller |
+| Mecanismo | `Database\Seeders\SeedingTenant::run()` envuelve la siembra de `DatabaseSeeder`. Con un taller activo (tests, `tenants:artisan`) usa ese y no lo olvida. Sin taller activo, busca en la central el taller cuya `database` es la de la conexión por defecto (en SQLite, la ruta resuelta: relativa o absoluta da igual) y lo activa con `makeCurrent()`, como `tenants:artisan`, sin `ensureReady()`. Al terminar lo olvida, también si la siembra falla |
+| Sin taller | Sin taller registrado para esa base, o sin la central migrada, no siembra nada. El mensaje indica el comando que falta (`tenants:register` o el `migrate` de la central). En producción `DB_DATABASE` va vacío, así que la siembra de ejemplo no encuentra taller y no corre |
+| Guía | `README.md` y `development/setup.md`: primero la central y el registro del taller, después `migrate --seed`. Ese orden evita además otro fallo: desde T3, paso 4 (2.96), las migraciones limpian la cache de permisos, que vive en la central, y sin la central migrada `migrate` falla antes de sembrar |
+| Alcance | Solo `DatabaseSeeder`. `db:seed --class=RolesAndPermissionsSeeder` (actualizar un equipo) sigue sin taller, como antes: no usa los discos. La skill `revisar-navegador` siembra ahora con `migrate --seed` |
+| Tests | `tests/Feature/Seeders/SeedingTenantTest` (5): sin taller activo siembra en el de la base y lo olvida después, lo encuentra con la ruta escrita de otra forma, lo olvida también si la siembra falla, sin taller para la base no siembra nada, y con taller activo siembra en ese y lo mantiene. Cada test se comprobó quitándole su protección |
+
 ---
 
 ## 3. Frontend

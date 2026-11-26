@@ -9,9 +9,20 @@ class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
+    /**
+     * En el taller activo o, sin él, en el registrado con la base que se siembra (SeedingTenant, deuda #23).
+     */
     public function run(): void
     {
-        $this->call([
+        SeedingTenant::run(fn () => $this->call($this->seeders()));
+    }
+
+    /**
+     * @return array<int, class-string>
+     */
+    private function seeders(): array
+    {
+        return [
             RolesAndPermissionsSeeder::class,
             AdminUserSeeder::class,
             MechanicSeeder::class,
@@ -60,6 +71,6 @@ class DatabaseSeeder extends Seeder
             VehicleMaintenanceSeeder::class,
             CommissionSeeder::class,
             NotificationSeeder::class,
-        ]);
+        ];
     }
 }
