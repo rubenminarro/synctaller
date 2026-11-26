@@ -12,6 +12,7 @@ use App\Models\WorkOrderAllocation;
 use App\Models\WorkOrderItem;
 use App\Models\WorkOrderPart;
 use App\Multitenancy\RequireTenantForQueuedJobs;
+use App\Multitenancy\TenantStorage;
 use App\Services\WorkshopSettingService;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Gate;
@@ -52,6 +53,9 @@ class AppServiceProvider extends ServiceProvider
         // Todo job es del taller: no se despacha sin uno activo (historial 2.96). Cada job prepara su taller en su
         // middleware (`PrepareTenant`), donde puede liberarse si la base no responde: en `Queue::before` no podía.
         Queue::createPayloadUsing(new RequireTenantForQueuedJobs);
+
+        // Discos con la raíz del taller activo (T4, historial 2.98).
+        TenantStorage::register();
 
         // Bypass implícito para el rol 'administrador'
         Gate::before(function ($user, $ability) {

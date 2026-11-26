@@ -45,7 +45,7 @@ class DatabaseSeederTest extends TestCase
     public function test_seeders_cover_every_state_and_are_idempotent(): void
     {
         Storage::fake('public');
-        Storage::fake('claim_documents');
+        Storage::fake('tenant_private');
         Queue::fake();
 
         $this->seed(DatabaseSeeder::class);
@@ -133,7 +133,7 @@ class DatabaseSeederTest extends TestCase
         $byAllocation = Invoice::where('allocation_id', $confirmed->id)->where('status', 'issued')->get();
         $this->assertSame(['cash', 'credit'], $byAllocation->map(fn (Invoice $invoice) => $invoice->condition->value)->sort()->values()->all());
         $this->assertSame(['paid', 'partial'], $byAllocation->map(fn (Invoice $invoice) => $invoice->paymentStatus()->value)->sort()->values()->all());
-        DB::table('claim_documents')->pluck('path')->each(fn (string $path) => Storage::disk('claim_documents')->assertExists($path));
+        DB::table('claim_documents')->pluck('path')->each(fn (string $path) => Storage::disk('tenant_private')->assertExists($path));
         $this->assertTrue((bool) Vehicle::where('chassis', VehiclesSeeder::WITHOUT_PLATE_CHASSIS)->value('no_plate'));
         $this->assertGreaterThanOrEqual(30, Client::count());
         $this->assertGreaterThanOrEqual(45, Vehicle::count());

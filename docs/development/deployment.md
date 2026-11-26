@@ -17,6 +17,8 @@ deciden antes de T6 (V9). Este documento reúne solo los requisitos ya identific
 | Remitente autorizado en el servidor de correo | Handoff 2.78 |
 | `INSURER_DEDUCTIBLE_NET_MODE` encendido (por defecto desde V16) salvo decisión contraria | `reglas-de-negocio.md` 6.31 |
 | Sin `config:cache` en desarrollo | `backend/CLAUDE.md` |
+| Nginx sirve `/storage/tenants/{id}/` solo en el host del taller `{id}` (el enlace `public/storage` expone los archivos públicos de todos los talleres) | Historial 2.98 |
+| CORS, `VITE_API_URL` y proxies de confianza para varios talleres | Deuda técnica #22 |
 | Antes de publicar T3, paso 4: vaciar la cola vieja con el código anterior (`queue:work --stop-when-empty`) y migrar la central, que suma la cola y la cache. Un job viejo, sin taller, el paquete lo borraría | Historial 2.96 |
 
 ## Runbook (procedimientos operativos)
