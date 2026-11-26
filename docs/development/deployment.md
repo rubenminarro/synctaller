@@ -23,6 +23,7 @@ deciden antes de T6 (V9). Este documento reúne solo los requisitos ya identific
 
 | Situación | Qué hacer | Origen |
 |---|---|---|
+| Un taller no recibió hoy sus recordatorios | El scheduler los despacha en cuanto el taller está activo, sin mantenimiento y con su base disponible, después de su hora (`reminders_at`). Si sigue sin recibirlos, buscar en el log `La base del taller no responde.` o `No se pudieron despachar los recordatorios del taller.` con su `tenant_id`. Para forzarlos: `php artisan notifications:send-reminders --tenant={id}`, con `queue:work` corriendo. Correrlo de nuevo no repite avisos | Historial 2.97 |
 | Un aviso a cliente lleva más de 6 horas `pending` | La base de su taller no respondió durante todo el plazo de reintentos y el job quedó en `failed_jobs` de la central. Con la base otra vez disponible: `php artisan queue:failed` para ubicarlo y `php artisan queue:retry {uuid}` (o `all`). Mientras siga `pending`, el taller no lo puede reenviar (`CLIENT_NOTIFICATION_PENDING`) | Historial 2.96 |
 
 ## Requisitos antes del primer taller comercial

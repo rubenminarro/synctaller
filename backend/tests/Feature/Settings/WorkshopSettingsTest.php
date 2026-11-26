@@ -6,7 +6,7 @@ use App\Jobs\SendClientNotification;
 use App\Mail\ClientNotificationMail;
 use App\Models\AuditLog;
 use App\Models\SystemSetting;
-use Illuminate\Console\Scheduling\Schedule;
+use App\Services\WorkshopSettingService;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\View;
 use Tests\Feature\Invoices\InvoiceTestCase;
@@ -202,18 +202,23 @@ class WorkshopSettingsTest extends InvoiceTestCase
         $this->assertSame(9, config('notifications.invoice_due_soon_days'));
     }
 
-    public function test_the_reminders_hour_is_read_when_the_scheduler_runs(): void
+    public function test_the_reminders_hour_is_the_saved_one_and_counts_once_reached(): void
     {
-        $event = collect(app(Schedule::class)->events())
-            ->first(fn ($event) => str_contains($event->command, 'notifications:send-reminders'));
+        // Sin exigir el minuto exacto (T3, paso 5; historial 2.97): el scheduler los despacha en cuanto puede.
+        $settings = app(WorkshopSettingService::class);
+        config(['notifications.reminders_at' => '08:00']);
+
+        $this->travelTo('2026-11-02 07:59:00');
+        $this->assertFalse($settings->remindersTimeReached());
 
         $this->travelTo('2026-11-02 08:00:00');
-        $this->assertTrue($event->filtersPass(app()));
+        $this->assertTrue($settings->remindersTimeReached());
 
-        $this->travelTo('2026-11-02 05:00:00');
-        $this->assertFalse($event->filtersPass(app()));
+        $this->travelTo('2026-11-02 09:30:00');
+        $this->assertTrue($settings->remindersTimeReached());
 
-        SystemSetting::create(['key' => 'notifications.reminders_at', 'value' => '05:00']);
-        $this->assertTrue($event->filtersPass(app()));
+        SystemSetting::create(['key' => 'notifications.reminders_at', 'value' => '10:00']);
+        $settings->apply();
+        $this->assertFalse($settings->remindersTimeReached());
     }
 }

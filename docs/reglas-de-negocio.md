@@ -382,8 +382,14 @@ Cada cambio de regla actualiza este documento en la misma rama.
 
   El administrador no recibe avisos internos salvo que se agregue su rol a la configuración.
 * **Tarea diaria:** `notifications:send-reminders` (facturas, mantenimientos y cuentas por pagar) se puede correr más de
-  una vez por día sin repetir avisos. Corre en cada taller activo y sin mantenimiento, o en los de `--tenant={id}`; un
-  taller que falla queda en el log y no frena a los demás (6.34).
+  una vez por día sin repetir avisos. Despacha a la cola un job por taller activo y sin mantenimiento, o por los de
+  `--tenant={id}` (`SendTenantReminders`, desde T3, paso 5; historial 2.97); un taller que falla queda en el log y no
+  frena a los demás (6.34).
+* **Hora de cada taller** (decisión del usuario, 2.97): el scheduler corre el comando cada minuto con `--due`, que
+  despacha cuando ya pasó la hora del taller (`reminders_at`, 6.32) y hoy todavía no se despachó. No exige el minuto
+  exacto: si a su hora el taller estaba en mantenimiento, suspendido o con la base caída, o el servidor estaba apagado,
+  los recordatorios salen en cuanto se puede ese mismo día. Si se adelanta la hora a una que ya pasó, salen en ese
+  momento. El día del último despacho queda en la cache de la central.
 * **Permisos:** `client-notifications.index|show|resend`. La bandeja interna `me/notifications` (filtros `unread`,
   `type`; `meta.unread_count`), `PATCH me/notifications/{id}/read` y `POST me/notifications/read-all` no usan permisos;
   un aviso ajeno responde 404.
@@ -850,10 +856,10 @@ Entrega T1 de `docs/especificacion-aseguradoras.html` (decisiones del 2026-11-01
   avisos (`notifications.reminders_at`, `invoice_due_soon_days`, `invoice_overdue_repeat_days`). Solo lo que se cambió: lo
   demás sale del `.env` o del archivo de config, y un campo en `null` borra lo guardado y vuelve a ese valor.
 * **Cómo se aplica:** sobre `config()`, así que el código sigue leyendo `config()`. Lo aplica `TenantRuntime::ensureReady()`
-  (preparar el taller, 6.34; desde T2, paso 3, historial 2.95) en cuatro caminos: al identificar el taller en cada request,
-  en el middleware de cada job (`PrepareTenant`, desde T3, 2.96: un worker vive más que un cambio), en el filtro del
-  scheduler y en el comando de recordatorios, por cada taller. Cualquier proceso nuevo que lea estos datos fuera de esos
-  caminos debe llamar a `ensureReady()`. Es un singleton: recuerda el valor original de lo que reemplazó, también entre
+  (preparar el taller, 6.34; desde T2, paso 3, historial 2.95) en tres caminos: al identificar el taller en cada request,
+  en el middleware de cada job (`PrepareTenant`, desde T3, 2.96: un worker vive más que un cambio) y en el comando de
+  recordatorios con `--due`, por cada taller (2.97). Cualquier proceso nuevo que lea estos datos fuera de esos caminos
+  debe activar el taller y llamar a `ensureReady()`, que sin taller activo falla (TD10). Es un singleton: recuerda el valor original de lo que reemplazó, también entre
   talleres, y lo restaura al olvidar el taller (`RestoreWorkshopSettingsTask`, 2.96).
 * **Remitente:** `ClientNotificationMail` lo pone en su `Envelope`, porque el mailer guarda el global al crearse. Un
   mailable nuevo debe hacer lo mismo.
@@ -863,8 +869,8 @@ Entrega T1 de `docs/especificacion-aseguradoras.html` (decisiones del 2026-11-01
   documentos en curso (un presupuesto aprobado se factura con la tasa nueva); lo emitido no cambia. Si la tasa cambió, la
   respuesta trae `meta.warnings`. **Un documento ya calculado nunca muestra la tasa de la configuración:** la factura la
   guarda por línea y el presupuesto, que no la guarda, la deduce de sus importes (`Budget::taxRate`).
-* **Hora de los recordatorios:** la tarea corre cada minuto y compara la hora en `when()`, porque `routes/console.php` se
-  evalúa en todo comando, incluso sin la base migrada.
+* **Hora de los recordatorios:** es la de cada taller. El comando la compara dentro de cada taller, no `routes/console.php`,
+  que se evalúa en todo comando y no tiene taller activo (6.17).
 
 ## 6.33 Retenciones de IVA y renta
 
@@ -939,7 +945,11 @@ migración central `2026_11_26_000001` (2.96).
   * taller en mantenimiento, o base que no responde o configuración ilegible → libera el job con espera (30 s, 2, 5 y
     15 min) durante 6 horas desde el despacho; después queda en `failed_jobs` de la central;
   * taller suspendido → descarta el job (un aviso queda `failed` con el motivo, 6.17).
-* **Consola y scheduler:** `notifications:send-reminders` activa y prepara cada taller (6.17). El filtro de hora del
-  scheduler todavía corre sin taller, sobre `DB_CONNECTION`, hasta T3, paso 5.
+* **Consola y scheduler** (desde T3, paso 5; historial 2.97): `notifications:send-reminders` recorre los talleres y les
+  despacha un job a cada uno; con `--due` activa y prepara cada taller para leer su hora (6.17). El scheduler no filtra
+  ni consulta nada sin taller activo.
+* **Fallo cerrado** (TD10): en producción `DB_DATABASE` va vacío, así que sin taller activo una consulta a la conexión
+  por defecto falla. `TenantRuntime::ensureReady()` sin taller activo lanza una excepción. El `.env` de desarrollo
+  conserva su base para `migrate`, `db:seed` y `tinker` (decisión del usuario, 2.97).
 * **Registro:** `php artisan tenants:register {name} {domain} {database}` crea la fila del taller (activo, sin
   mantenimiento). El dominio es solo el host; dominio y base son únicos. No crea ni migra la base: eso es el alta de T5.

@@ -143,7 +143,9 @@ php artisan queue:work      # en desarrollo lo reemplaza `npm run dev` (queue:li
 php artisan schedule:run    # cada minuto; en Windows, con el Programador de tareas
 ```
 
-Los recordatorios se prueban a mano con `php artisan notifications:send-reminders`.
+Los recordatorios se prueban a mano con `php artisan notifications:send-reminders` (todos los talleres, o `--tenant={id}`):
+despacha un job por taller, sin mirar la hora, y `queue:work` los registra. El scheduler lo corre con `--due`, que respeta la
+hora de cada taller.
 
 ## Datos de prueba
 

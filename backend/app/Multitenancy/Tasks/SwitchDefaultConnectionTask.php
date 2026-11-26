@@ -11,8 +11,9 @@ use Spatie\Multitenancy\Tasks\SwitchTenantTask;
  * reglas `exists:`/`unique:` y el SQL crudo van a la base del taller sin nombrar la conexión. Al olvidar el taller
  * vuelve la anterior.
  *
- * En T2 solo los requests HTTP activan un taller (historial 2.93): la consola, el worker y el scheduler siguen con
- * `DB_CONNECTION` hasta T3. Va después de `SwitchTenantDatabaseTask`, que ya le fijó la base a `tenant`.
+ * Corre en todo contexto que activa un taller: el request, cada job y el comando de recordatorios (historial 2.93, 2.96
+ * y 2.97). Sin taller activo queda `DB_CONNECTION`, que en producción no tiene base (fallo cerrado, TD10). Va después de
+ * `SwitchTenantDatabaseTask`, que ya le fijó la base a `tenant`.
  */
 class SwitchDefaultConnectionTask implements SwitchTenantTask
 {

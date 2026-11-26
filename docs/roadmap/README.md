@@ -7,6 +7,7 @@ original y no se renumeran. El detalle por módulo está en [`modules/README.md`
 
 | Fecha | Backend | Frontend | Notas |
 |---|---|---|---|
+| 2026-11-26 | Tests puntuales en verde (191, 1827 aserciones): `tests/Feature/Tenancy` (45; las protecciones nuevas de `ReminderCommandTest`, comprobadas quitándolas) y las carpetas `Notifications`, `Settings`, `Http`, `Auth`, `Access`, `Seeders`, `Budgets` y `Receptions`; Pint sin pendientes | ESLint (sin cambios en el frontend) | T3, paso 5 (historial 2.97). Corrida local en la rama `feature/t3-paso5-scheduler`, sin la suite completa; repetida con el mismo resultado después de las correcciones de `validar-docs` (solo documentación y un comentario de código). Contra MySQL: `schedule:list` muestra `notifications:send-reminders --due` cada minuto y `--tenant=999` responde el error esperado (código 1). No se despacharon recordatorios en `synctaller`, para no escribir avisos en la base de desarrollo. Sin revisión en navegador: las pantallas no cambian |
 | 2026-11-26 | 538 tests en verde, 9135 aserciones (antes de T3, paso 5); Pint sin pendientes | Sin corrida: el cambio no tocó el frontend (la CI lo omite por rutas) | T3, paso 4 (historial 2.96). Corrida de la CI sobre `main` (`5541141`), no local |
 | 2026-11-26 | Tests puntuales en verde (186, 1789 aserciones): `tests/Feature/Tenancy` (40; los 10 nuevos y el cambiado de `SwitchTenantTest`, comprobados contra su protección quitada) y las carpetas `Notifications`, `Settings`, `Http`, `Auth`, `Access`, `Seeders`, `Budgets` y `Receptions`; Pint sin pendientes | ESLint (sin cambios en el frontend) | T3, paso 4 (historial 2.96). Corrida local en la rama `feature/t3-paso4-colas`, sin la suite completa. Cola vieja de `synctaller` vaciada con el código de `main` (59 jobs, ninguno fallido) y migración central nueva aplicada en MySQL (`synctaller_central`). Probado con `php artisan serve`: `GET /api/branding` 200 en `127.0.0.1`, `404 TENANT_NOT_FOUND` en `localhost` y login inválido `401`; `queue:work` lee la cola de la central. Sin revisión en navegador: las pantallas no cambian |
 | 2026-11-26 | 528 tests en verde, 9085 aserciones (antes de T3); Pint sin pendientes | Sin corrida: el cambio no tocó el frontend (la CI lo omite por rutas) | T2, paso 3 y decisión sobre P9 (historial 2.94 y 2.95). Corrida de la CI sobre `main` (`87fea4e`), no local. T2 completo |
@@ -35,9 +36,8 @@ Ninguna entrega empieza sin autorización del usuario. **El sistema no está lis
 
 | Orden | Tarea | Bloqueo |
 |---|---|---|
-| 1 | **T3, paso 5:** el scheduler por taller (hora de cada taller y un job de recordatorios por taller, TD6) y el fallo cerrado de TD10 | Diseño aprobado el 2026-11-26 (historial 2.96). Sin bloqueo: el paso 4 está en `main` con la CI en verde (`5541141`) |
-| 2 | T4 y T5 | Según el plan de la sección 2.80. T5 incluye la suspensión y la baja decididas el 2026-11-26 (historial 2.94): bloqueo total, base conservada 5 años y exportación asistida a pedido |
-| 3 | Tarea P8 (fotos y firmas a privado) | Después de T4; requisito antes del primer taller comercial |
+| 1 | T4 y T5 | Según el plan de la sección 2.80. Después de que T3, paso 5 (historial 2.97) esté en `main` con la CI en verde. T5 incluye la suspensión y la baja decididas el 2026-11-26 (historial 2.94): bloqueo total, base conservada 5 años y exportación asistida a pedido |
+| 2 | Tarea P8 (fotos y firmas a privado) | Después de T4; requisito antes del primer taller comercial |
 
 Las entregas de las respuestas de la contadora (sección 2.83 del historial) quedaron completas el 2026-11-25 con V16 y el
 encendido de M10 (2.89).
@@ -95,13 +95,13 @@ Frontend: FA0 a FA4, M10 y M12 completos ([detalle](../modules/aseguradoras.md))
 | T0: spike | COMPLETADO |
 | T1: configuración en la base | COMPLETADO |
 | T2: central e identificación | COMPLETADO: pasos 1 (central, paquete y modelo `Tenant`) y 2 (identificación por host) el 2026-11-25; paso 3 (preparar el taller, `TenantRuntime`) el 2026-11-26 |
-| T3: colas, cache, permisos y scheduler | EN DESARROLLO: diseño aprobado el 2026-11-26; paso 4 (colas por taller, cola y cache en la central) el 2026-11-26 (2.96). Falta el paso 5 |
+| T3: colas, cache, permisos y scheduler | COMPLETADO: diseño aprobado el 2026-11-26; paso 4 (colas por taller, cola y cache en la central) el 2026-11-26 (2.96); paso 5 (scheduler por taller y fallo cerrado) el 2026-11-26 (2.97) |
 | T4: storage | PENDIENTE |
 | Tarea P8: fotos y firmas a privado | PENDIENTE |
 | T5: ciclo de vida | PENDIENTE |
 | T6: migrar la instalación actual | PENDIENTE |
 
-Los pasos 0 a 7 de la revisión del spike son internos de T2, T3 y T5, no fases nuevas (historial 2.80). El paso 0 está hecho y se repitió con 4.2.3 el 2026-11-25; los pasos 1, 2, 3 y 4 también (2.90, 2.93, 2.95 y 2.96).
+Los pasos 0 a 7 de la revisión del spike son internos de T2, T3 y T5, no fases nuevas (historial 2.80). El paso 0 está hecho y se repitió con 4.2.3 el 2026-11-25; los pasos 1 a 5 también (2.90, 2.93, 2.95, 2.96 y 2.97).
 
 ## Pendiente sin fase
 
