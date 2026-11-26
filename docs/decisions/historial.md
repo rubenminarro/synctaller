@@ -998,6 +998,31 @@ HTTP: `403 TENANT_SUSPENDED` y `404 TENANT_NOT_FOUND` ya existían. Regla vigent
 | Navegador | `/revisar-navegador` con administrador y cajero, sobre el entorno aislado (SQLite): con sesión abierta en Facturas, se suspendió el taller y la app y el login mostraron la pantalla (`403` en `/branding` y `/me`, sin excepciones ni errores de consola); al reactivarlo, "Reintentar" volvió a la app con la misma sesión y Facturas cargó normal |
 | Dominio | Un taller dado de baja conserva su dominio y su base, que son únicos: no se reutilizan para otro taller mientras exista la fila |
 
+### 2.105 T5, paso 5: restauración de un taller y runbooks (2026-11-26)
+
+Diseño aprobado por el usuario el 2026-11-26, según §3.9 de la [especificación](../especificacion-aseguradoras.html) y el
+paso 5 del plan de 2.101, con las decisiones de 2.94. La fecha de baja ya estaba hecha (paso 4, 2.104). Agrega un
+comando y una migración central, y los procedimientos operativos en [`deployment.md`](../development/deployment.md). No
+cambia el frontend, rutas, permisos, `error_code` ni códigos HTTP. Regla vigente en [reglas de negocio](../reglas-de-negocio.md), 6.34.
+Con este paso, T5 queda completo.
+
+| Tema | Decisión |
+|---|---|
+| Comando | `App\Console\Commands\RestoreTenant`: `tenants:restore {id} {database} [--force]`. Cambia `tenants.database` a una base restaurada con otro nombre, después de verificarla (§3.9: cambio atómico de puntero). No importa el backup, que depende del hosting (V9), ni toca la base anterior: se borra a mano según el runbook |
+| Estados | Decisión del usuario: activo, suspendido y dado de baja (la base conservada sirve para la exportación asistida). No cambia el estado. Rechaza un taller en `provisioning` (se retoma o se descarta, 2.103) y uno con la base borrada |
+| Taller activo | Decisión del usuario: se permite, con un aviso en la confirmación de que lo guardado en la base actual después del backup se pierde. Con `--force` no pregunta. El caso típico es una base caída, que ya no recibe escrituras |
+| Migraciones | Decisión del usuario: si a la base restaurada le faltan migraciones (un backup viejo), se le aplican con `TenantMigrator` antes del cambio. `TenantMigrator::pending()` es nuevo. Si una falla, el puntero no cambia y el taller sigue con su base de antes |
+| Base borrada | Decisión del usuario: columna central `tenants.database_deleted_at` (migración `2026_11_26_000005`), que completa a mano el runbook del borrado a los 5 años. La fila queda `cancelled`; así se distingue una base conservada de una borrada, y `tenants:restore` la rechaza |
+| Verificación | Sin conectar con el taller: nombre válido, distinto del actual (en SQLite, por la ruta resuelta), ni la central ni la de la conexión por defecto, ni la de otro taller, y que exista y tenga tablas. Con la base nueva activa solo en memoria (la fila no cambia): que responda y qué migraciones le faltan. Después de confirmar: migrarla, `TenantRuntime::ensureReady()` (lo que hará cada request) y al menos un usuario `administrador` |
+| Mismo taller | Si la base actual responde y tiene RUC (`company.tax_id`), la restaurada tiene que tener el mismo: así no se apunta al dump de otro taller. Si no responde (el caso típico), la confirmación muestra el nombre comercial y el RUC de la base restaurada y advierte que no se pudo comprobar |
+| Confirmación | Antes de migrar, porque migrar ya modifica la base restaurada. Muestra la base actual y la nueva, el estado, la identidad, las migraciones pendientes y el aviso del taller activo |
+| Cambio | Toma el lock de `tenants:migrate` (`tenants:migrate:{id}`), para no cruzarse con una migración. Relee la fila con `lockForUpdate` dentro de una transacción de la central y solo cambia si sigue con la misma base, en un estado restaurable y sin la base borrada. Después borra la cache de permisos del taller (la clave lleva su id y tenía los roles de la base anterior). La configuración del taller no se cachea. Queda en el log `Cambió la base del taller.` con `tenant_id`, `from` y `to`; una falla al conectar o preparar, `Falló la restauración del taller.` |
+| Workers | No hace falta reiniciarlos: cada job relee el taller en la central y reconecta al activarlo |
+| Reutilización | Las protecciones de base de `tenants:discard` (la central, la conexión por defecto y la comparación de rutas resueltas) pasan a `TenantDatabase::isProtected()` y `same()`, sin cambiar su comportamiento |
+| Runbooks | En `deployment.md`: backup (`mysqldump` por taller, la central y el storage del taller), restauración, exportación asistida (un CSV por tabla, el dump y los archivos, sin `personal_access_tokens`, `password_reset_tokens`, `sessions`, `migrations` ni la columna `password` de `users`), borrado a los 5 años (base y storage, con `database_deleted_at`) y corrección manual de una baja (pendiente de 2.104) |
+| Tests | `tests/Feature/Tenancy/RestoreTenantCommandTest` (14), con copias de una base de taller migrada que el test borra. Cada protección se comprobó quitándola: el RUC, la confirmación, la migración, el administrador, la cache de permisos, el lock, la misma base, la central y la conexión por defecto, la base de otro taller, la base vacía, el estado, la base borrada y el taller activo releído al terminar. La relectura con la fila bloqueada no tiene test: no se puede intercalar otro cambio dentro de un comando de consola |
+| MySQL | Migración central aplicada en `synctaller_central`. Con un taller temporal (`tenants:create`, `synctaller_prueba_restore`): `mysqldump` importado en `synctaller_prueba_restore_r` sin el registro de la `000074`; rechazos de la misma base, `synctaller`, `synctaller_central`, una base que no existe y un nombre con comilla invertida (código 1); la restauración aplicó la `000074` y cambió el puntero (código 0), y con `php artisan serve`, `GET /api/branding` por el host del taller respondió 200. La fila y las dos bases se borraron al terminar |
+
 ---
 
 ## 3. Frontend

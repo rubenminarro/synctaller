@@ -22,6 +22,7 @@ use Spatie\Multitenancy\Models\Tenant as BaseTenant;
  * @property bool $maintenance
  * @property string|null $provisioning_error Error del último intento de alta, mientras está en `provisioning`
  * @property Carbon|null $cancelled_at Fecha de la baja (`tenants:cancel`): desde ahí corren los 5 años de conservación
+ * @property Carbon|null $database_deleted_at Fecha en que se borró la base de un taller dado de baja (runbook; 2.105)
  */
 class Tenant extends BaseTenant
 {
@@ -33,6 +34,7 @@ class Tenant extends BaseTenant
         'maintenance',
         'provisioning_error',
         'cancelled_at',
+        'database_deleted_at',
     ];
 
     protected $attributes = [
@@ -46,6 +48,7 @@ class Tenant extends BaseTenant
             'status' => TenantStatus::class,
             'maintenance' => 'boolean',
             'cancelled_at' => 'datetime',
+            'database_deleted_at' => 'datetime',
         ];
     }
 }
