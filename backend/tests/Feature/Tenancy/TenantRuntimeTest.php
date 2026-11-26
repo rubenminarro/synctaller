@@ -8,12 +8,13 @@ use App\Models\Tenant;
 use App\Multitenancy\TenantRuntime;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Log;
+use LogicException;
 use Tests\Concerns\UsesTenantDatabases;
 use Tests\TestCase;
 
 /**
  * Preparar el taller (T2, paso 3; historial 2.95): `TenantRuntime::ensureReady()` comprueba la base del taller activo y
- * aplica su configuración, en el request, en cada job, en el scheduler y en el comando de recordatorios. Cada test
+ * aplica su configuración, en el request, en cada job y en el comando de recordatorios. Sin taller activo, falla. Cada test
  * falla si se quita la protección que cubre.
  *
  * Como en IdentifyTenantTest, la transacción va en la conexión fija `sqlite` y los datos de A y B quedan en sus
@@ -90,15 +91,21 @@ class TenantRuntimeTest extends TestCase
         $this->assertSame('Taller A S.A.', config('company.legal_name'));
     }
 
-    public function test_without_an_active_tenant_it_applies_the_settings_of_the_default_connection(): void
+    public function test_without_an_active_tenant_it_fails_closed(): void
     {
-        // El filtro del scheduler hasta T3, paso 5 (historial 2.96): sin taller, la base de `DB_CONNECTION`.
+        // Fallo cerrado (TD10; T3, paso 5, historial 2.97): antes aplicaba la configuración de `DB_CONNECTION`.
+        config(['company.legal_name' => 'Razón social del .env']);
         Tenant::forgetCurrent();
-        SystemSetting::create(['key' => 'company.legal_name', 'value' => 'Taller sin línea T S.A.']);
+        SystemSetting::create(['key' => 'company.legal_name', 'value' => 'De la conexión por defecto S.A.']);
 
-        app(TenantRuntime::class)->ensureReady();
+        try {
+            app(TenantRuntime::class)->ensureReady();
+            $this->fail('Se preparó la configuración sin taller activo.');
+        } catch (LogicException $e) {
+            $this->assertSame('Preparar el taller requiere un taller activo.', $e->getMessage());
+        }
 
-        $this->assertSame('Taller sin línea T S.A.', config('company.legal_name'));
+        $this->assertSame('Razón social del .env', config('company.legal_name'));
     }
 
     private function registerTenant(string $name): Tenant

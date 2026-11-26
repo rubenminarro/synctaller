@@ -7,6 +7,7 @@ use App\Models\Tenant;
 use App\Services\WorkshopSettingService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use LogicException;
 use Throwable;
 
 /**
@@ -14,10 +15,11 @@ use Throwable;
  * su configuración (`system_settings`, T1). Es la segunda de las dos fases: cambiar de taller (las tareas del paquete)
  * no abre conexión; preparar sí, y es lo único que puede fallar.
  *
- * Es el único punto de entrada en los cuatro contextos: el request (`IdentifyTenant`), cada job (su middleware
- * `PrepareTenant`, historial 2.96), el scheduler y el comando de recordatorios (por cada taller). Sin taller activo
- * (el filtro del scheduler hasta T3, paso 5) aplica la configuración sobre la conexión por defecto, como antes de la
- * línea T, y un error sigue su curso.
+ * Es el único punto de entrada en los tres contextos: el request (`IdentifyTenant`), cada job (su middleware
+ * `PrepareTenant`, historial 2.96) y el comando de recordatorios, por cada taller (también desde el scheduler).
+ *
+ * Fallo cerrado (TD10; T3, paso 5, historial 2.97): sin taller activo no hay nada que preparar y lanza una excepción.
+ * Antes aplicaba la configuración sobre la conexión por defecto, que en producción no tiene base.
  */
 class TenantRuntime
 {
@@ -27,16 +29,11 @@ class TenantRuntime
 
     /**
      * @throws TenantException si el taller activo no responde o no se puede leer su configuración
+     * @throws LogicException sin taller activo
      */
     public function ensureReady(): void
     {
-        $tenant = Tenant::current();
-
-        if ($tenant === null) {
-            $this->settings->apply();
-
-            return;
-        }
+        $tenant = Tenant::current() ?? throw new LogicException('Preparar el taller requiere un taller activo.');
 
         $this->attempt($tenant, 'La base del taller no responde.',
             fn () => DB::connection(config('multitenancy.tenant_database_connection_name'))->getPdo());

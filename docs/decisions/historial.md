@@ -835,6 +835,23 @@ scheduler por taller y el fallo cerrado de TD10). Reglas vigentes en [reglas de 
 | Desarrollo | Antes de usar esta versión: vaciar la cola vieja de `synctaller` con el código anterior y migrar la central. El historial de `failed_jobs` queda en `synctaller` ([setup](../development/setup.md)) |
 | Tests | `tests/Feature/Tenancy` pasa de 30 a 40: `TenantQueueTest` (7, con la cola `database` de la central y un worker en el mismo proceso), `ReminderCommandTest` (3) y uno nuevo en `SwitchTenantTest` (los permisos en memoria, en lugar del job sin taller, que ya no aplica). Cada uno se comprobó contra su protección quitada. Los tests que simulaban `Queue::before` con un `JobProcessing` falso pasan por el middleware real |
 
+### 2.97 T3, paso 5: scheduler por taller y fallo cerrado (2026-11-26)
+
+Segundo y último paso de T3, con el diseño aprobado el 2026-11-26 (2.96). Con este paso T3 queda completo. Reglas
+vigentes en [reglas de negocio](../reglas-de-negocio.md), 6.17, 6.32 y 6.34. La API no cambia: ninguna ruta, permiso,
+`error_code` ni código HTTP nuevo. Sin migraciones ni cambios en el frontend.
+
+| Tema | Decisión |
+|---|---|
+| Un job por taller | `SendTenantReminders` (`RunsInTenant`) corre `NotificationReminderService::run()` en su taller y deja los conteos en el log. `notifications:send-reminders` ya no registra los recordatorios en su proceso: despacha un job por taller activo y sin mantenimiento, o por los de `--tenant` (§3.5) |
+| Hora de cada taller (TD6) | El scheduler corre `notifications:send-reminders --due` cada minuto, sin filtro `when()`. Con `--due`, el comando activa y prepara cada taller, lee su `reminders_at` y despacha si ya llegó la hora |
+| Hora perdida | Decisión del usuario: **se recupera el día**. No hace falta el minuto exacto (`remindersTimeReached()`, antes `remindersDue()`): basta con que ya haya pasado la hora y que hoy no se haya despachado. Un taller que a su hora estaba en mantenimiento, suspendido o con la base caída, o un servidor apagado, recibe los recordatorios en cuanto se puede ese día. Si se adelanta la hora a una que ya pasó, salen en ese momento. Las claves de deduplicación evitan avisos repetidos |
+| Día despachado | Se guarda en la cache de la central (`notifications:reminders-dispatched:{id}`, 48 horas), después de despachar. Un taller que no se pudo preparar no se marca y se vuelve a intentar al minuto siguiente: deja un error en el log en cada minuto mientras siga caído. Si se borra la cache, puede volver a despachar el mismo día, y la deduplicación evita los avisos repetidos. Una vez despachado, los reintentos y la suspensión son del job (2.96) |
+| Comando manual | Decisión del usuario: sin `--due`, despacha a todos o a los de `--tenant` sin mirar la hora y sin marcar el día. Muestra a qué talleres despachó; los conteos van al log del job, que procesa `queue:work` |
+| Fallo cerrado (TD10) | Decisión del usuario: **en el código**, sin cambiar el `.env` de desarrollo. `TenantRuntime::ensureReady()` sin taller activo lanza una excepción en vez de aplicar la configuración de `DB_CONNECTION`. Era el último camino que consultaba la conexión por defecto sin taller (el filtro del scheduler). En desarrollo, `migrate`, `db:seed` y `tinker` siguen con su base. La alternativa (conexión por defecto `tenant` también en la consola) se descartó porque exigía `--database` en esos comandos hasta `tenants:migrate` (T5) |
+| Sesiones | Revisado: `SESSION_DRIVER=database` usa la conexión por defecto, pero `routes/web.php` no tiene rutas y la API no abre sesión (Bearer). Sin cambios |
+| Tests | `tests/Feature/Tenancy` pasa de 40 a 45: `ReminderCommandTest` pasa de 3 a 8 (job por taller en su taller, hora de cada taller una vez por día, recuperación después del mantenimiento, taller caído sin marcar, `--tenant`, taller activo al terminar, entrada del scheduler y fallo cerrado con una conexión por defecto sin base). Usa la cola y la cache `database` de la central: la `array` de los tests se vacía al cambiar de taller. En `TenantRuntimeTest`, el test sin taller pasa a comprobar el fallo cerrado. Cada protección nueva se comprobó quitándola. En `WorkshopSettingsTest` y `NotificationReminderTest` cambian el test del filtro del scheduler y el de la salida del comando |
+
 ---
 
 ## 3. Frontend

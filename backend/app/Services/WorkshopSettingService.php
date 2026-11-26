@@ -93,13 +93,14 @@ class WorkshopSettingService
     }
 
     /**
-     * ¿Es la hora de los recordatorios? Se evalúa al ejecutar el scheduler, no al
-     * arrancar: routes/console.php corre en todo comando, incluso sin base migrada.
-     * Espera la configuración ya aplicada (TenantRuntime::ensureReady()).
+     * ¿Ya llegó hoy la hora de los recordatorios del taller? No exige el minuto
+     * exacto: si a esa hora no se pudo, el scheduler los despacha en cuanto puede
+     * (T3, paso 5; historial 2.97). Espera la configuración ya aplicada
+     * (TenantRuntime::ensureReady()).
      */
-    public function remindersDue(): bool
+    public function remindersTimeReached(): bool
     {
-        return now()->format('H:i') === config('notifications.reminders_at');
+        return now()->format('H:i') >= (string) config('notifications.reminders_at');
     }
 
     private function cast(string $field, string $value): int|string

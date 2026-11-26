@@ -2,9 +2,10 @@
 
 **Estado: EN DESARROLLO.** Operar varios talleres, con una base por taller. Lo hecho hasta ahora es la evaluación, la
 configuración por taller, T2 completo (la base central, el paquete y el modelo `Tenant`, la identificación del taller por
-el host y su preparación, `TenantRuntime::ensureReady()`) y el paso 4 de T3: **cada request a `api/*` y cada job usan la
-base de su taller** (reglas de negocio 6.34), con la cola y la cache en la central, y el comando de recordatorios recorre
-los talleres. El filtro de hora del scheduler sigue sin taller, sobre `DB_CONNECTION`, hasta el paso 5.
+el host y su preparación, `TenantRuntime::ensureReady()`) y T3 completo: **cada request a `api/*` y cada job usan la
+base de su taller** (reglas de negocio 6.34), con la cola y la cache en la central, y el scheduler despacha un job de
+recordatorios por taller, a la hora de cada uno. Sin taller activo, nada consulta la conexión por defecto (fallo cerrado,
+TD10). Falta T4 en adelante.
 
 | Dato | Referencia |
 |---|---|
@@ -16,6 +17,7 @@ los talleres. El filtro de hora del scheduler sigue sin taller, sobre `DB_CONNEC
 | Paso 3 de T2 | [historial](../decisions/historial.md), sección 2.95; [reglas de negocio](../reglas-de-negocio.md), 6.32 y 6.34 |
 | Suspensión y baja (P9) | [historial](../decisions/historial.md), sección 2.94 |
 | Paso 4 de T3 | [historial](../decisions/historial.md), sección 2.96; [reglas de negocio](../reglas-de-negocio.md), 6.17, 6.32 y 6.34 |
+| Paso 5 de T3 | [historial](../decisions/historial.md), sección 2.97; [reglas de negocio](../reglas-de-negocio.md), 6.17, 6.32 y 6.34 |
 
 ## Estado por entrega
 
@@ -24,7 +26,7 @@ los talleres. El filtro de hora del scheduler sigue sin taller, sobre `DB_CONNEC
 | T0 | Evaluar el paquete | COMPLETADO | Viable. Paso 0 medido el 2026-11-01 y repetido con 4.2.3 y diez talleres el 2026-11-25 (informe, sección 9) |
 | T1 | Configuración del taller en la base | COMPLETADO | `reglas-de-negocio.md` 6.32. Tests: `WorkshopSettings` 14 |
 | T2 | Base central e identificación | COMPLETADO | Paso 1 hecho el 2026-11-25: paquete 4.2.3, conexiones `central` y `tenant`, tabla `tenants` y tareas al activar un taller. Paso 2 hecho el 2026-11-25: `IdentifyTenant`, errores `TENANT_*`, conexión por defecto `tenant` en HTTP y comando `tenants:register`. Paso 3 hecho el 2026-11-26: `TenantRuntime::ensureReady()` prepara el taller en el request, en cada job, en el scheduler y en el comando de recordatorios; se borró `ApplyWorkshopSettings`. Tests en `tests/Feature/Tenancy` (30) |
-| T3 | Colas, cache, permisos y scheduler | EN DESARROLLO | Diseño aprobado el 2026-11-26, en dos pasos. Paso 4 hecho el 2026-11-26 (2.96): cola, fallidos y cache en la central; todo job con su taller (`PrepareTenant`: libera con espera, descarta si el taller está suspendido); permisos y configuración limpios al cambiar de taller; recordatorios por taller. Falta el paso 5: el scheduler por taller (hora de cada uno y un job por taller) y el fallo cerrado de TD10. Tests en `tests/Feature/Tenancy` (40) |
+| T3 | Colas, cache, permisos y scheduler | COMPLETADO | Diseño aprobado el 2026-11-26, en dos pasos. Paso 4 hecho el 2026-11-26 (2.96): cola, fallidos y cache en la central; todo job con su taller (`PrepareTenant`: libera con espera, descarta si el taller está suspendido); permisos y configuración limpios al cambiar de taller; recordatorios por taller. Paso 5 hecho el 2026-11-26 (2.97): un job de recordatorios por taller (`SendTenantReminders`), el scheduler con la hora de cada taller una vez por día (se recupera la hora perdida) y el fallo cerrado de TD10 en el código (`ensureReady()` sin taller falla). Tests en `tests/Feature/Tenancy` (45) |
 | T4 | Storage por taller | PENDIENTE | Depende de T3 |
 | Tarea P8 | Fotos y firmas a privado | PENDIENTE | Después de T4; deuda #15 |
 | T5 | Ciclo de vida | PENDIENTE | Incluye `tenants:migrate`, la suspensión (bloqueo total) y la baja con la base conservada 5 años y exportación asistida a pedido (historial 2.94) |
@@ -34,8 +36,8 @@ los talleres. El filtro de hora del scheduler sigue sin taller, sobre `DB_CONNEC
 
 * La línea T no bloquea a la línea de aseguradoras.
 * La configuración de T1 se aplica en un solo punto, `TenantRuntime::ensureReady()` (historial 2.95): en el request, en el
-  middleware de cada job y en el comando de recordatorios, con su taller. Solo el filtro de hora del scheduler la aplica
-  todavía sin taller, sobre `DB_CONNECTION`: el paso 5 lo cambia por el recorrido de talleres.
+  middleware de cada job y en el comando de recordatorios con `--due`, siempre con su taller. Sin taller activo lanza una
+  excepción (fallo cerrado, TD10; historial 2.97): un proceso nuevo debe activar el taller antes de prepararlo.
 * Todo job es del taller (2.96). Un job nuevo usa el trait `RunsInTenant`, para liberarse si el taller no está disponible y
   descartarse si está suspendido; si deja registro en el taller, implementa `DiscardsForSuspendedTenant`. Un job que no
   sea de ningún taller implementa `NotTenantAware`.

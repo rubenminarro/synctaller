@@ -14,6 +14,7 @@ use App\Models\VehicleModel;
 use App\Services\ClientNotificationService;
 use App\Services\MaintenanceService;
 use App\Services\NotificationReminderService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Tests\Feature\Invoices\InvoiceTestCase;
@@ -218,8 +219,16 @@ class NotificationReminderTest extends InvoiceTestCase
 
     public function test_command_runs_all_reminders(): void
     {
+        // Despacha el job del taller (historial 2.97); en los tests la cola es `sync` y corre en el momento.
+        Log::spy();
+
         $this->artisan('notifications:send-reminders')
-            ->expectsOutput('Facturas: 0 aviso(s).')
+            ->expectsOutput('Taller #'.self::TEST_TENANT_ID.' (Taller de prueba): recordatorios despachados.')
             ->assertSuccessful();
+
+        Log::shouldHaveReceived('info')
+            ->withArgs(fn (string $message, array $context = []) => $message === 'Recordatorios registrados.'
+                && $context === ['tenant_id' => self::TEST_TENANT_ID, 'invoices' => 0, 'maintenances' => 0, 'accounts_payable' => 0])
+            ->once();
     }
 }
