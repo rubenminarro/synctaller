@@ -7,6 +7,7 @@ original y no se renumeran. El detalle por módulo está en [`modules/README.md`
 
 | Fecha | Backend | Frontend | Notas |
 |---|---|---|---|
+| 2026-11-26 | 582 tests en verde, 9417 aserciones (antes de T5, paso 4); Pint sin pendientes | Sin corrida: el cambio no tocó el frontend (la CI lo omite por rutas) | T5, paso 3 (historial 2.103). Corrida de la CI sobre `main` (`ea62bca`), no local |
 | 2026-11-26 | Tests puntuales en verde (94, 570 aserciones): `tests/Feature/Tenancy` (79, con `CreateTenantCommandTest`, 10 nuevos, `DiscardTenantCommandTest`, 6 nuevos, y uno nuevo en `IdentifyTenantTest`, cada protección comprobada quitándola), `tests/Feature/Seeders` (6) y `tests/Feature/Auth` (9); Pint sin pendientes | ESLint (sin cambios en el frontend) | T5, paso 3 (historial 2.103). Corrida local en la rama `feature/t5-paso3-alta`, sin la suite completa. Alta y descarte probados en MySQL con un taller temporal, ya borrado (2.103). El entorno local estaba en un estado anterior a T2 y el taller #1 de desarrollo no está registrado (2.103, "Entorno local"). Sin revisión en navegador: las pantallas no cambian |
 | 2026-11-26 | 565 tests en verde, 9298 aserciones (antes de T5, paso 3); Pint sin pendientes | Sin corrida: el cambio no tocó el frontend (la CI lo omite por rutas) | T5, paso 2 (historial 2.102). Corrida de la CI sobre `main` (`ff454fe`), no local |
 | 2026-11-26 | Tests puntuales en verde (85, 700 aserciones): `tests/Feature/Tenancy` (con `TenantQueueTablesTest`, 3 nuevos, cada protección comprobada quitándola, y `SwitchTenantTest` con la cache en la central), `tests/Feature/Seeders` y `tests/Feature/Notifications`; Pint sin pendientes | ESLint (sin cambios en el frontend) | T5, paso 2 (historial 2.102). Corrida local en la rama `feature/t5-paso2-tablas-sin-uso`, sin la suite completa. En MySQL: `tenants:migrate` con el taller #1 aplicó la `000074` (código 0); las cinco tablas quedaron solo en `synctaller_central` (estaban vacías en `synctaller`) y la segunda corrida no tiene pendientes. La migración rechaza una conexión con la base central. Sin revisión en navegador: las pantallas no cambian |
@@ -46,7 +47,7 @@ Ninguna entrega empieza sin autorización del usuario. **El sistema no está lis
 
 | Orden | Tarea | Bloqueo |
 |---|---|---|
-| 1 | T5 | Plan en 5 pasos (historial 2.101), sobre el de la sección 2.80. Sin bloqueo: los pasos 1 (`tenants:migrate`, `afacc66`) y 2 (deuda #20, historial 2.102, `ff454fe`) están en `main` con la CI en verde; el paso 3 (alta, `tenants:create` y `tenants:discard`, historial 2.103) está en la rama `feature/t5-paso3-alta`, sin merge. Después: paso 4 (suspensión, baja y pantalla del frontend) y 5 (restauración y runbooks). T5 incluye la suspensión y la baja decididas el 2026-11-26 (historial 2.94): bloqueo total, base conservada 5 años y exportación asistida a pedido |
+| 1 | T5 | Plan en 5 pasos (historial 2.101), sobre el de la sección 2.80. Sin bloqueo: los pasos 1 (`tenants:migrate`, `afacc66`), 2 (deuda #20, historial 2.102, `ff454fe`) y 3 (alta, `tenants:create` y `tenants:discard`, historial 2.103, `ea62bca`) están en `main` con la CI en verde. Después: paso 4 (suspensión, baja y pantalla del frontend) y 5 (restauración y runbooks). T5 incluye la suspensión y la baja decididas el 2026-11-26 (historial 2.94): bloqueo total, base conservada 5 años y exportación asistida a pedido |
 | 2 | Tarea P8 (fotos y firmas a privado) | Sin bloqueo: T4 está en `main`. Usa el disco `tenant_private`; requisito antes del primer taller comercial |
 
 Las entregas de las respuestas de la contadora (sección 2.83 del historial) quedaron completas el 2026-11-25 con V16 y el
@@ -108,7 +109,7 @@ Frontend: FA0 a FA4, M10 y M12 completos ([detalle](../modules/aseguradoras.md))
 | T3: colas, cache, permisos y scheduler | COMPLETADO: diseño aprobado el 2026-11-26; paso 4 (colas por taller, cola y cache en la central) el 2026-11-26 (2.96); paso 5 (scheduler por taller y fallo cerrado) el 2026-11-26 (2.97) |
 | T4: storage | COMPLETADO el 2026-11-26 (2.98): diseño e implementación |
 | Tarea P8: fotos y firmas a privado | PENDIENTE |
-| T5: ciclo de vida | EN CURSO: plan en 5 pasos aprobado el 2026-11-26 (2.101); paso 1 (`tenants:migrate`) el 2026-11-26, en `main` con la CI en verde; paso 2 (sin tablas de cola y cache en las bases de taller, deuda #20) el 2026-11-26 (2.102), en `main` con la CI en verde; paso 3 (alta completa, `tenants:create` y `tenants:discard`) el 2026-11-26 (2.103), en su rama |
+| T5: ciclo de vida | EN CURSO: plan en 5 pasos aprobado el 2026-11-26 (2.101); paso 1 (`tenants:migrate`) el 2026-11-26, en `main` con la CI en verde; paso 2 (sin tablas de cola y cache en las bases de taller, deuda #20) el 2026-11-26 (2.102), en `main` con la CI en verde; paso 3 (alta completa, `tenants:create` y `tenants:discard`) el 2026-11-26 (2.103), en `main` con la CI en verde |
 | T6: migrar la instalación actual | PENDIENTE |
 
 Los pasos 0 a 7 de la revisión del spike son internos de T2, T3 y T5, no fases nuevas (historial 2.80). El paso 0 está hecho y se repitió con 4.2.3 el 2026-11-25; los pasos 1 a 5 también (2.90, 2.93, 2.95, 2.96 y 2.97).
