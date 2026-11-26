@@ -6,8 +6,8 @@ use App\Enums\TenantMigrationRunStatus;
 use App\Enums\TenantStatus;
 use App\Models\Tenant;
 use App\Models\TenantMigrationRun;
+use App\Multitenancy\TenantMigrator;
 use Illuminate\Console\Command;
-use Illuminate\Database\Migrations\Migrator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -22,8 +22,9 @@ use Throwable;
  * viejo, leer su configuración podría fallar. Mientras migra, el taller sigue atendiendo: las migraciones son
  * compatibles hacia atrás (se migra y después se publica el código).
  *
- * Usa el `Migrator` y no el comando `migrate`, que con `--force` crea la base si no existe: un taller que apunta a una
- * base caída o mal escrita recibiría una vacía con todas las migraciones. Acá una base que falta es una falla.
+ * Migra con `TenantMigrator` (el `Migrator`, no el comando `migrate`, que con `--force` crea la base si no existe): un
+ * taller que apunta a una base caída o mal escrita recibiría una vacía con todas las migraciones. Acá una base que falta
+ * es una falla. La lógica es común con el alta (`tenants:create`; T5, paso 3, historial 2.103).
  *
  * Un taller que falla queda en mantenimiento (`503 TENANT_MAINTENANCE`), los demás siguen y el comando termina con
  * código 1. Cuando una corrida posterior sale bien, le quita el mantenimiento que puso la fallida; uno puesto a mano no
@@ -47,7 +48,7 @@ class MigrateTenants extends Command
      */
     private const LOCK_SECONDS = 3600;
 
-    public function handle(Migrator $migrator): int
+    public function handle(TenantMigrator $migrator): int
     {
         $ids = array_map('intval', $this->option('tenant'));
         $tenants = Tenant::query()
@@ -105,7 +106,7 @@ class MigrateTenants extends Command
         return "tenants:migrate:{$tenant->id}";
     }
 
-    private function runFor(Tenant $tenant, Migrator $migrator): bool
+    private function runFor(Tenant $tenant, TenantMigrator $migrator): bool
     {
         $label = "Taller #{$tenant->id} ({$tenant->name})";
         $lock = Cache::lock(self::lockKey($tenant), self::LOCK_SECONDS);
@@ -125,23 +126,16 @@ class MigrateTenants extends Command
             ]);
 
             $tenant->makeCurrent();
-            $connection = config('multitenancy.tenant_database_connection_name');
             $before = null;
 
             try {
                 // Conecta con la base: si falta o no responde, falla acá, antes de migrar (el Migrator no la crea).
-                $before = $this->ranMigrations($migrator, $connection);
-                $migrator->usingConnection($connection, function () use ($migrator) {
-                    if (! $migrator->repositoryExists()) {
-                        $migrator->getRepository()->createRepository();
-                    }
+                $before = $migrator->ran();
+                $migrator->run();
 
-                    $migrator->run(array_merge($migrator->paths(), [database_path('migrations')]));
-                });
-
-                $applied = array_values(array_diff($this->ranMigrations($migrator, $connection), $before));
+                $applied = array_values(array_diff($migrator->ran(), $before));
             } catch (Throwable $e) {
-                $applied = $before === null ? [] : $this->appliedSince($migrator, $connection, $before);
+                $applied = $before === null ? [] : $this->appliedSince($migrator, $before);
                 $this->recordFailure($tenant, $run, $applied, $e);
                 $this->error("{$label}: falló la migración y queda en mantenimiento. El detalle está en el log.");
 
@@ -198,24 +192,15 @@ class MigrateTenants extends Command
     }
 
     /**
-     * @return list<string>
-     */
-    private function ranMigrations(Migrator $migrator, string $connection): array
-    {
-        return $migrator->usingConnection($connection,
-            fn () => $migrator->repositoryExists() ? $migrator->getRepository()->getRan() : []);
-    }
-
-    /**
      * Las que llegaron a aplicarse antes de la falla, si la base todavía responde.
      *
      * @param  list<string>  $before
      * @return list<string>
      */
-    private function appliedSince(Migrator $migrator, string $connection, array $before): array
+    private function appliedSince(TenantMigrator $migrator, array $before): array
     {
         try {
-            return array_values(array_diff($this->ranMigrations($migrator, $connection), $before));
+            return array_values(array_diff($migrator->ran(), $before));
         } catch (Throwable) {
             return [];
         }
