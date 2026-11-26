@@ -169,6 +169,30 @@ class TenantQueueTest extends TestCase
         $this->assertSame(0, $notification->attempts);
     }
 
+    public function test_a_pending_notification_of_a_cancelled_tenant_fails_with_its_own_reason(): void
+    {
+        // Historial 2.104: el taller dado de baja conserva su base; sin el descarte, el aviso se enviaría.
+        Mail::fake();
+        $a = $this->registerTenant('a');
+        $a->makeCurrent();
+        $notification = $this->pendingNotification();
+        SendClientNotification::dispatch($notification->id);
+        Tenant::forgetCurrent();
+        $a->update(['status' => TenantStatus::CANCELLED]);
+
+        $this->work();
+
+        Mail::assertNothingSent();
+        $this->assertSame(0, DB::connection('central')->table('jobs')->count());
+        $this->assertSame(0, DB::connection('central')->table('failed_jobs')->count());
+
+        $a->makeCurrent();
+        $notification->refresh();
+        $this->assertSame(ClientNotificationStatus::FAILED, $notification->status);
+        $this->assertSame('Taller dado de baja.', $notification->error);
+        $this->assertSame(0, $notification->attempts);
+    }
+
     public function test_queue_retry_runs_a_failed_job_again_in_its_tenant(): void
     {
         $a = $this->registerTenant('a');

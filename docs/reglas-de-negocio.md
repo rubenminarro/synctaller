@@ -364,7 +364,8 @@ Cada cambio de regla actualiza este documento en la misma rama.
   * El envío corre en el taller que registró el aviso (T3, historial 2.96). Si la base del taller no responde o está en
     mantenimiento, el envío se reintenta solo, con espera, hasta 6 horas desde el registro; si vence, el aviso sigue
     `pending` hasta que la plataforma lo reencola (`queue:retry`). Con el taller suspendido no se envía: queda `failed`
-    con el motivo `Taller suspendido.`, sin sumar intento, y se puede reenviar después de reactivar el taller.
+    con el motivo `Taller suspendido.`, sin sumar intento, y se puede reenviar después de reactivar el taller. Con el
+    taller dado de baja, lo mismo con el motivo `Taller dado de baja.` (historial 2.104).
   * Los avisos automáticos no se repiten gracias a `dedupe_key` (único).
 * **Reenvío** (`POST client-notifications/{id}/resend`): crea otro registro (`resent_from_id`, `created_by`) con el
   contenido actual del documento. Errores:
@@ -932,7 +933,7 @@ migración central `2026_11_26_000001` (2.96). Las bases de taller no tienen esa
 
   | Caso | HTTP | `error_code` | Mensaje |
   |---|---|---|---|
-  | Ningún taller con ese host, o uno en alta (`provisioning`) | 404 | `TENANT_NOT_FOUND` | No se encontró el taller. |
+  | Ningún taller con ese host, uno en alta (`provisioning`) o uno dado de baja (`cancelled`, TD11) | 404 | `TENANT_NOT_FOUND` | No se encontró el taller. |
   | Taller suspendido | 403 | `TENANT_SUSPENDED` | El taller está suspendido. |
   | Taller en mantenimiento (`tenants.maintenance`) | 503 | `TENANT_MAINTENANCE` | El taller está en mantenimiento. Intente más tarde. |
   | La base del taller no responde o no se puede leer su configuración | 503 | `TENANT_UNAVAILABLE` | El servicio del taller no está disponible. |
@@ -947,7 +948,7 @@ migración central `2026_11_26_000001` (2.96). Las bases de taller no tienen esa
   están en la base central, para todos los talleres. Antes de `handle`, el middleware `PrepareTenant`:
   * taller en mantenimiento, o base que no responde o configuración ilegible → libera el job con espera (30 s, 2, 5 y
     15 min) durante 6 horas desde el despacho; después queda en `failed_jobs` de la central;
-  * taller suspendido → descarta el job (un aviso queda `failed` con el motivo, 6.17).
+  * taller suspendido o dado de baja → descarta el job (un aviso queda `failed` con el motivo, 6.17).
 * **Consola y scheduler** (desde T3, paso 5; historial 2.97): `notifications:send-reminders` recorre los talleres y les
   despacha un job a cada uno; con `--due` activa y prepara cada taller para leer su hora (6.17). El scheduler no filtra
   ni consulta nada sin taller activo.
@@ -974,6 +975,22 @@ migración central `2026_11_26_000001` (2.96). Las bases de taller no tienen esa
   conserva su contraseña) o se descarta con `php artisan tenants:discard {id} [--force]`, que borra la base y la fila
   solo de un taller en `provisioning` y nunca la base central ni la de la conexión por defecto. Los dos comandos toman
   el lock `tenants:provision:{dominio}` en la cache de la central.
+* **Suspensión, reactivación y baja** (T5, paso 4; historial 2.94 y 2.104; `AppMultitenancyTenantStatusTransition`):
+
+  | Comando | Desde | Hacia |
+  |---|---|---|
+  | `php artisan tenants:suspend {id}` | `active` | `suspended` |
+  | `php artisan tenants:reactivate {id}` | `suspended` | `active` |
+  | `php artisan tenants:cancel {id} [--force]` | `active` o `suspended` | `cancelled`, con la fecha en `tenants.cancelled_at` |
+
+  Cada comando relee el estado con la fila bloqueada en la central; desde otro estado, o con un id desconocido, no cambia
+  nada y termina con código 1. El cambio queda en el log (`Cambió el estado del taller.` con su `tenant_id`). No tocan el
+  mantenimiento, los tokens ni los datos: al reactivar, las sesiones vuelven a funcionar. La suspensión es un bloqueo total
+  (`403 TENANT_SUSPENDED` en todas las rutas, también el login y el branding). La baja es final: ningún comando la revierte,
+  el taller responde `404 TENANT_NOT_FOUND`, no se migra ni recibe recordatorios y su base se conserva 5 años desde
+  `cancelled_at` (su borrado y la exportación asistida son procedimientos operativos, paso 5). `tenants:cancel` pide
+  confirmación salvo con `--force`. El frontend muestra la pantalla de taller suspendido ante cualquier
+  `TENANT_SUSPENDED`, sin borrar el token.
 * **Migraciones por taller** (T5, paso 1; historial 2.101; `App\Console\Commands\MigrateTenants`):
   `php artisan tenants:migrate [--tenant=*] [--failed]` aplica las migraciones pendientes de `database/migrations` en la
   base de cada taller activo o suspendido, con o sin mantenimiento. Por taller toma un lock en la cache de la central, y

@@ -69,6 +69,7 @@ class ReminderCommandTest extends TestCase
         $b = $this->tenant('b', $this->tenantDatabase('b'));
         $suspended = $this->tenant('suspendido', $this->missingDatabase('suspendido'), ['status' => TenantStatus::SUSPENDED]);
         $maintenance = $this->tenant('mantenimiento', $this->missingDatabase('mantenimiento'), ['maintenance' => true]);
+        $cancelled = $this->tenant('baja', $this->missingDatabase('baja'), ['status' => TenantStatus::CANCELLED]);
 
         // Sin `--due`, sin mirar la hora: a las 05:00 todavía no es la de ninguno.
         $this->travelTo('2026-11-02 05:00:00');
@@ -76,6 +77,7 @@ class ReminderCommandTest extends TestCase
             ->expectsOutput("Taller #{$a->id} (Taller a): recordatorios despachados.")
             ->expectsOutput("Taller #{$b->id} (Taller b): recordatorios despachados.")
             ->doesntExpectOutputToContain("Taller #{$suspended->id}")
+            ->doesntExpectOutputToContain("Taller #{$cancelled->id}")
             ->doesntExpectOutputToContain("Taller #{$maintenance->id}")
             ->assertSuccessful();
 

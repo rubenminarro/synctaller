@@ -17,7 +17,8 @@ use Throwable;
  * 1. Taller en mantenimiento: libera el job con espera, sin tocar su base.
  * 2. Prepara el taller (`TenantRuntime::ensureReady()`): si su base no responde o no se puede leer su configuración,
  *    libera el job con espera. Un problema de infraestructura no lo deja fallido.
- * 3. Taller suspendido (P9): descarta el job. Si es un aviso, antes lo deja `failed` con el motivo (`DiscardsForSuspendedTenant`).
+ * 3. Taller suspendido (P9) o dado de baja (historial 2.104): descarta el job. Si es un aviso, antes lo deja `failed`
+ *    con el motivo (`DiscardsForSuspendedTenant`).
  *
  * Liberar el job no cuenta como excepción (`maxExceptions`): los reintentos terminan con `retryUntil` (`RunsInTenant`).
  */
@@ -47,7 +48,7 @@ class PrepareTenant
             return;
         }
 
-        if ($tenant?->status === TenantStatus::SUSPENDED) {
+        if (in_array($tenant?->status, [TenantStatus::SUSPENDED, TenantStatus::CANCELLED], true)) {
             $this->discard($job, $tenant);
 
             return;
@@ -60,10 +61,10 @@ class PrepareTenant
     {
         try {
             if ($job instanceof DiscardsForSuspendedTenant) {
-                $job->discardForSuspendedTenant();
+                $job->discardForSuspendedTenant($tenant->status);
             }
         } catch (Throwable $e) {
-            Log::error('No se pudo descartar el job del taller suspendido.', [
+            Log::error('No se pudo descartar el job del taller suspendido o dado de baja.', [
                 'tenant_id' => $tenant->id,
                 'job' => $job::class,
                 'exception' => $e->getMessage(),
@@ -73,7 +74,11 @@ class PrepareTenant
             return;
         }
 
-        Log::info('Job descartado: el taller está suspendido.', ['tenant_id' => $tenant->id, 'job' => $job::class]);
+        Log::info('Job descartado: el taller está suspendido o dado de baja.', [
+            'tenant_id' => $tenant->id,
+            'status' => $tenant->status->value,
+            'job' => $job::class,
+        ]);
 
         $job->delete();
     }

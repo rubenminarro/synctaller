@@ -1,5 +1,6 @@
 import { MutationCache, QueryClient } from '@tanstack/react-query'
 import { isApiError } from '@/services/api'
+import { TENANT_SUSPENDED } from '@/lib/tenantStatus'
 import { toast } from '@/lib/toast'
 
 declare module '@tanstack/react-query' {
@@ -38,6 +39,8 @@ export const queryClient = new QueryClient({
     onError: (error, _variables, _context, mutation) => {
       if (mutation.meta?.skipErrorToast) return
       if (isApiError(error) && (error.isValidation || error.status === 401)) return
+      // El taller suspendido ya tiene su pantalla (TenantSuspendedGate).
+      if (isApiError(error) && error.code === TENANT_SUSPENDED) return
       toast.error(isApiError(error) ? error.message : 'Ocurrió un error inesperado.')
     },
   }),

@@ -32,8 +32,9 @@ class IdentifyTenant
         // `getHost()` ya lo da en minúsculas y sin puerto, como se guarda (`tenants:register`).
         $tenant = Tenant::query()->where('domain', $request->getHost())->first();
 
-        // Un taller en alta todavía no existe para nadie (T5, paso 3; historial 2.103).
-        if ($tenant === null || $tenant->status === TenantStatus::PROVISIONING) {
+        // Un taller en alta todavía no existe para nadie (T5, paso 3; historial 2.103) y uno dado de baja ya no existe
+        // (TD11; paso 4, historial 2.104).
+        if ($tenant === null || in_array($tenant->status, [TenantStatus::PROVISIONING, TenantStatus::CANCELLED], true)) {
             throw TenantException::notFound();
         }
 
