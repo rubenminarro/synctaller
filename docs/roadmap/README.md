@@ -7,6 +7,7 @@ original y no se renumeran. El detalle por módulo está en [`modules/README.md`
 
 | Fecha | Backend | Frontend | Notas |
 |---|---|---|---|
+| 2026-11-26 | 538 tests en verde, 9135 aserciones (antes de T3, paso 5); Pint sin pendientes | Sin corrida: el cambio no tocó el frontend (la CI lo omite por rutas) | T3, paso 4 (historial 2.96). Corrida de la CI sobre `main` (`5541141`), no local |
 | 2026-11-26 | Tests puntuales en verde (186, 1789 aserciones): `tests/Feature/Tenancy` (40; los 10 nuevos y el cambiado de `SwitchTenantTest`, comprobados contra su protección quitada) y las carpetas `Notifications`, `Settings`, `Http`, `Auth`, `Access`, `Seeders`, `Budgets` y `Receptions`; Pint sin pendientes | ESLint (sin cambios en el frontend) | T3, paso 4 (historial 2.96). Corrida local en la rama `feature/t3-paso4-colas`, sin la suite completa. Cola vieja de `synctaller` vaciada con el código de `main` (59 jobs, ninguno fallido) y migración central nueva aplicada en MySQL (`synctaller_central`). Probado con `php artisan serve`: `GET /api/branding` 200 en `127.0.0.1`, `404 TENANT_NOT_FOUND` en `localhost` y login inválido `401`; `queue:work` lee la cola de la central. Sin revisión en navegador: las pantallas no cambian |
 | 2026-11-26 | 528 tests en verde, 9085 aserciones (antes de T3); Pint sin pendientes | Sin corrida: el cambio no tocó el frontend (la CI lo omite por rutas) | T2, paso 3 y decisión sobre P9 (historial 2.94 y 2.95). Corrida de la CI sobre `main` (`87fea4e`), no local. T2 completo |
 | 2026-11-26 | Tests puntuales en verde: `tests/Feature/Tenancy` (30, 98 aserciones; los 5 nuevos de `TenantRuntimeTest` comprobados contra su protección quitada) y las carpetas `Settings`, `Notifications`, `Http`, `Auth`, `Access` y `Seeders` (84, 925 aserciones); Pint sin pendientes | Sin corrida: el cambio no tocó el frontend | T2, paso 3 (historial 2.95) y decisión sobre P9 (2.94). Corrida local en la rama `feature/t2-paso3-preparar-taller`, sin la suite completa; `Tenancy` y Pint se repitieron después del último cambio de código (un import sin uso y comentarios). Probado con `php artisan serve` sobre la base de desarrollo: `GET /api/branding` 200 en `127.0.0.1`, `404 TENANT_NOT_FOUND` en `localhost` y el login con credenciales inválidas `401`. Sin revisión en navegador: las pantallas no cambian |
@@ -34,7 +35,7 @@ Ninguna entrega empieza sin autorización del usuario. **El sistema no está lis
 
 | Orden | Tarea | Bloqueo |
 |---|---|---|
-| 1 | **T3, paso 5:** el scheduler por taller (hora de cada taller y un job de recordatorios por taller, TD6) y el fallo cerrado de TD10 | Diseño aprobado el 2026-11-26 (historial 2.96). Tras el paso 4 en `main` y su corrida de la CI |
+| 1 | **T3, paso 5:** el scheduler por taller (hora de cada taller y un job de recordatorios por taller, TD6) y el fallo cerrado de TD10 | Diseño aprobado el 2026-11-26 (historial 2.96). Sin bloqueo: el paso 4 está en `main` con la CI en verde (`5541141`) |
 | 2 | T4 y T5 | Según el plan de la sección 2.80. T5 incluye la suspensión y la baja decididas el 2026-11-26 (historial 2.94): bloqueo total, base conservada 5 años y exportación asistida a pedido |
 | 3 | Tarea P8 (fotos y firmas a privado) | Después de T4; requisito antes del primer taller comercial |
 
