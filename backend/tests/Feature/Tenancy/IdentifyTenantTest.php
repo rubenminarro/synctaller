@@ -49,6 +49,21 @@ class IdentifyTenantTest extends TestCase
         }
     }
 
+    public function test_a_cancelled_tenant_responds_tenant_not_found_on_every_route(): void
+    {
+        // TD11 (historial 2.104): con su base conservada y un token vigente, el taller dado de baja no existe para nadie.
+        $a = $this->registerTenant('a');
+        $token = $this->tokenIn($a);
+        $a->update(['status' => TenantStatus::CANCELLED]);
+
+        foreach ($this->routes('a.localhost') as [$method, $uri]) {
+            $this->withToken($token)->json($method, $uri, $this->loginPayload())
+                ->assertNotFound()
+                ->assertJsonPath('error_code', 'TENANT_NOT_FOUND')
+                ->assertJsonPath('message', 'No se encontró el taller.');
+        }
+    }
+
     public function test_a_suspended_tenant_responds_forbidden_also_on_login_and_branding(): void
     {
         $this->registerTenant('a', ['status' => TenantStatus::SUSPENDED]);

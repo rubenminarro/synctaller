@@ -59,12 +59,17 @@ class TenantMigrateCommandTest extends TestCase
     {
         $a = $this->tenant('a', $this->emptyDatabase('a'));
         $suspended = $this->tenant('suspendido', $this->emptyDatabase('suspendido'), ['status' => TenantStatus::SUSPENDED]);
+        // Dado de baja (historial 2.104): su base se conserva tal como quedó.
+        $cancelled = $this->tenant('baja', $this->emptyDatabase('baja'), ['status' => TenantStatus::CANCELLED]);
         $total = count($this->migrationNames());
 
         $this->artisan('tenants:migrate')
             ->expectsOutput("Taller #{$a->id} (Taller a): {$total} migraciones aplicadas.")
             ->expectsOutput("Taller #{$suspended->id} (Taller suspendido): {$total} migraciones aplicadas.")
+            ->doesntExpectOutputToContain("Taller #{$cancelled->id}")
             ->assertSuccessful();
+
+        $this->assertFalse(TenantMigrationRun::where('tenant_id', $cancelled->id)->exists());
 
         $this->assertNull(Tenant::current(), 'Deja el taller que estaba activo: ninguno.');
 

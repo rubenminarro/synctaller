@@ -12,6 +12,7 @@ import { AuthProvider } from '@/features/auth/AuthProvider'
 import { PreferencesSync } from '@/features/preferences/usePreferences'
 import { BrandingSync } from '@/features/system-settings/useBranding'
 import { queryClient } from '@/lib/queryClient'
+import { TenantSuspendedGate } from '@/pages/TenantSuspendedPage'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -19,7 +20,9 @@ createRoot(document.getElementById('root')!).render(
       <AuthProvider>
         <PreferencesSync />
         <BrandingSync />
-        <RouterProvider router={router} />
+        <TenantSuspendedGate>
+          <RouterProvider router={router} />
+        </TenantSuspendedGate>
         <Toaster />
       </AuthProvider>
     </QueryClientProvider>

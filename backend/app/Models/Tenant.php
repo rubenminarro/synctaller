@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\TenantStatus;
+use Illuminate\Support\Carbon;
 use Spatie\Multitenancy\Models\Tenant as BaseTenant;
 
 /**
@@ -20,6 +21,7 @@ use Spatie\Multitenancy\Models\Tenant as BaseTenant;
  * @property TenantStatus $status
  * @property bool $maintenance
  * @property string|null $provisioning_error Error del último intento de alta, mientras está en `provisioning`
+ * @property Carbon|null $cancelled_at Fecha de la baja (`tenants:cancel`): desde ahí corren los 5 años de conservación
  */
 class Tenant extends BaseTenant
 {
@@ -30,6 +32,7 @@ class Tenant extends BaseTenant
         'status',
         'maintenance',
         'provisioning_error',
+        'cancelled_at',
     ];
 
     protected $attributes = [
@@ -42,6 +45,7 @@ class Tenant extends BaseTenant
         return [
             'status' => TenantStatus::class,
             'maintenance' => 'boolean',
+            'cancelled_at' => 'datetime',
         ];
     }
 }

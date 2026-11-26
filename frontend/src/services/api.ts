@@ -1,4 +1,5 @@
 import axios, { type AxiosResponse } from 'axios'
+import { TENANT_SUSPENDED, tenantStatus } from '@/lib/tenantStatus'
 import { tokenStorage } from '@/lib/tokenStorage'
 import type { ApiEnvelope, ListParams, Paginated, PaginationMeta, ValidationErrors } from '@/types/api'
 
@@ -52,6 +53,11 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(undefined, async (error: unknown) => {
   const apiError = await toApiError(error)
+
+  // Taller suspendido (P9): cualquier request lo informa, también el login y el branding. La sesión se conserva.
+  if (apiError.code === TENANT_SUSPENDED) {
+    tenantStatus.markSuspended()
+  }
 
   // Sin token (p. ej. login con credenciales inválidas) el 401 es un error más del formulario.
   if (apiError.status === 401 && tokenStorage.get()) {

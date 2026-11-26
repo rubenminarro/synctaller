@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\ClientNotificationStatus;
 use App\Enums\ClientNotificationType;
 use App\Enums\NotificationChannel;
+use App\Enums\TenantStatus;
 use App\Exceptions\NotificationException;
 use App\Jobs\SendClientNotification;
 use App\Mail\ClientNotificationMail;
@@ -31,6 +32,8 @@ use Throwable;
 class ClientNotificationService
 {
     public const SUSPENDED_TENANT_ERROR = 'Taller suspendido.';
+
+    public const CANCELLED_TENANT_ERROR = 'Taller dado de baja.';
 
     public function __construct(
         protected DocumentPdfService $documentPdfService
@@ -145,9 +148,10 @@ class ClientNotificationService
 
     /**
      * El aviso en cola de un taller suspendido no se envía (§3.5 de la especificación; historial 2.96): queda failed
-     * con el motivo, nunca pending, para que se pueda reenviar al reactivar el taller. No cuenta como intento.
+     * con el motivo, nunca pending, para que se pueda reenviar al reactivar el taller. No cuenta como intento. El de un
+     * taller dado de baja queda igual, con su propio motivo (historial 2.104).
      */
-    public function failForSuspendedTenant(int $clientNotificationId): void
+    public function failForSuspendedTenant(int $clientNotificationId, TenantStatus $status): void
     {
         $notification = ClientNotification::find($clientNotificationId);
 
@@ -157,7 +161,7 @@ class ClientNotificationService
 
         $notification->update([
             'status' => ClientNotificationStatus::FAILED,
-            'error' => self::SUSPENDED_TENANT_ERROR,
+            'error' => $status === TenantStatus::CANCELLED ? self::CANCELLED_TENANT_ERROR : self::SUSPENDED_TENANT_ERROR,
         ]);
     }
 

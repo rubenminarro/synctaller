@@ -135,7 +135,9 @@ Base: `/api`. Todas las respuestas son JSON (el backend fuerza `Accept: applicat
   vinculada o `null`, en `useAuth().mechanic`) y `data.preferences` (preferencias visuales, en
   `useAuth().preferences`). `POST /login` solo trae IDs de permisos. `GET /api/branding` (logo del sistema) es público.
 * Los tokens no expiran: ante un `401` se limpia la sesión local y se redirige al login.
-* Ante un `403` se informa falta de permiso; no se reintenta.
+* Ante un `403` se informa falta de permiso; no se reintenta. La excepción es `403 TENANT_SUSPENDED` (taller suspendido):
+  el interceptor lo marca (`src/lib/tenantStatus.ts`) y `TenantSuspendedGate` reemplaza toda la app por la pantalla
+  "Taller suspendido", sin borrar el token (historial 2.104).
 
 ---
 
