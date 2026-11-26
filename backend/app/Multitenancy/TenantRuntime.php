@@ -14,9 +14,10 @@ use Throwable;
  * su configuración (`system_settings`, T1). Es la segunda de las dos fases: cambiar de taller (las tareas del paquete)
  * no abre conexión; preparar sí, y es lo único que puede fallar.
  *
- * Es el único punto de entrada en los cuatro contextos: el request (`IdentifyTenant`), cada job (`Queue::before`), el
- * scheduler y el comando de recordatorios. Hasta T3 solo el request tiene un taller activo: sin taller, aplica la
- * configuración sobre la conexión por defecto, como antes de la línea T, y un error sigue su curso.
+ * Es el único punto de entrada en los cuatro contextos: el request (`IdentifyTenant`), cada job (su middleware
+ * `PrepareTenant`, historial 2.96), el scheduler y el comando de recordatorios (por cada taller). Sin taller activo
+ * (el filtro del scheduler hasta T3, paso 5) aplica la configuración sobre la conexión por defecto, como antes de la
+ * línea T, y un error sigue su curso.
  */
 class TenantRuntime
 {

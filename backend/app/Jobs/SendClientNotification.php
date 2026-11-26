@@ -2,19 +2,21 @@
 
 namespace App\Jobs;
 
+use App\Multitenancy\Jobs\DiscardsForSuspendedTenant;
+use App\Multitenancy\Jobs\RunsInTenant;
 use App\Services\ClientNotificationService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
 /**
- * Envía un aviso registrado. Sin reintentos automáticos: un fallo queda
- * registrado (failed) y se reenvía a mano.
+ * Envía un aviso registrado, en el taller que lo despachó (`RunsInTenant`, historial 2.96). Un fallo del envío queda
+ * registrado (failed) y se reenvía a mano, sin reintentos: solo se reintenta, hasta 6 horas, si la base del taller no
+ * responde o está en mantenimiento. Con el taller suspendido, el aviso queda failed con el motivo.
  */
-class SendClientNotification implements ShouldQueue
+class SendClientNotification implements DiscardsForSuspendedTenant, ShouldQueue
 {
     use Queueable;
-
-    public int $tries = 1;
+    use RunsInTenant;
 
     public function __construct(
         public readonly int $clientNotificationId
@@ -23,5 +25,10 @@ class SendClientNotification implements ShouldQueue
     public function handle(ClientNotificationService $service): void
     {
         $service->deliver($this->clientNotificationId);
+    }
+
+    public function discardForSuspendedTenant(): void
+    {
+        app(ClientNotificationService::class)->failForSuspendedTenant($this->clientNotificationId);
     }
 }

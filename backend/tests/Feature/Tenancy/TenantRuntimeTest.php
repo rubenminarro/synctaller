@@ -2,15 +2,12 @@
 
 namespace Tests\Feature\Tenancy;
 
+use App\Jobs\SendClientNotification;
 use App\Models\SystemSetting;
 use App\Models\Tenant;
 use App\Multitenancy\TenantRuntime;
-use Illuminate\Contracts\Queue\Job;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Queue\Events\JobProcessing;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
-use Mockery;
 use Tests\Concerns\UsesTenantDatabases;
 use Tests\TestCase;
 
@@ -86,17 +83,16 @@ class TenantRuntimeTest extends TestCase
         $a = $this->registerTenant('a');
         $this->storeLegalName($a, 'Taller A S.A.');
         $a->makeCurrent();
-        $job = Mockery::mock(Job::class);
-        $job->shouldReceive('payload')->andReturn([]);
 
-        Event::dispatch(new JobProcessing('sync', $job));
+        // En su middleware (`PrepareTenant`, historial 2.96). Un aviso inexistente no envía nada.
+        SendClientNotification::dispatch(0);
 
         $this->assertSame('Taller A S.A.', config('company.legal_name'));
     }
 
     public function test_without_an_active_tenant_it_applies_the_settings_of_the_default_connection(): void
     {
-        // La consola y el worker hasta T3 (historial 2.93): sin taller, la base de `DB_CONNECTION`.
+        // El filtro del scheduler hasta T3, paso 5 (historial 2.96): sin taller, la base de `DB_CONNECTION`.
         Tenant::forgetCurrent();
         SystemSetting::create(['key' => 'company.legal_name', 'value' => 'Taller sin línea T S.A.']);
 

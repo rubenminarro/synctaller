@@ -46,5 +46,5 @@ interactivos. Hay que revisarla antes del primer taller comercial (historial 2.7
 ## Multitenancy
 
 `spatie/laravel-multitenancy` **4.2.3**, fija (TD2), instalada el 2026-11-25 en el paso 1 de T2 (historial 2.90). Desde
-el paso 2 (historial 2.93) cada request a `api/*` activa el taller de su host; los listeners de colas del paquete no se
-registran hasta T3 (`DeferQueueTenancyAction`).
+el paso 2 (historial 2.93) cada request a `api/*` activa el taller de su host, y desde T3, paso 4 (2.96), cada job lleva
+su taller con las colas del paquete encendidas. La 4.3.2 se revisa desde el 2026-12-10 (deuda técnica #21).
