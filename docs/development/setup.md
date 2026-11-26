@@ -105,6 +105,6 @@ En desarrollo, `MAIL_MAILER=log` escribe los emails en `storage/logs/laravel.log
 |---|---|
 | `php artisan test` | Todos en verde |
 | `php artisan migrate:status` | Todas las migraciones en `Ran` |
-| `php artisan migrate:status --database=central --path=database/migrations/central` | Las de `tenants` y de la cola y la cache en `Ran` |
+| `php artisan migrate:status --database=central --path=database/migrations/central` | Las de `tenants`, la cola y la cache, y el registro de `tenants:migrate` en `Ran` |
 | `GET /api/branding` | 200 (`404 TENANT_NOT_FOUND` si falta registrar el taller del host) |
 | Login en el frontend | Entra con un usuario sembrado |

@@ -915,8 +915,8 @@ historial 2.83 y 2.84; `InvoiceWithholdingService`). Migración `000072`.
 
 ## 6.34 Identificación del taller
 
-Entregas T2, pasos 2 y 3, T3, pasos 4 y 5, y T4 de `docs/especificacion-aseguradoras.html` (§3.2, §3.3, §3.5 y §3.7;
-historial 2.80, 2.93, 2.95, 2.96, 2.97 y 2.98; middleware `IdentifyTenant`, `TenantRuntime` y el middleware de jobs
+Entregas T2, pasos 2 y 3, T3, pasos 4 y 5, T4 y T5, paso 1, de `docs/especificacion-aseguradoras.html` (§3.2, §3.3, §3.5,
+§3.7 y §3.8; historial 2.80, 2.93, 2.95, 2.96, 2.97, 2.98 y 2.101; middleware `IdentifyTenant`, `TenantRuntime` y el middleware de jobs
 `PrepareTenant`).
 Usa la tabla `tenants` de la base central (paso 1, 2.90); la cola y la cache, también en la central, se crean con la
 migración central `2026_11_26_000001` (2.96).
@@ -960,6 +960,14 @@ migración central `2026_11_26_000001` (2.96).
   (`{esquema}://{dominio}:{puerto}/storage/tenants/{id}/…`).
 * **Registro:** `php artisan tenants:register {name} {domain} {database}` crea la fila del taller (activo, sin
   mantenimiento). El dominio es solo el host; dominio y base son únicos. No crea ni migra la base: eso es el alta de T5.
+* **Migraciones por taller** (T5, paso 1; historial 2.101; `App\Console\Commands\MigrateTenants`):
+  `php artisan tenants:migrate [--tenant=*] [--failed]` aplica las migraciones pendientes de `database/migrations` en la
+  base de cada taller activo o suspendido, con o sin mantenimiento. Por taller toma un lock en la cache de la central, y
+  si ya está tomado lo informa como en curso y no toca esa base. Una base que falta o no responde es una falla: el comando
+  no la crea. Mientras migra, el taller sigue atendiendo. Cada corrida queda en `tenant_migration_runs` de la central
+  (migración `2026_11_26_000002`). El taller que falla queda en mantenimiento (`503 TENANT_MAINTENANCE`), los demás siguen
+  y el comando termina con código 1. `--failed` repite los talleres cuya última corrida falló; cuando una corrida sale bien
+  después de una fallida, se quita el mantenimiento que esa puso, pero nunca uno puesto a mano.
 * **Siembra de ejemplo** (deuda #23; historial 2.100; `Database\Seeders\SeedingTenant`): `DatabaseSeeder` corre en el
   taller activo. Sin taller activo (`migrate --seed`, `db:seed`), activa el registrado con la base que se siembra (la de la
   conexión por defecto; en SQLite se compara la ruta resuelta) y lo olvida al terminar, también si la siembra falla. Sin
