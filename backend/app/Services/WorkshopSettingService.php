@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Configuración del taller guardada en system_settings. Se aplica sobre config()
- * en cada request, job y tarea programada, así que el resto de la aplicación
+ * en cada request, job y tarea programada (al preparar el taller,
+ * TenantRuntime::ensureReady()), así que el resto de la aplicación
  * sigue leyendo config() como siempre. Es un singleton: en un worker recuerda
  * el valor original de lo que reemplazó, para volver a él si se borra.
  */
@@ -81,11 +82,10 @@ class WorkshopSettingService
     /**
      * ¿Es la hora de los recordatorios? Se evalúa al ejecutar el scheduler, no al
      * arrancar: routes/console.php corre en todo comando, incluso sin base migrada.
+     * Espera la configuración ya aplicada (TenantRuntime::ensureReady()).
      */
     public function remindersDue(): bool
     {
-        $this->apply();
-
         return now()->format('H:i') === config('notifications.reminders_at');
     }
 

@@ -116,7 +116,7 @@ Controller (HasMiddleware) → Form Request → Service → Model/Eloquent → A
 | `app/Enums` | Estados y tipos |
 | `app/Exceptions` | `AppException` y una subclase por módulo |
 | `app/Support/Decimal.php` | Redondeo BCMath |
-| `app/Multitenancy/Tasks` | Tareas propias al activar un taller (línea T, historial 2.90 y 2.93). La config está en `config/multitenancy.php` y la base central, en `database/migrations/central`. El taller se identifica por el host en `IdentifyTenant` (reglas 6.34); se registra con `tenants:register` |
+| `app/Multitenancy/Tasks` | Tareas propias al activar un taller (línea T, historial 2.90 y 2.93). La config está en `config/multitenancy.php` y la base central, en `database/migrations/central`. El taller se identifica por el host en `IdentifyTenant` (reglas 6.34) y se prepara (su base y su configuración) con `TenantRuntime::ensureReady()` (`app/Multitenancy`) (2.95); se registra con `tenants:register` |
 | `app/Traits/ApiResponse.php` | `successResponse` / `errorResponse` |
 | `app/Traits/FileResponse.php` | Descarga de archivos generados (PDF, CSV) y de documentos subidos (`storedFileResponse`: adjunto y `nosniff`) |
 | `app/Traits/Auditable.php` | Registro automático de cambios en `audit_logs` |

@@ -1,7 +1,6 @@
 <?php
 
 use App\Exceptions\AppException;
-use App\Http\Middleware\ApplyWorkshopSettings;
 use App\Http\Middleware\EnsureJsonResponse;
 use App\Http\Middleware\IdentifyTenant;
 use Illuminate\Auth\AuthenticationException;
@@ -35,8 +34,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // Global (antes del ruteo) para que también los 404/405 de /api respondan JSON.
         $middleware->prepend(EnsureJsonResponse::class);
 
-        // El taller se identifica por el host antes de leer su configuración y de autenticar (reglas de negocio 6.34).
-        $middleware->api(prepend: [IdentifyTenant::class, ApplyWorkshopSettings::class]);
+        // El taller se identifica por el host y se prepara (su base y su configuración) antes de autenticar (reglas 6.34).
+        $middleware->api(prepend: [IdentifyTenant::class]);
 
         $middleware->alias([
             'role' => RoleMiddleware::class,

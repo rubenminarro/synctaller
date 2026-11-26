@@ -11,6 +11,7 @@ use App\Models\WorkOrder;
 use App\Models\WorkOrderAllocation;
 use App\Models\WorkOrderItem;
 use App\Models\WorkOrderPart;
+use App\Multitenancy\TenantRuntime;
 use App\Services\WorkshopSettingService;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Gate;
@@ -48,8 +49,8 @@ class AppServiceProvider extends ServiceProvider
             'vehicle_maintenance' => VehicleMaintenance::class,
         ]);
 
-        // Un worker vive más que un cambio de configuración: se vuelve a aplicar antes de cada job.
-        Queue::before(fn () => $this->app->make(WorkshopSettingService::class)->apply());
+        // Un worker vive más que un cambio de configuración: se vuelve a preparar antes de cada job. En T3, ya con su taller.
+        Queue::before(fn () => $this->app->make(TenantRuntime::class)->ensureReady());
 
         // Bypass implícito para el rol 'administrador'
         Gate::before(function ($user, $ability) {

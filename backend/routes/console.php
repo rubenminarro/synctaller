@@ -1,5 +1,6 @@
 <?php
 
+use App\Multitenancy\TenantRuntime;
 use App\Services\WorkshopSettingService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -10,8 +11,12 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 // Recordatorios a clientes y cuentas por pagar (requiere schedule:run cada minuto). La hora es
-// configurable por taller: se compara al correr, no al arrancar.
+// configurable por taller: se prepara el taller y se compara al correr, no al arrancar.
 Schedule::command('notifications:send-reminders')
     ->everyMinute()
-    ->when(fn () => app(WorkshopSettingService::class)->remindersDue())
+    ->when(function () {
+        app(TenantRuntime::class)->ensureReady();
+
+        return app(WorkshopSettingService::class)->remindersDue();
+    })
     ->withoutOverlapping();
