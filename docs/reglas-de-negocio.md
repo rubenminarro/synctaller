@@ -915,11 +915,12 @@ historial 2.83 y 2.84; `InvoiceWithholdingService`). Migración `000072`.
 
 ## 6.34 Identificación del taller
 
-Entregas T2, pasos 2 y 3, T3, pasos 4 y 5, T4 y T5, paso 1, de `docs/especificacion-aseguradoras.html` (§3.2, §3.3, §3.5,
-§3.7 y §3.8; historial 2.80, 2.93, 2.95, 2.96, 2.97, 2.98 y 2.101; middleware `IdentifyTenant`, `TenantRuntime` y el middleware de jobs
+Entregas T2, pasos 2 y 3, T3, pasos 4 y 5, T4 y T5, pasos 1 y 2, de `docs/especificacion-aseguradoras.html` (§3.2, §3.3, §3.5,
+§3.7 y §3.8; historial 2.80, 2.93, 2.95, 2.96, 2.97, 2.98, 2.101 y 2.102; middleware `IdentifyTenant`, `TenantRuntime` y el middleware de jobs
 `PrepareTenant`).
 Usa la tabla `tenants` de la base central (paso 1, 2.90); la cola y la cache, también en la central, se crean con la
-migración central `2026_11_26_000001` (2.96).
+migración central `2026_11_26_000001` (2.96). Las bases de taller no tienen esas tablas: las quita la migración de taller
+`000074` (T5, paso 2, 2.102), que se niega a correr sobre la base central.
 
 * **Por el host:** todo request a `api/*`, también `POST /login` y `GET /branding`, busca su taller en `tenants.domain` con
   el host del request (en minúsculas y sin puerto) antes de autenticar. No hay cabecera `X-Tenant` (TD8). Quedan fuera
