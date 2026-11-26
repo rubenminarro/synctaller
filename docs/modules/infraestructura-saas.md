@@ -6,7 +6,8 @@ el host y su preparación, `TenantRuntime::ensureReady()`) y T3 completo: **cada
 base de su taller** (reglas de negocio 6.34), con la cola y la cache en la central, y el scheduler despacha un job de
 recordatorios por taller, a la hora de cada uno. Sin taller activo, nada consulta la conexión por defecto (fallo cerrado,
 TD10). T4 completo: los archivos de cada taller van a su propia carpeta y sin taller activo los discos no se resuelven.
-Falta P8 y T5 en adelante.
+T5 en curso: `tenants:migrate` migra la base de cada taller y las bases de taller ya no tienen tablas de cola ni cache.
+Falta P8 y el resto de T5 en adelante.
 
 | Dato | Referencia |
 |---|---|
@@ -31,7 +32,7 @@ Falta P8 y T5 en adelante.
 | T3 | Colas, cache, permisos y scheduler | COMPLETADO | Diseño aprobado el 2026-11-26, en dos pasos. Paso 4 hecho el 2026-11-26 (2.96): cola, fallidos y cache en la central; todo job con su taller (`PrepareTenant`: libera con espera, descarta si el taller está suspendido); permisos y configuración limpios al cambiar de taller; recordatorios por taller. Paso 5 hecho el 2026-11-26 (2.97): un job de recordatorios por taller (`SendTenantReminders`), el scheduler con la hora de cada taller una vez por día (se recupera la hora perdida) y el fallo cerrado de TD10 en el código (`ensureReady()` sin taller falla). Tests en `tests/Feature/Tenancy` (45) |
 | T4 | Storage por taller | COMPLETADO | Hecho el 2026-11-26 (2.98): driver `tenant_local` (`TenantStorage`) con raíces `tenants/{id}` en el disco público y en el privado (`tenant_private`, antes `claim_documents`), `SwitchTenantStorageTask`, fallo cerrado sin taller y URL pública con el host del taller. No conserva los archivos actuales. Tests en `tests/Feature/Tenancy` (49; 51 corridas en PHPUnit) |
 | Tarea P8 | Fotos y firmas a privado | PENDIENTE | Después de T4; deuda #15 |
-| T5 | Ciclo de vida | PENDIENTE | Incluye `tenants:migrate`, la suspensión (bloqueo total) y la baja con la base conservada 5 años y exportación asistida a pedido (historial 2.94) |
+| T5 | Ciclo de vida | EN CURSO | Plan en 5 pasos (2.101). Paso 1 hecho el 2026-11-26 (2.101): `tenants:migrate`. Paso 2 hecho el 2026-11-26 (2.102): las bases de taller ya no tienen las tablas de cola y cache. Incluye la suspensión (bloqueo total) y la baja con la base conservada 5 años y exportación asistida a pedido (historial 2.94) |
 | T6 | Migrar la instalación actual | PENDIENTE | Requiere T1 a T5, P8 y decidir el hosting (V9) |
 
 ## Observaciones para continuar
@@ -43,6 +44,6 @@ Falta P8 y T5 en adelante.
 * Todo job es del taller (2.96). Un job nuevo usa el trait `RunsInTenant`, para liberarse si el taller no está disponible y
   descartarse si está suspendido; si deja registro en el taller, implementa `DiscardsForSuspendedTenant`. Un job que no
   sea de ningún taller implementa `NotTenantAware`.
-* Las tablas `jobs`, `failed_jobs`, `job_batches`, `cache` y `cache_locks` de las bases de taller quedaron sin uso (deuda
-  técnica #20).
+* Las tablas `jobs`, `failed_jobs`, `job_batches`, `cache` y `cache_locks` viven solo en la central: la migración de
+  taller `000074` las quita de cada base de taller y no corre sobre la central (T5, paso 2; historial 2.102; deuda #20).
 * Para repetir la medición, las herramientas están en [`spike-t0/`](../spike-t0/README.md).

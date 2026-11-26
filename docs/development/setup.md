@@ -65,7 +65,11 @@ cd ../frontend && npm ci
 **Al pasar a T3, paso 4** (historial 2.96), una sola vez: la cola y la cache pasan de `synctaller` a la central. **Antes**
 del `git pull`, con el código anterior, vaciar la cola vieja (`php artisan queue:work --stop-when-empty`): el código
 nuevo ya no la lee, y el paquete borraría sus jobs porque no traen taller. Después, el `migrate --database=central` de
-arriba crea las tablas nuevas. El historial de `failed_jobs` queda en `synctaller`.
+arriba crea las tablas nuevas. El historial de `failed_jobs` queda en `synctaller` hasta T5, paso 2.
+
+**Al pasar a T5, paso 2** (historial 2.102): el `migrate` de arriba borra de `synctaller` las tablas `jobs`,
+`job_batches`, `failed_jobs`, `cache` y `cache_locks`, que ya viven en la central. Si `failed_jobs` de `synctaller` tiene
+filas que interesen, revisarlas **antes** del `git pull`; después ya no están.
 
 | No usar | Motivo |
 |---|---|

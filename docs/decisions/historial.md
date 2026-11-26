@@ -934,6 +934,23 @@ Agrega una migración central y no cambia el frontend. No agrega rutas, permisos
 | Tests | `tests/Feature/Tenancy/TenantMigrateCommandTest` (8), con bases SQLite vacías que el test crea y borra. Comprueba que migra activos y suspendidos y registra cada corrida, que el taller que falla queda en mantenimiento sin crear su base y los demás se migran, que una falla a mitad registra lo aplicado, que `--failed` repite solo los fallidos y les quita el mantenimiento, que no quita un mantenimiento manual, que el lock se respeta con un taller activo al empezar y después de migrar otro, que un id desconocido se informa y que se conserva el taller activo. Cada protección se comprobó quitándola: el mantenimiento al fallar, quitarlo solo si lo puso el comando, quitarlo al salir bien, el lock, olvidar el taller antes del lock y después de cada taller, el filtro de `--failed`, los suspendidos y el `migrate --force` sin la lectura previa. Una comprobación previa con `getPdo()` resultó redundante y se quitó |
 | MySQL | Migración central aplicada en `synctaller_central`. Con el taller #1, `tenants:migrate` responde "sin migraciones pendientes" (código 0), `--failed` "No hay talleres con la última corrida fallida." y `--tenant=99` código 1 |
 
+### 2.102 T5, paso 2: sin tablas de cola y cache en las bases de taller (2026-11-26)
+
+Diseño aprobado por el usuario el 2026-11-26. Resuelve la deuda #20. Es el paso 2 del plan de 2.101 y cumple la regla de
+§3.8 de la [especificación](../especificacion-aseguradoras.html): las tablas se agregaron en la central en T3, paso 4
+(2.96), y se quitan del taller ahora, con `tenants:migrate` (paso 1) ya en `main`. Agrega una migración de taller y no
+cambia el frontend, rutas, permisos, `error_code` ni códigos HTTP. Regla vigente en [reglas de negocio](../reglas-de-negocio.md), 6.34.
+
+| Tema | Decisión |
+|---|---|
+| Migración | Migración de taller nueva `0001_01_01_000074_drop_queue_and_cache_tables`: `up()` borra `jobs`, `job_batches`, `failed_jobs`, `cache` y `cache_locks` si existen, y `down()` las vuelve a crear con el esquema de las originales |
+| Migraciones originales | Decisión del usuario: `0001_01_01_000001` y `0001_01_01_000002` no se editan, porque ya están aplicadas. Un taller nuevo (paso 3) crea las cinco tablas y las borra en la misma corrida |
+| Protección | Decisión del usuario: la migración lanza una excepción si la conexión es la central, por su nombre o porque apunta a la misma base (en SQLite el mismo archivo; en los demás motores, el mismo servidor, puerto y base). Evita que un `migrate` con `DB_DATABASE` mal puesto borre la cola y la cache reales. Solo lee la configuración: no llama a código de la aplicación |
+| Datos | Las cinco tablas de `synctaller` estaban vacías al aplicarla (también `failed_jobs`, al contrario de lo que decía la deuda #20), así que no se perdió nada |
+| Tests | `tests/Feature/Tenancy/TenantQueueTablesTest` (3): la base del taller no tiene las cinco tablas y la central sí; en una base SQLite vacía, revertir la migración las vuelve a crear y aplicarla otra vez las quita; y no corre sobre una conexión con la base central. Cada protección se comprobó quitándola: el borrado, el `down()`, la comprobación de la central y la comparación por base (no solo por nombre) |
+| `SwitchTenantTest` | Guardaba la cache de sus tests en la conexión `sqlite`, la base de taller de los tests, y sin la tabla `cache` fallaba. Ahora usa la cache `database` de la central, como en producción. Sigue fallando si se quita la tarea de permisos (`SwitchTenantPermissionsCacheTask`) |
+| MySQL | `tenants:migrate` con el taller #1: "1 migración aplicada" (código 0), con la corrida `succeeded` en `tenant_migration_runs`; las cinco tablas quedaron solo en `synctaller_central` y la segunda corrida no tiene pendientes. Llamada directa a `up()` sobre una copia de la conexión central: rechazada, sin borrar nada. La cache de la central sigue respondiendo |
+
 ---
 
 ## 3. Frontend

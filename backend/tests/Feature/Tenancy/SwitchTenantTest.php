@@ -18,8 +18,10 @@ use Tests\TestCase;
  * la protección que cubre: la tarea de base, la conexión por defecto, el prefijo con separador, la tarea de permisos (la
  * cache y la memoria) o que el job `sync` sea del taller del request.
  *
- * Estos tests cambian de taller, y cada cambio vuelve a conectar `tenant`. La transacción de RefreshDatabase y la cache
- * van entonces en la conexión fija `sqlite`, la misma base de los tests, que ningún cambio de taller toca.
+ * Estos tests cambian de taller, y cada cambio vuelve a conectar `tenant`. La transacción de RefreshDatabase va entonces
+ * en la conexión fija `sqlite`, la misma base de los tests, que ningún cambio de taller toca. La cache es la `database`
+ * de la central, como en producción: la base del taller ya no tiene la tabla `cache` (T5, paso 2; historial 2.102), y
+ * la central tampoco se reconecta al cambiar de taller.
  */
 class SwitchTenantTest extends TestCase
 {
@@ -33,7 +35,7 @@ class SwitchTenantTest extends TestCase
         parent::setUp();
 
         // La cache de los tests es `array`, que no usa prefijo. La de base de datos sí, como en producción.
-        config(['cache.default' => 'database', 'cache.stores.database.connection' => 'sqlite']);
+        config(['cache.default' => 'database']);
     }
 
     protected function tearDown(): void
@@ -124,7 +126,7 @@ class SwitchTenantTest extends TestCase
 
         // Sin la tarea de permisos, el registro seguiría con la cache con la que arrancó y no aparecería ninguna de
         // estas claves: los dos talleres compartirían una sola.
-        $keys = DB::connection('sqlite')->table('cache')->where('key', 'like', '%spatie.permission.cache')->pluck('key')->sort()->values()->all();
+        $keys = DB::connection('central')->table('cache')->where('key', 'like', '%spatie.permission.cache')->pluck('key')->sort()->values()->all();
 
         $this->assertSame(['tenant:10:spatie.permission.cache', 'tenant:1:spatie.permission.cache'], $keys);
     }
