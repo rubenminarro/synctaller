@@ -915,8 +915,8 @@ historial 2.83 y 2.84; `InvoiceWithholdingService`). Migración `000072`.
 
 ## 6.34 Identificación del taller
 
-Entregas T2, pasos 2 y 3, T3, pasos 4 y 5, T4 y T5, pasos 1 y 2, de `docs/especificacion-aseguradoras.html` (§3.2, §3.3, §3.5,
-§3.7 y §3.8; historial 2.80, 2.93, 2.95, 2.96, 2.97, 2.98, 2.101 y 2.102; middleware `IdentifyTenant`, `TenantRuntime` y el middleware de jobs
+Entregas T2, pasos 2 y 3, T3, pasos 4 y 5, T4 y T5, pasos 1 a 3, de `docs/especificacion-aseguradoras.html` (§3.2, §3.3, §3.5,
+§3.7, §3.8 y §3.9; historial 2.80, 2.93, 2.95, 2.96, 2.97, 2.98, 2.101, 2.102 y 2.103; middleware `IdentifyTenant`, `TenantRuntime` y el middleware de jobs
 `PrepareTenant`).
 Usa la tabla `tenants` de la base central (paso 1, 2.90); la cola y la cache, también en la central, se crean con la
 migración central `2026_11_26_000001` (2.96). Las bases de taller no tienen esas tablas: las quita la migración de taller
@@ -932,7 +932,7 @@ migración central `2026_11_26_000001` (2.96). Las bases de taller no tienen esa
 
   | Caso | HTTP | `error_code` | Mensaje |
   |---|---|---|---|
-  | Ningún taller con ese host | 404 | `TENANT_NOT_FOUND` | No se encontró el taller. |
+  | Ningún taller con ese host, o uno en alta (`provisioning`) | 404 | `TENANT_NOT_FOUND` | No se encontró el taller. |
   | Taller suspendido | 403 | `TENANT_SUSPENDED` | El taller está suspendido. |
   | Taller en mantenimiento (`tenants.maintenance`) | 503 | `TENANT_MAINTENANCE` | El taller está en mantenimiento. Intente más tarde. |
   | La base del taller no responde o no se puede leer su configuración | 503 | `TENANT_UNAVAILABLE` | El servicio del taller no está disponible. |
@@ -960,7 +960,20 @@ migración central `2026_11_26_000001` (2.96). Las bases de taller no tienen esa
   lanza una excepción (fallo cerrado). La URL pública lleva el host del taller con el esquema y el puerto de `APP_URL`
   (`{esquema}://{dominio}:{puerto}/storage/tenants/{id}/…`).
 * **Registro:** `php artisan tenants:register {name} {domain} {database}` crea la fila del taller (activo, sin
-  mantenimiento). El dominio es solo el host; dominio y base son únicos. No crea ni migra la base: eso es el alta de T5.
+  mantenimiento). El dominio es solo el host; dominio y base son únicos. No crea ni migra la base: es el camino de una
+  instalación que ya la tiene.
+* **Alta** (T5, paso 3; historial 2.103; `App\Console\Commands\CreateTenant`): `php artisan tenants:create {name} {domain}
+  {database}` con `--admin-email`, `--admin-username`, `--admin-first-name`, `--admin-last-name`, `--company-name`,
+  `--company-legal-name` y `--company-tax-id`, todos obligatorios. Registra el taller en `provisioning`, crea su base
+  (MySQL: solo `[a-z0-9_]`, hasta 64; SQLite: una ruta `.sqlite`), la migra, siembra roles y permisos, crea el
+  administrador inicial con una contraseña aleatoria que se muestra una sola vez, guarda en `system_settings` el nombre
+  comercial, la razón social y el RUC, y vacíos los demás datos de la empresa, comprueba el taller y lo pasa a `active`.
+  Nunca se hace sobre una base con tablas, salvo la del mismo taller en alta. Mientras está en `provisioning` el taller
+  responde `404 TENANT_NOT_FOUND` y no se migra ni recibe recordatorios. Si falla, queda en `provisioning` con el error en
+  `tenants.provisioning_error` y en el log; se retoma con el mismo dominio y la misma base (el administrador ya creado
+  conserva su contraseña) o se descarta con `php artisan tenants:discard {id} [--force]`, que borra la base y la fila
+  solo de un taller en `provisioning` y nunca la base central ni la de la conexión por defecto. Los dos comandos toman
+  el lock `tenants:provision:{dominio}` en la cache de la central.
 * **Migraciones por taller** (T5, paso 1; historial 2.101; `App\Console\Commands\MigrateTenants`):
   `php artisan tenants:migrate [--tenant=*] [--failed]` aplica las migraciones pendientes de `database/migrations` en la
   base de cada taller activo o suspendido, con o sin mantenimiento. Por taller toma un lock en la cache de la central, y

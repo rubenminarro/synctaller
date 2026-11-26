@@ -37,6 +37,18 @@ class IdentifyTenantTest extends TestCase
         }
     }
 
+    public function test_a_tenant_in_provisioning_responds_tenant_not_found_on_every_route(): void
+    {
+        // Con su base migrada: si el middleware no revisara el estado, el taller atendería.
+        $this->registerTenant('a', ['status' => TenantStatus::PROVISIONING]);
+
+        foreach ($this->routes('a.localhost') as [$method, $uri]) {
+            $this->json($method, $uri, $this->loginPayload())
+                ->assertNotFound()
+                ->assertJsonPath('error_code', 'TENANT_NOT_FOUND');
+        }
+    }
+
     public function test_a_suspended_tenant_responds_forbidden_also_on_login_and_branding(): void
     {
         $this->registerTenant('a', ['status' => TenantStatus::SUSPENDED]);
