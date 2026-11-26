@@ -10,7 +10,7 @@ use Illuminate\Http\UploadedFile;
 /**
  * Documentos de ejemplo (M4) del siniestro abierto (C07): la denuncia en PDF y
  * una foto, por ClaimDocumentService con el recepcionista del escenario.
- * Archivos chicos generados acá (en el disco claim_documents). Idempotente:
+ * Archivos chicos generados acá (en el disco tenant_private). Idempotente:
  * omite el siniestro que ya tiene documentos.
  */
 class ClaimDocumentSeeder extends Seeder

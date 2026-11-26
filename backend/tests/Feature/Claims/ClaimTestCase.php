@@ -26,7 +26,7 @@ abstract class ClaimTestCase extends InvoiceTestCase
 
         Storage::fake('public');
         // Los documentos de siniestros (también la evidencia de las autorizaciones) no se escriben en storage real.
-        Storage::fake('claim_documents');
+        Storage::fake('tenant_private');
     }
 
     protected function insurer(): int

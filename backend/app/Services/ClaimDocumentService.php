@@ -15,21 +15,21 @@ use Illuminate\Support\Str;
 use Throwable;
 
 /**
- * Documentos privados de siniestros (M4, decisión E). Disco claim_documents sin
+ * Documentos privados de siniestros (M4, decisión E). Disco tenant_private sin
  * URL: el archivo se guarda con un nombre interno (UUID) y su sha256, se
  * descarga solo por la API (cada descarga queda auditada) y la baja es lógica
  * (el archivo se conserva). Las rutas se arman solo acá.
  */
 class ClaimDocumentService
 {
-    public const DISK = 'claim_documents';
+    public const DISK = 'tenant_private';
 
     public function __construct(
         protected AuditLogger $auditLogger
     ) {}
 
     /**
-     * Ruta interna del archivo. T4 (storage por taller) cambiará solo la raíz del disco.
+     * Ruta interna del archivo. La raíz del disco es la del taller activo (T4, historial 2.98).
      */
     public static function pathFor(Claim $claim, string $fileName): string
     {

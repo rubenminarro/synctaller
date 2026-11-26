@@ -23,7 +23,7 @@ class ClaimDocumentTest extends ClaimTestCase
     {
         parent::setUp();
 
-        Storage::fake('claim_documents');
+        Storage::fake('tenant_private');
     }
 
     private function claim(): Claim
@@ -77,7 +77,7 @@ class ClaimDocumentTest extends ClaimTestCase
 
         $document = ClaimDocument::findOrFail($data['id']);
         $this->assertMatchesRegularExpression("#^claims/{$claim->id}/[0-9a-f-]{36}\\.pdf$#", $document->path);
-        Storage::disk('claim_documents')->assertExists($document->path);
+        Storage::disk('tenant_private')->assertExists($document->path);
 
         // La ruta interna no sale ni en la auditoría.
         $created = AuditLog::where('auditable_type', 'claim_document')->where('event', 'created')->sole();
@@ -118,7 +118,7 @@ class ClaimDocumentTest extends ClaimTestCase
         $this->upload($claim, $this->pdf(), 'otro')->assertStatus(422)->assertJsonValidationErrors('type');
 
         $this->assertSame(0, ClaimDocument::count());
-        $this->assertSame([], Storage::disk('claim_documents')->allFiles());
+        $this->assertSame([], Storage::disk('tenant_private')->allFiles());
     }
 
     public function test_the_download_is_an_audited_attachment(): void
@@ -154,7 +154,7 @@ class ClaimDocumentTest extends ClaimTestCase
 
         $this->get("/api/claims/{$claim->id}/documents/{$id}/download", ['Accept' => 'application/json'])->assertNotFound();
         $this->getJson("/api/claims/{$claim->id}/documents")->assertOk()->assertJsonCount(0, 'data');
-        Storage::disk('claim_documents')->assertExists($path);
+        Storage::disk('tenant_private')->assertExists($path);
         $this->assertSame('Duplicado.', ClaimDocument::withTrashed()->findOrFail($id)->deletion_reason);
     }
 

@@ -539,7 +539,8 @@ Entrega M3 de `docs/especificacion-aseguradoras.html` (decisiones del 2026-10-29
 Entrega M4 de `docs/especificacion-aseguradoras.html` (decisión E y decisiones del 2026-10-29; `ClaimDocumentService`).
 
 * **Almacenamiento:**
-  * disco propio `claim_documents` (`storage/app/claim-documents`), privado, **sin `serve`** ni URL ni `temporaryUrl`;
+  * disco privado del taller `tenant_private` (`storage/app/tenants/{id}/private`, desde T4; antes `claim_documents`,
+    historial 2.98), **sin `serve`** ni URL ni `temporaryUrl`;
   * nombre interno UUID con la extensión según el contenido (`claims/{claim}/{uuid}.ext`, armado solo en
     `ClaimDocumentService::pathFor`); el nombre original queda como dato;
   * se guardan `mime`, `size` y `sha256`. `path` nunca sale en la API ni en la auditoría.
@@ -914,8 +915,9 @@ historial 2.83 y 2.84; `InvoiceWithholdingService`). Migración `000072`.
 
 ## 6.34 Identificación del taller
 
-Entregas T2, pasos 2 y 3, y T3, paso 4, de `docs/especificacion-aseguradoras.html` (§3.2, §3.3 y §3.5; historial 2.80,
-2.93, 2.95 y 2.96; middleware `IdentifyTenant`, `TenantRuntime` y el middleware de jobs `PrepareTenant`).
+Entregas T2, pasos 2 y 3, T3, pasos 4 y 5, y T4 de `docs/especificacion-aseguradoras.html` (§3.2, §3.3, §3.5 y §3.7;
+historial 2.80, 2.93, 2.95, 2.96, 2.97 y 2.98; middleware `IdentifyTenant`, `TenantRuntime` y el middleware de jobs
+`PrepareTenant`).
 Usa la tabla `tenants` de la base central (paso 1, 2.90); la cola y la cache, también en la central, se crean con la
 migración central `2026_11_26_000001` (2.96).
 
@@ -951,5 +953,10 @@ migración central `2026_11_26_000001` (2.96).
 * **Fallo cerrado** (TD10): en producción `DB_DATABASE` va vacío, así que sin taller activo una consulta a la conexión
   por defecto falla. `TenantRuntime::ensureReady()` sin taller activo lanza una excepción. El `.env` de desarrollo
   conserva su base para `migrate`, `db:seed` y `tinker` (decisión del usuario, 2.97).
+* **Archivos** (desde T4; historial 2.98; `App\Multitenancy\TenantStorage`): los discos `public` y `tenant_private` toman
+  la raíz del taller activo (`storage/app/public/tenants/{id}` y `storage/app/tenants/{id}/private`) y se vuelven a
+  resolver en cada cambio de taller. Las rutas guardadas en la base son relativas al disco. Sin taller activo, usarlos
+  lanza una excepción (fallo cerrado). La URL pública lleva el host del taller con el esquema y el puerto de `APP_URL`
+  (`{esquema}://{dominio}:{puerto}/storage/tenants/{id}/…`).
 * **Registro:** `php artisan tenants:register {name} {domain} {database}` crea la fila del taller (activo, sin
   mantenimiento). El dominio es solo el host; dominio y base son únicos. No crea ni migra la base: eso es el alta de T5.

@@ -38,21 +38,27 @@ return [
             'report' => false,
         ],
 
+        // Discos por taller (T4, historial 2.98; App\Multitenancy\TenantStorage): `{tenant}` es el id del taller
+        // activo y sin taller no se resuelven. `tenant_url` es la ruta pública: la URL lleva el host del taller.
+        // `url` queda para Storage::fake en los tests.
         'public' => [
-            'driver' => 'local',
-            'root' => storage_path('app/public'),
+            'driver' => 'tenant_local',
+            'root' => storage_path('app/public/tenants/{tenant}'),
             'url' => env('APP_URL').'/storage',
+            'tenant_url' => '/storage/tenants/{tenant}',
             'visibility' => 'public',
+            'lazy_root_creation' => true,
             'throw' => false,
             'report' => false,
         ],
 
-        // Documentos de siniestros (M4, decisión E): privados, sin serve ni URL. Solo se descargan por la API, con
-        // permiso y auditoría. ClaimDocumentService arma las rutas (T4 cambiará la raíz por taller).
-        'claim_documents' => [
-            'driver' => 'local',
-            'root' => storage_path('app/claim-documents'),
+        // Privado del taller (decisión E): documentos de siniestros y, con P8, fotos y firmas. Sin serve ni URL: solo
+        // se descargan por la API, con permiso y auditoría.
+        'tenant_private' => [
+            'driver' => 'tenant_local',
+            'root' => storage_path('app/tenants/{tenant}/private'),
             'visibility' => 'private',
+            'lazy_root_creation' => true,
             'serve' => false,
             'throw' => true,
             'report' => false,

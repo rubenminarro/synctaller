@@ -5,6 +5,7 @@ use App\Multitenancy\Tasks\PrefixTenantCacheTask;
 use App\Multitenancy\Tasks\RestoreWorkshopSettingsTask;
 use App\Multitenancy\Tasks\SwitchDefaultConnectionTask;
 use App\Multitenancy\Tasks\SwitchTenantPermissionsCacheTask;
+use App\Multitenancy\Tasks\SwitchTenantStorageTask;
 use Illuminate\Broadcasting\BroadcastEvent;
 use Illuminate\Events\CallQueuedListener;
 use Illuminate\Mail\SendQueuedMailable;
@@ -32,8 +33,9 @@ return [
     ],
 
     /*
-     * Tareas al activar un taller, en este orden: la base, la conexión por defecto (historial 2.93), después la cache
-     * y por último los permisos, que releen la cache ya con el prefijo del taller y vacían los que tenían en memoria.
+     * Tareas al activar un taller, en este orden: la base, la conexión por defecto (historial 2.93), después la cache,
+     * los discos del taller (T4, historial 2.98) y por último los permisos, que releen la cache ya con el prefijo del
+     * taller y vacían los que tenían en memoria.
      * Al olvidarlo, la configuración del taller vuelve a la del .env (historial 2.96). Ninguna abre una conexión:
      * preparar el taller (comprobar su base y aplicar su configuración) es otra fase (historial 2.80).
      */
@@ -41,6 +43,7 @@ return [
         SwitchTenantDatabaseTask::class,
         SwitchDefaultConnectionTask::class,
         PrefixTenantCacheTask::class,
+        SwitchTenantStorageTask::class,
         SwitchTenantPermissionsCacheTask::class,
         RestoreWorkshopSettingsTask::class,
     ],

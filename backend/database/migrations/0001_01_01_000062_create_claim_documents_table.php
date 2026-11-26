@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 /**
  * Documentos privados de un siniestro (M4): denuncia, póliza, informe del perito,
- * autorización… El archivo vive en el disco claim_documents con un nombre
+ * autorización… El archivo vive en el disco tenant_private con un nombre
  * interno (UUID); `path` nunca se expone. Baja lógica con motivo: el archivo se
  * conserva (la retención legal depende de G10). El vínculo con la autorización
  * de la aseguradora llega con M6.

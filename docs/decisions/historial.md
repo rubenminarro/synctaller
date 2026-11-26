@@ -852,6 +852,29 @@ vigentes en [reglas de negocio](../reglas-de-negocio.md), 6.17, 6.32 y 6.34. La 
 | Sesiones | Revisado: `SESSION_DRIVER=database` usa la conexión por defecto, pero `routes/web.php` no tiene rutas y la API no abre sesión (Bearer). Sin cambios |
 | Tests | `tests/Feature/Tenancy` pasa de 40 a 45: `ReminderCommandTest` pasa de 3 a 8 (job por taller en su taller, hora de cada taller una vez por día, recuperación después del mantenimiento, taller caído sin marcar, `--tenant`, taller activo al terminar, entrada del scheduler y fallo cerrado con una conexión por defecto sin base). Usa la cola y la cache `database` de la central: la `array` de los tests se vacía al cambiar de taller. En `TenantRuntimeTest`, el test sin taller pasa a comprobar el fallo cerrado. Cada protección nueva se comprobó quitándola. En `WorkshopSettingsTest` y `NotificationReminderTest` cambian el test del filtro del scheduler y el de la salida del comando |
 
+### 2.98 T4: storage por taller (2026-11-26)
+
+Diseño aprobado por el usuario el 2026-11-26, según §3.7 de la [especificación](../especificacion-aseguradoras.html) y la
+fila T4 de §9, e implementado el mismo día. Reglas vigentes en [reglas de negocio](../reglas-de-negocio.md), 6.24 y 6.34.
+Sin migraciones ni cambios en el frontend; ninguna ruta, permiso, `error_code` ni código HTTP nuevo. Hoy todos los talleres comparten las raíces de los discos: `public`
+(`storage/app/public`: branding, fotos de recepción y de diagnóstico, firmas de entrega) y `claim_documents`
+(`storage/app/claim-documents`). Las rutas guardadas en la base son relativas al disco, así que T4 cambia solo la raíz.
+
+| Tema | Decisión |
+|---|---|
+| Raíces | Público: `storage/app/public/tenants/{id}/…`. Privado: `storage/app/tenants/{id}/private/…`. Las rutas guardadas (`branding/…`, `receptions/…`, `diagnostic-items/{id}/…`, `deliveries/…`, `claims/{id}/…`) no cambian |
+| Mecanismo | Los discos `public` y privado toman la raíz del taller activo al resolverse: driver `tenant_local` (`App\Multitenancy\TenantStorage`, registrado en `AppServiceProvider`), un disco `local` cuyo `{tenant}` en `root` y `tenant_url` se reemplaza por el id del taller. Una tarea nueva, `SwitchTenantStorageTask` (después de la de cache), olvida las instancias de esos discos al activar y al olvidar un taller, como las tareas de cache y permisos (2.96). Vale igual en el request, el job y el scheduler. Las carpetas se crean al primer uso (`lazy_root_creation`) |
+| Fallo cerrado | Sin taller activo, usar uno de esos discos lanza una excepción, como `ensureReady()` (TD10, 2.97). No hay raíz por defecto donde un archivo quede mezclado |
+| Disco privado | `claim_documents` pasa a llamarse `tenant_private` (nombre propuesto en §3.7), sin `serve` y sin URL firmada ni `temporaryUrl`. `ClaimDocumentService::pathFor` no cambia. P8 usará este disco |
+| Disco `local` | Sin cambios (deuda #14, decisión E) |
+| URL pública | Decisión del usuario: se arma con el `domain` del taller, con el esquema y el puerto de `APP_URL` (por ejemplo `http://127.0.0.1:8000/storage/tenants/1/…`), para que un taller nunca reciba enlaces con el host de otro. `ReceptionPhotoResource` deja `asset('storage/'.…)` y usa `Storage::disk('public')->url()`, como el resto |
+| Contrato | Sin cambios de forma: `url`, `logo_url`, `logo_black_url`, `favicon_url` y `signature_url` siguen iguales; cambia su valor. Sin cambios en el frontend. Los PDF incrustan las imágenes en base64 |
+| Archivos existentes | Decisión del usuario: el proyecto está en desarrollo y los archivos y datos actuales no se conservan. T4 no incluye un comando para moverlos ni compatibilidad con las raíces viejas. Si T6 necesita moverlos, se decide ahí. A pedido del usuario se borraron las carpetas viejas de desarrollo, ninguna en git: `storage/app/claim-documents` (vacía) y `storage/app/public/diagnostic-items` (38 archivos) |
+| Validación | Decisión del usuario: T4 queda validada con los tests y la prueba con `php artisan serve`, **sin revisión en navegador** (las pantallas no cambian; cambian los valores de las URL) |
+| Acceso entre talleres | El criterio de §9 (archivos de A no accesibles por rutas de B) lo cumple la API: cada taller resuelve sus discos con su raíz. Los archivos públicos los sirve el servidor web por el enlace `public/storage`, sin pasar por la API: cerrarlos por host es una regla de Nginx, que queda como requisito del [despliegue](../development/deployment.md). Hasta P8 son públicos por diseño (deuda #15) |
+| Alcance | Decisión del usuario: CORS con varios orígenes, `VITE_API_URL` por taller y proxies de confianza, que 2.93 dejaba para "T4", salen de T4. Dependen del hosting (V9) y quedan como deuda #22 |
+| Tests | Los que usan `Storage::fake` no cambian, salvo el nombre del disco privado (`ClaimDocumentTest`, `ClaimTestCase`, `DatabaseSeederTest`). `tests/Feature/Tenancy` pasa de 45 a 49 tests (51 corridas en PHPUnit, por el data provider) con `TenantStorageTest` (discos reales sobre una carpeta temporal): lo guardado con A no se ve desde B en los dos discos, fallo cerrado sin taller en los dos (también con el disco ya resuelto), URL con el host del taller y URL de las fotos de recepción. Cada test se comprobó quitándole su protección: la tarea, el fallo cerrado, el host del taller y el `url()` del disco en `ReceptionPhotoResource` |
+
 ---
 
 ## 3. Frontend

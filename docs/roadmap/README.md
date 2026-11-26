@@ -7,6 +7,7 @@ original y no se renumeran. El detalle por módulo está en [`modules/README.md`
 
 | Fecha | Backend | Frontend | Notas |
 |---|---|---|---|
+| 2026-11-26 | Tests puntuales en verde (249 corridas de PHPUnit, 3927 aserciones): `tests/Feature/Tenancy` (49 métodos, 51 corridas; los 4 nuevos de `TenantStorageTest`, 6 corridas por su data provider, comprobados contra su protección quitada) y las carpetas `Claims`, `Receptions`, `Deliveries`, `Documents`, `Settings`, `Seeders`, `Http`, `Auth`, `Access` y `Notifications`; Pint sin pendientes | ESLint (sin cambios en el frontend) | T4 (historial 2.98). Corrida local en la rama `feature/t4-storage`, sin la suite completa. Probado con `php artisan serve` sobre la base de desarrollo, solo lectura: `GET /api/branding` 200 en `127.0.0.1` y `404 TENANT_NOT_FOUND` en `localhost`; con el taller #1, la URL pública es `http://127.0.0.1:8000/storage/tenants/1/…`, las raíces `storage/app/public/tenants/1` y `storage/app/tenants/1/private`, y sin taller el disco falla. `route:list --path=storage` sigue mostrando solo las dos rutas `storage/{path}` del disco `local`. Sin revisión en navegador: las pantallas no cambian; el usuario dio la entrega por validada así. Los archivos ya subidos en desarrollo no se conservan y sus carpetas viejas se borraron (2.98) |
 | 2026-11-26 | 543 tests en verde, 9173 aserciones (antes de T4); Pint sin pendientes | Sin corrida: el cambio no tocó el frontend (la CI lo omite por rutas) | T3, paso 5 (historial 2.97). Corrida de la CI sobre `main` (`8a45213`), no local. T3 completo |
 | 2026-11-26 | Tests puntuales en verde (191, 1827 aserciones): `tests/Feature/Tenancy` (45; las protecciones nuevas de `ReminderCommandTest`, comprobadas quitándolas) y las carpetas `Notifications`, `Settings`, `Http`, `Auth`, `Access`, `Seeders`, `Budgets` y `Receptions`; Pint sin pendientes | ESLint (sin cambios en el frontend) | T3, paso 5 (historial 2.97). Corrida local en la rama `feature/t3-paso5-scheduler`, sin la suite completa; repetida con el mismo resultado después de las correcciones de `validar-docs` (solo documentación y un comentario de código). Contra MySQL: `schedule:list` muestra `notifications:send-reminders --due` cada minuto y `--tenant=999` responde el error esperado (código 1). No se despacharon recordatorios en `synctaller`, para no escribir avisos en la base de desarrollo. Sin revisión en navegador: las pantallas no cambian |
 | 2026-11-26 | 538 tests en verde, 9135 aserciones (antes de T3, paso 5); Pint sin pendientes | Sin corrida: el cambio no tocó el frontend (la CI lo omite por rutas) | T3, paso 4 (historial 2.96). Corrida de la CI sobre `main` (`5541141`), no local |
@@ -37,8 +38,8 @@ Ninguna entrega empieza sin autorización del usuario. **El sistema no está lis
 
 | Orden | Tarea | Bloqueo |
 |---|---|---|
-| 1 | T4 y T5 | Según el plan de la sección 2.80. Sin bloqueo: T3 está completo en `main` con la CI en verde (`8a45213`). T5 incluye la suspensión y la baja decididas el 2026-11-26 (historial 2.94): bloqueo total, base conservada 5 años y exportación asistida a pedido |
-| 2 | Tarea P8 (fotos y firmas a privado) | Después de T4; requisito antes del primer taller comercial |
+| 1 | T5 | Según el plan de la sección 2.80. Sin bloqueo una vez que T4 (historial 2.98) esté en `main` con la CI en verde. T5 incluye la suspensión y la baja decididas el 2026-11-26 (historial 2.94): bloqueo total, base conservada 5 años y exportación asistida a pedido |
+| 2 | Tarea P8 (fotos y firmas a privado) | Después de T4 en `main`, sobre el disco `tenant_private`; requisito antes del primer taller comercial |
 
 Las entregas de las respuestas de la contadora (sección 2.83 del historial) quedaron completas el 2026-11-25 con V16 y el
 encendido de M10 (2.89).
@@ -97,7 +98,7 @@ Frontend: FA0 a FA4, M10 y M12 completos ([detalle](../modules/aseguradoras.md))
 | T1: configuración en la base | COMPLETADO |
 | T2: central e identificación | COMPLETADO: pasos 1 (central, paquete y modelo `Tenant`) y 2 (identificación por host) el 2026-11-25; paso 3 (preparar el taller, `TenantRuntime`) el 2026-11-26 |
 | T3: colas, cache, permisos y scheduler | COMPLETADO: diseño aprobado el 2026-11-26; paso 4 (colas por taller, cola y cache en la central) el 2026-11-26 (2.96); paso 5 (scheduler por taller y fallo cerrado) el 2026-11-26 (2.97) |
-| T4: storage | PENDIENTE |
+| T4: storage | COMPLETADO el 2026-11-26 (2.98): diseño e implementación |
 | Tarea P8: fotos y firmas a privado | PENDIENTE |
 | T5: ciclo de vida | PENDIENTE |
 | T6: migrar la instalación actual | PENDIENTE |
