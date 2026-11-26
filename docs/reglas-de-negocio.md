@@ -916,8 +916,8 @@ historial 2.83 y 2.84; `InvoiceWithholdingService`). Migración `000072`.
 
 ## 6.34 Identificación del taller
 
-Entregas T2, pasos 2 y 3, T3, pasos 4 y 5, T4 y T5, pasos 1 a 3, de `docs/especificacion-aseguradoras.html` (§3.2, §3.3, §3.5,
-§3.7, §3.8 y §3.9; historial 2.80, 2.93, 2.95, 2.96, 2.97, 2.98, 2.101, 2.102 y 2.103; middleware `IdentifyTenant`, `TenantRuntime` y el middleware de jobs
+Entregas T2, pasos 2 y 3, T3, pasos 4 y 5, T4 y T5, de `docs/especificacion-aseguradoras.html` (§3.2, §3.3, §3.5,
+§3.7, §3.8 y §3.9; historial 2.80, 2.93, 2.95, 2.96, 2.97, 2.98, 2.101, 2.102, 2.103, 2.104 y 2.105; middleware `IdentifyTenant`, `TenantRuntime` y el middleware de jobs
 `PrepareTenant`).
 Usa la tabla `tenants` de la base central (paso 1, 2.90); la cola y la cache, también en la central, se crean con la
 migración central `2026_11_26_000001` (2.96). Las bases de taller no tienen esas tablas: las quita la migración de taller
@@ -988,9 +988,19 @@ migración central `2026_11_26_000001` (2.96). Las bases de taller no tienen esa
   mantenimiento, los tokens ni los datos: al reactivar, las sesiones vuelven a funcionar. La suspensión es un bloqueo total
   (`403 TENANT_SUSPENDED` en todas las rutas, también el login y el branding). La baja es final: ningún comando la revierte,
   el taller responde `404 TENANT_NOT_FOUND`, no se migra ni recibe recordatorios y su base se conserva 5 años desde
-  `cancelled_at` (su borrado y la exportación asistida son procedimientos operativos, paso 5). `tenants:cancel` pide
+  `cancelled_at` (su borrado y la exportación asistida son procedimientos operativos, en `docs/development/deployment.md`). `tenants:cancel` pide
   confirmación salvo con `--force`. El frontend muestra la pantalla de taller suspendido ante cualquier
   `TENANT_SUSPENDED`, sin borrar el token.
+* **Restauración** (T5, paso 5; historial 2.105; `App\Console\Commands\RestoreTenant`):
+  `php artisan tenants:restore {id} {database} [--force]` pasa un taller activo, suspendido o dado de baja a una base
+  restaurada con otro nombre, importada antes según el runbook. No cambia su estado. Rechaza, sin cambiar nada y con
+  código 1: un taller en `provisioning` o con la base borrada (`tenants.database_deleted_at`, migración central
+  `2026_11_26_000005`), la misma base, la central o la de la conexión por defecto, la de otro taller y una base que no
+  existe o está vacía. Si la base actual responde y tiene RUC (`company.tax_id`), el de la restaurada tiene que coincidir.
+  Pide confirmación salvo con `--force` (con un taller activo, advierte que se pierde lo guardado después del backup),
+  aplica las migraciones que le falten, la prepara con `TenantRuntime::ensureReady()` y exige un usuario `administrador`;
+  si algo falla, el puntero no cambia. El cambio toma el lock de `tenants:migrate`, relee la fila bloqueada, borra la
+  cache de permisos del taller y queda en el log (`Cambió la base del taller.`). La base anterior no se toca.
 * **Migraciones por taller** (T5, paso 1; historial 2.101; `App\Console\Commands\MigrateTenants`):
   `php artisan tenants:migrate [--tenant=*] [--failed]` aplica las migraciones pendientes de `database/migrations` en la
   base de cada taller activo o suspendido, con o sin mantenimiento. Por taller toma un lock en la cache de la central, y

@@ -11,7 +11,7 @@ use PDO;
  * historial 2.103). Usa el motor de la conexión `tenant`: MySQL en desarrollo y producción, SQLite (un archivo) en los
  * tests. En MySQL las sentencias van por la conexión central, que es del mismo servidor y no depende del taller activo.
  *
- * Solo la usan `tenants:create` y `tenants:discard`. El nombre se valida acá también, porque va dentro de un
+ * La usan `tenants:create`, `tenants:discard` y `tenants:restore` (paso 5, historial 2.105). El nombre se valida acá también, porque va dentro de un
  * `CREATE DATABASE` o un `DROP DATABASE`: en MySQL solo `[a-z0-9_]` y en SQLite una ruta `.sqlite` en una carpeta que
  * ya existe.
  */
@@ -110,6 +110,35 @@ class TenantDatabase
 
         DB::connection(config('multitenancy.landlord_database_connection_name'))
             ->statement(sprintf('DROP DATABASE IF EXISTS `%s`', $name));
+    }
+
+    /**
+     * Si la base es la central o la de la conexión por defecto: ningún taller la borra (`tenants:discard`) ni pasa a
+     * usarla (`tenants:restore`).
+     */
+    public function isProtected(string $name): bool
+    {
+        $connections = [config('multitenancy.landlord_database_connection_name'), config('database.default')];
+
+        foreach ($connections as $connection) {
+            $protected = (string) config("database.connections.{$connection}.database");
+
+            if ($protected !== '' && $this->same($protected, $name)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * En SQLite la base es una ruta: se comparan las reales, para que otra forma de escribirla no esquive un control.
+     */
+    public function same(string $a, string $b): bool
+    {
+        $real = fn (string $path) => realpath($path) ?: $path;
+
+        return strcasecmp($real($a), $real($b)) === 0;
     }
 
     private function assertValid(string $name): void

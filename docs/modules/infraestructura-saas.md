@@ -6,10 +6,11 @@ el host y su preparación, `TenantRuntime::ensureReady()`) y T3 completo: **cada
 base de su taller** (reglas de negocio 6.34), con la cola y la cache en la central, y el scheduler despacha un job de
 recordatorios por taller, a la hora de cada uno. Sin taller activo, nada consulta la conexión por defecto (fallo cerrado,
 TD10). T4 completo: los archivos de cada taller van a su propia carpeta y sin taller activo los discos no se resuelven.
-T5 en curso: `tenants:migrate` migra la base de cada taller, las bases de taller ya no tienen tablas de cola ni cache y
+T5 completo: `tenants:migrate` migra la base de cada taller, las bases de taller ya no tienen tablas de cola ni cache y
 `tenants:create` da de alta un taller completo (con `tenants:discard` para un alta que no terminó), y `tenants:suspend`,
 `tenants:reactivate` y `tenants:cancel` lo suspenden, lo reactivan o lo dan de baja, con la pantalla de taller suspendido
-en el frontend. Falta P8 y el resto de T5 en adelante.
+en el frontend, y `tenants:restore` pasa un taller a una base restaurada, con los runbooks de backup, exportación y
+borrado en [`deployment.md`](../development/deployment.md). Falta P8 y T6.
 
 | Dato | Referencia |
 |---|---|
@@ -22,6 +23,7 @@ en el frontend. Falta P8 y el resto de T5 en adelante.
 | Suspensión y baja (P9) | [historial](../decisions/historial.md), secciones 2.94 y 2.104; [reglas de negocio](../reglas-de-negocio.md), 6.34 |
 | Paso 4 de T3 | [historial](../decisions/historial.md), sección 2.96; [reglas de negocio](../reglas-de-negocio.md), 6.17, 6.32 y 6.34 |
 | Paso 5 de T3 | [historial](../decisions/historial.md), sección 2.97; [reglas de negocio](../reglas-de-negocio.md), 6.17, 6.32 y 6.34 |
+| Restauración y runbooks (T5, paso 5) | [historial](../decisions/historial.md), sección 2.105; [reglas de negocio](../reglas-de-negocio.md), 6.34 |
 | T4 | [historial](../decisions/historial.md), sección 2.98; [reglas de negocio](../reglas-de-negocio.md), 6.24 y 6.34 |
 
 ## Estado por entrega
@@ -34,7 +36,7 @@ en el frontend. Falta P8 y el resto de T5 en adelante.
 | T3 | Colas, cache, permisos y scheduler | COMPLETADO | Diseño aprobado el 2026-11-26, en dos pasos. Paso 4 hecho el 2026-11-26 (2.96): cola, fallidos y cache en la central; todo job con su taller (`PrepareTenant`: libera con espera, descarta si el taller está suspendido); permisos y configuración limpios al cambiar de taller; recordatorios por taller. Paso 5 hecho el 2026-11-26 (2.97): un job de recordatorios por taller (`SendTenantReminders`), el scheduler con la hora de cada taller una vez por día (se recupera la hora perdida) y el fallo cerrado de TD10 en el código (`ensureReady()` sin taller falla). Tests en `tests/Feature/Tenancy` (45) |
 | T4 | Storage por taller | COMPLETADO | Hecho el 2026-11-26 (2.98): driver `tenant_local` (`TenantStorage`) con raíces `tenants/{id}` en el disco público y en el privado (`tenant_private`, antes `claim_documents`), `SwitchTenantStorageTask`, fallo cerrado sin taller y URL pública con el host del taller. No conserva los archivos actuales. Tests en `tests/Feature/Tenancy` (49; 51 corridas en PHPUnit) |
 | Tarea P8 | Fotos y firmas a privado | PENDIENTE | Después de T4; deuda #15 |
-| T5 | Ciclo de vida | EN CURSO | Plan en 5 pasos (2.101). Paso 1 hecho el 2026-11-26 (2.101): `tenants:migrate`. Paso 2 hecho el 2026-11-26 (2.102): las bases de taller ya no tienen las tablas de cola y cache. Paso 3 hecho el 2026-11-26 (2.103): alta completa con `tenants:create` (estado `provisioning`, base, migraciones, roles, administrador inicial y datos de la empresa) y `tenants:discard`. Paso 4 hecho el 2026-11-26 (2.104): `tenants:suspend`, `tenants:reactivate` y `tenants:cancel` (estado `cancelled` final, con `cancelled_at`), descarte de los jobs de un taller dado de baja y pantalla "Taller suspendido" del frontend. Falta el paso 5: restauración y runbooks de backup, borrado a los 5 años y exportación asistida (historial 2.94) |
+| T5 | Ciclo de vida | COMPLETADO | Plan en 5 pasos (2.101). Paso 1 hecho el 2026-11-26 (2.101): `tenants:migrate`. Paso 2 hecho el 2026-11-26 (2.102): las bases de taller ya no tienen las tablas de cola y cache. Paso 3 hecho el 2026-11-26 (2.103): alta completa con `tenants:create` (estado `provisioning`, base, migraciones, roles, administrador inicial y datos de la empresa) y `tenants:discard`. Paso 4 hecho el 2026-11-26 (2.104): `tenants:suspend`, `tenants:reactivate` y `tenants:cancel` (estado `cancelled` final, con `cancelled_at`), descarte de los jobs de un taller dado de baja y pantalla "Taller suspendido" del frontend. Paso 5 hecho el 2026-11-26 (2.105): `tenants:restore` (cambio verificado de `tenants.database`, con las migraciones que falten), `tenants.database_deleted_at` y runbooks de backup, restauración, exportación asistida, borrado a los 5 años y corrección de una baja. Tests en `tests/Feature/Tenancy` (102; 104 corridas en PHPUnit) |
 | T6 | Migrar la instalación actual | PENDIENTE | Requiere T1 a T5, P8 y decidir el hosting (V9) |
 
 ## Observaciones para continuar

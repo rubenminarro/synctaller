@@ -42,7 +42,7 @@ class DiscardTenant extends Command
             return self::FAILURE;
         }
 
-        if ($this->isProtected($tenant->database)) {
+        if ($databases->isProtected($tenant->database)) {
             $this->error("Taller #{$tenant->id}: su base es la central o la de la conexión por defecto y no se borra.");
 
             return self::FAILURE;
@@ -92,31 +92,6 @@ class DiscardTenant extends Command
         $this->info("Taller #{$tenant->id} descartado: se borraron su base y su registro.");
 
         return self::SUCCESS;
-    }
-
-    private function isProtected(string $database): bool
-    {
-        $connections = [config('multitenancy.landlord_database_connection_name'), config('database.default')];
-
-        foreach ($connections as $connection) {
-            $protected = (string) config("database.connections.{$connection}.database");
-
-            if ($protected !== '' && $this->sameDatabase($protected, $database)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * En SQLite la base es una ruta: se comparan las reales, para que otra forma de escribirla no esquive el control.
-     */
-    private function sameDatabase(string $a, string $b): bool
-    {
-        $real = fn (string $path) => realpath($path) ?: $path;
-
-        return strcasecmp($real($a), $real($b)) === 0;
     }
 
     private function restore(?Tenant $previous, Tenant $discarded): void

@@ -6,7 +6,7 @@ use Illuminate\Database\Migrations\Migrator;
 
 /**
  * Migra la base del taller activo con las migraciones de `database/migrations` (T5, pasos 1 y 3; historial 2.101 y
- * 2.103). La usan `tenants:migrate` y `tenants:create`.
+ * 2.103). La usan `tenants:migrate`, `tenants:create` y `tenants:restore` (paso 5, historial 2.105).
  *
  * Usa el `Migrator` y no el comando `migrate`, que con `--force` crea la base si no existe: un taller que apunta a una
  * base caída o mal escrita recibiría una vacía con todas las migraciones. Acá una base que falta es una falla. Crearla
@@ -30,6 +30,18 @@ class TenantMigrator
     }
 
     /**
+     * Migraciones del código que la base del taller activo todavía no tiene (`tenants:restore`, paso 5; 2.105).
+     *
+     * @return list<string>
+     */
+    public function pending(): array
+    {
+        $ran = $this->ran();
+
+        return array_values(array_diff(array_keys($this->migrator->getMigrationFiles($this->paths())), $ran));
+    }
+
+    /**
      * Aplica las migraciones pendientes en la base del taller activo.
      */
     public function run(): void
@@ -39,8 +51,16 @@ class TenantMigrator
                 $this->migrator->getRepository()->createRepository();
             }
 
-            $this->migrator->run(array_merge($this->migrator->paths(), [database_path('migrations')]));
+            $this->migrator->run($this->paths());
         });
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function paths(): array
+    {
+        return array_merge($this->migrator->paths(), [database_path('migrations')]);
     }
 
     private function connection(): string
