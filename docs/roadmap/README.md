@@ -7,6 +7,7 @@ original y no se renumeran. El detalle por módulo está en [`modules/README.md`
 
 | Fecha | Backend | Frontend | Notas |
 |---|---|---|---|
+| 2026-11-26 | 543 tests en verde, 9173 aserciones (antes de T4); Pint sin pendientes | Sin corrida: el cambio no tocó el frontend (la CI lo omite por rutas) | T3, paso 5 (historial 2.97). Corrida de la CI sobre `main` (`8a45213`), no local. T3 completo |
 | 2026-11-26 | Tests puntuales en verde (191, 1827 aserciones): `tests/Feature/Tenancy` (45; las protecciones nuevas de `ReminderCommandTest`, comprobadas quitándolas) y las carpetas `Notifications`, `Settings`, `Http`, `Auth`, `Access`, `Seeders`, `Budgets` y `Receptions`; Pint sin pendientes | ESLint (sin cambios en el frontend) | T3, paso 5 (historial 2.97). Corrida local en la rama `feature/t3-paso5-scheduler`, sin la suite completa; repetida con el mismo resultado después de las correcciones de `validar-docs` (solo documentación y un comentario de código). Contra MySQL: `schedule:list` muestra `notifications:send-reminders --due` cada minuto y `--tenant=999` responde el error esperado (código 1). No se despacharon recordatorios en `synctaller`, para no escribir avisos en la base de desarrollo. Sin revisión en navegador: las pantallas no cambian |
 | 2026-11-26 | 538 tests en verde, 9135 aserciones (antes de T3, paso 5); Pint sin pendientes | Sin corrida: el cambio no tocó el frontend (la CI lo omite por rutas) | T3, paso 4 (historial 2.96). Corrida de la CI sobre `main` (`5541141`), no local |
 | 2026-11-26 | Tests puntuales en verde (186, 1789 aserciones): `tests/Feature/Tenancy` (40; los 10 nuevos y el cambiado de `SwitchTenantTest`, comprobados contra su protección quitada) y las carpetas `Notifications`, `Settings`, `Http`, `Auth`, `Access`, `Seeders`, `Budgets` y `Receptions`; Pint sin pendientes | ESLint (sin cambios en el frontend) | T3, paso 4 (historial 2.96). Corrida local en la rama `feature/t3-paso4-colas`, sin la suite completa. Cola vieja de `synctaller` vaciada con el código de `main` (59 jobs, ninguno fallido) y migración central nueva aplicada en MySQL (`synctaller_central`). Probado con `php artisan serve`: `GET /api/branding` 200 en `127.0.0.1`, `404 TENANT_NOT_FOUND` en `localhost` y login inválido `401`; `queue:work` lee la cola de la central. Sin revisión en navegador: las pantallas no cambian |
@@ -36,7 +37,7 @@ Ninguna entrega empieza sin autorización del usuario. **El sistema no está lis
 
 | Orden | Tarea | Bloqueo |
 |---|---|---|
-| 1 | T4 y T5 | Según el plan de la sección 2.80. Después de que T3, paso 5 (historial 2.97) esté en `main` con la CI en verde. T5 incluye la suspensión y la baja decididas el 2026-11-26 (historial 2.94): bloqueo total, base conservada 5 años y exportación asistida a pedido |
+| 1 | T4 y T5 | Según el plan de la sección 2.80. Sin bloqueo: T3 está completo en `main` con la CI en verde (`8a45213`). T5 incluye la suspensión y la baja decididas el 2026-11-26 (historial 2.94): bloqueo total, base conservada 5 años y exportación asistida a pedido |
 | 2 | Tarea P8 (fotos y firmas a privado) | Después de T4; requisito antes del primer taller comercial |
 
 Las entregas de las respuestas de la contadora (sección 2.83 del historial) quedaron completas el 2026-11-25 con V16 y el
