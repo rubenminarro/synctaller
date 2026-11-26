@@ -1,0 +1,132 @@
+<?php
+
+namespace Tests\Feature\Tenancy;
+
+use App\Models\SystemSetting;
+use App\Models\Tenant;
+use App\Multitenancy\TenantRuntime;
+use Illuminate\Contracts\Queue\Job;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Queue\Events\JobProcessing;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
+use Mockery;
+use Tests\Concerns\UsesTenantDatabases;
+use Tests\TestCase;
+
+/**
+ * Preparar el taller (T2, paso 3; historial 2.95): `TenantRuntime::ensureReady()` comprueba la base del taller activo y
+ * aplica su configuración, en el request, en cada job, en el scheduler y en el comando de recordatorios. Cada test
+ * falla si se quita la protección que cubre.
+ *
+ * Como en IdentifyTenantTest, la transacción va en la conexión fija `sqlite` y los datos de A y B quedan en sus
+ * archivos (UsesTenantDatabases): los valores se guardan con `updateOrCreate` y se borran los que el test no quiere.
+ */
+class TenantRuntimeTest extends TestCase
+{
+    use RefreshDatabase;
+    use UsesTenantDatabases;
+
+    protected $connectionsToTransact = ['sqlite'];
+
+    public function test_each_request_applies_the_settings_of_its_tenant(): void
+    {
+        config(['company.legal_name' => 'Razón social del .env']);
+        $a = $this->registerTenant('a');
+        $b = $this->registerTenant('b');
+        $this->storeLegalName($a, 'Taller A S.A.');
+        $this->storeLegalName($b, 'Taller B S.A.');
+
+        $this->getJson('http://a.localhost/api/branding')->assertOk();
+        $this->assertSame('Taller A S.A.', config('company.legal_name'));
+
+        $this->getJson('http://b.localhost/api/branding')->assertOk();
+        $this->assertSame('Taller B S.A.', config('company.legal_name'));
+    }
+
+    public function test_a_value_saved_in_one_tenant_does_not_reach_another_without_it(): void
+    {
+        config(['company.legal_name' => 'Razón social del .env']);
+        $a = $this->registerTenant('a');
+        $b = $this->registerTenant('b');
+        $this->storeLegalName($a, 'Taller A S.A.');
+        $this->storeLegalName($b, null);
+
+        $this->getJson('http://a.localhost/api/branding')->assertOk();
+        $this->getJson('http://b.localhost/api/branding')->assertOk();
+
+        $this->assertSame('Razón social del .env', config('company.legal_name'));
+    }
+
+    public function test_a_tenant_whose_settings_cannot_be_read_responds_without_technical_details(): void
+    {
+        // La base existe y conecta, pero no está migrada: falla la lectura de system_settings.
+        $empty = database_path('testing-tenant-sin-migrar.sqlite');
+        file_put_contents($empty, '');
+        $tenant = Tenant::create(['name' => 'Sin migrar', 'domain' => 'vacio.localhost', 'database' => realpath($empty)]);
+        Log::spy();
+
+        $response = $this->getJson('http://vacio.localhost/api/branding')
+            ->assertServiceUnavailable()
+            ->assertJsonPath('error_code', 'TENANT_UNAVAILABLE')
+            ->assertJsonPath('message', 'El servicio del taller no está disponible.');
+
+        $this->assertStringNotContainsString('system_settings', $response->getContent());
+        $this->assertNull(Tenant::current(), 'Un taller sin configuración legible no queda activo.');
+        Log::shouldHaveReceived('error')
+            ->withArgs(fn (string $message, array $context = []) => $message === 'No se pudo aplicar la configuración del taller.'
+                && ($context['tenant_id'] ?? null) === $tenant->id
+                && str_contains($context['exception'], 'system_settings'))
+            ->once();
+    }
+
+    public function test_each_job_applies_the_settings_of_the_active_tenant(): void
+    {
+        config(['company.legal_name' => 'Razón social del .env']);
+        $a = $this->registerTenant('a');
+        $this->storeLegalName($a, 'Taller A S.A.');
+        $a->makeCurrent();
+        $job = Mockery::mock(Job::class);
+        $job->shouldReceive('payload')->andReturn([]);
+
+        Event::dispatch(new JobProcessing('sync', $job));
+
+        $this->assertSame('Taller A S.A.', config('company.legal_name'));
+    }
+
+    public function test_without_an_active_tenant_it_applies_the_settings_of_the_default_connection(): void
+    {
+        // La consola y el worker hasta T3 (historial 2.93): sin taller, la base de `DB_CONNECTION`.
+        Tenant::forgetCurrent();
+        SystemSetting::create(['key' => 'company.legal_name', 'value' => 'Taller sin línea T S.A.']);
+
+        app(TenantRuntime::class)->ensureReady();
+
+        $this->assertSame('Taller sin línea T S.A.', config('company.legal_name'));
+    }
+
+    private function registerTenant(string $name): Tenant
+    {
+        return Tenant::create([
+            'name' => "Taller {$name}",
+            'domain' => "{$name}.localhost",
+            'database' => $this->tenantDatabase($name),
+        ]);
+    }
+
+    /**
+     * Guarda (o borra, con null) la razón social en la base del taller y lo deja sin activar.
+     */
+    private function storeLegalName(Tenant $tenant, ?string $value): void
+    {
+        $tenant->makeCurrent();
+
+        if ($value === null) {
+            SystemSetting::where('key', 'company.legal_name')->delete();
+        } else {
+            SystemSetting::updateOrCreate(['key' => 'company.legal_name'], ['value' => $value]);
+        }
+
+        Tenant::forgetCurrent();
+    }
+}

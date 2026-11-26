@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Multitenancy\TenantRuntime;
 use App\Services\NotificationReminderService;
-use App\Services\WorkshopSettingService;
 use Illuminate\Console\Command;
 
 class SendNotificationReminders extends Command
@@ -12,9 +12,9 @@ class SendNotificationReminders extends Command
 
     protected $description = 'Registra los recordatorios diarios: facturas por vencer o vencidas, mantenimientos y cuentas por pagar vencidas';
 
-    public function handle(NotificationReminderService $reminders, WorkshopSettingService $settings): int
+    public function handle(NotificationReminderService $reminders, TenantRuntime $runtime): int
     {
-        $settings->apply();
+        $runtime->ensureReady();
 
         $result = $reminders->run();
 

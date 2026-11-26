@@ -1,12 +1,13 @@
 # Roadmap
 
-Fuente de verdad del estado por fase y entrega. Verificado el 2026-11-25 contra el código (auditoría `validar-docs`). Las fases conservan su numeración
+Fuente de verdad del estado por fase y entrega. Verificado el 2026-11-26 contra el código (auditoría `validar-docs`). Las fases conservan su numeración
 original y no se renumeran. El detalle por módulo está en [`modules/README.md`](../modules/README.md).
 
 ## Última verificación
 
 | Fecha | Backend | Frontend | Notas |
 |---|---|---|---|
+| 2026-11-26 | Tests puntuales en verde: `tests/Feature/Tenancy` (30, 98 aserciones; los 5 nuevos de `TenantRuntimeTest` comprobados contra su protección quitada) y las carpetas `Settings`, `Notifications`, `Http`, `Auth`, `Access` y `Seeders` (84, 925 aserciones); Pint sin pendientes | Sin corrida: el cambio no tocó el frontend | T2, paso 3 (historial 2.95) y decisión sobre P9 (2.94). Corrida local en la rama `feature/t2-paso3-preparar-taller`, sin la suite completa; `Tenancy` y Pint se repitieron después del último cambio de código (un import sin uso y comentarios). Probado con `php artisan serve` sobre la base de desarrollo: `GET /api/branding` 200 en `127.0.0.1`, `404 TENANT_NOT_FOUND` en `localhost` y el login con credenciales inválidas `401`. Sin revisión en navegador: las pantallas no cambian |
 | 2026-11-25 | 523 tests en verde, 9070 aserciones (antes de T2, paso 3); Pint sin pendientes | Sin corrida: el cambio no tocó el frontend (la CI lo omite por rutas) | T2, paso 2 (historial 2.93). Corrida de la CI sobre `main` (`3932a32`), no local. Primera corrida completa con el taller de prueba |
 | 2026-11-25 | Tests puntuales en verde (240, 4559 aserciones): `tests/Feature/Tenancy` (25, cada test comprobado contra su protección quitada) y las carpetas `Http`, `Auth`, `Access`, `Seeders`, `Settings`, `Notifications`, `Documents`, `Invoices`, `Claims` y `Receptions`; Pint sin pendientes | ESLint (sin cambios en el frontend) | T2, paso 2 (historial 2.93). Corrida local, sin la suite completa. Taller #1 registrado en `synctaller_central` (`127.0.0.1` → `synctaller`) y probado con `php artisan serve`: `GET /api/branding` 200 en `127.0.0.1` y `404 TENANT_NOT_FOUND` en `localhost` (también el login), `/up` fuera de la identificación y CORS desde el SPA sin cambios. Sin revisión en navegador: las pantallas no cambian |
 | 2026-11-25 | 508 tests en verde, 9007 aserciones (antes de T2, paso 2; con Laravel y Symfony ya actualizados); Pint sin pendientes | Sin corrida: el cambio no tocó el frontend (la CI lo omite por rutas) | Deuda #19 (historial 2.92). Corrida de la CI sobre `main` (`11cd48d`), no local |
@@ -31,10 +32,9 @@ Ninguna entrega empieza sin autorización del usuario. **El sistema no está lis
 
 | Orden | Tarea | Bloqueo |
 |---|---|---|
-| 1 | **T2, paso 3:** unificar `ApplyWorkshopSettings` en `TenantRuntime::ensureReady()` (preparar el taller) | Tras el paso 2 (historial 2.93). Empieza con el diseño, según el plan de la sección 2.80 del [historial](../decisions/historial.md) |
-| 2 | Retención de 5 años y suspensión por etapas en la línea T (V14, G10) | Decisión comercial sobre P9; se suma al plan de T5 |
-| 3 | T3 a T5 | Según el plan de la sección 2.80 del [historial](../decisions/historial.md) |
-| 4 | Tarea P8 (fotos y firmas a privado) | Después de T4; requisito antes del primer taller comercial |
+| 1 | **T3:** colas, cache, permisos y scheduler por taller (pasos 4 y 5 de la revisión del spike) | Tras T2 (historial 2.95). Empieza con el diseño, según el plan de la sección 2.80 del [historial](../decisions/historial.md) |
+| 2 | T4 y T5 | Según el plan de la sección 2.80. T5 incluye la suspensión y la baja decididas el 2026-11-26 (historial 2.94): bloqueo total, base conservada 5 años y exportación asistida a pedido |
+| 3 | Tarea P8 (fotos y firmas a privado) | Después de T4; requisito antes del primer taller comercial |
 
 Las entregas de las respuestas de la contadora (sección 2.83 del historial) quedaron completas el 2026-11-25 con V16 y el
 encendido de M10 (2.89).
@@ -91,14 +91,14 @@ Frontend: FA0 a FA4, M10 y M12 completos ([detalle](../modules/aseguradoras.md))
 |---|---|
 | T0: spike | COMPLETADO |
 | T1: configuración en la base | COMPLETADO |
-| T2: central e identificación | EN CURSO: pasos 1 (central, paquete y modelo `Tenant`) y 2 (identificación por host) hechos el 2026-11-25; falta el paso 3 |
+| T2: central e identificación | COMPLETADO: pasos 1 (central, paquete y modelo `Tenant`) y 2 (identificación por host) el 2026-11-25; paso 3 (preparar el taller, `TenantRuntime`) el 2026-11-26 |
 | T3: colas, cache, permisos y scheduler | PENDIENTE |
 | T4: storage | PENDIENTE |
 | Tarea P8: fotos y firmas a privado | PENDIENTE |
 | T5: ciclo de vida | PENDIENTE |
 | T6: migrar la instalación actual | PENDIENTE |
 
-Los pasos 0 a 7 de la revisión del spike son internos de T2, T3 y T5, no fases nuevas (historial 2.80). El paso 0 está hecho y se repitió con 4.2.3 el 2026-11-25; los pasos 1 y 2 también (2.90 y 2.93).
+Los pasos 0 a 7 de la revisión del spike son internos de T2, T3 y T5, no fases nuevas (historial 2.80). El paso 0 está hecho y se repitió con 4.2.3 el 2026-11-25; los pasos 1, 2 y 3 también (2.90, 2.93 y 2.95).
 
 ## Pendiente sin fase
 

@@ -844,10 +844,11 @@ Entrega T1 de `docs/especificacion-aseguradoras.html` (decisiones del 2026-11-01
 * **Qué se guarda:** datos del taller (`company.*`), tasa de IVA por defecto, remitente (`mail.from.*`) y los horarios de
   avisos (`notifications.reminders_at`, `invoice_due_soon_days`, `invoice_overdue_repeat_days`). Solo lo que se cambió: lo
   demás sale del `.env` o del archivo de config, y un campo en `null` borra lo guardado y vuelve a ese valor.
-* **Cómo se aplica:** sobre `config()`, así que el código sigue leyendo `config()`. Lo aplican el middleware
-  `ApplyWorkshopSettings` (grupo `api`), `Queue::before` (un worker vive más que un cambio) y la tarea de recordatorios.
-  Cualquier proceso nuevo que lea estos datos fuera de esos tres caminos debe llamar a `apply()`. T2 lo llamará al
-  identificar el taller. Es un singleton: recuerda el valor original de lo que reemplazó.
+* **Cómo se aplica:** sobre `config()`, así que el código sigue leyendo `config()`. Lo aplica `TenantRuntime::ensureReady()`
+  (preparar el taller, 6.34; desde T2, paso 3, historial 2.95) en cuatro caminos: al identificar el taller en cada request,
+  en `Queue::before` (un worker vive más que un cambio), en el filtro del scheduler y en el comando de recordatorios.
+  Cualquier proceso nuevo que lea estos datos fuera de esos caminos debe llamar a `ensureReady()`. Es un singleton:
+  recuerda el valor original de lo que reemplazó, también entre talleres.
 * **Remitente:** `ClientNotificationMail` lo pone en su `Envelope`, porque el mailer guarda el global al crearse. Un
   mailable nuevo debe hacer lo mismo.
 * **API:** `GET|PATCH system-settings/workshop` con `system-settings.update` (solo administrador). `PATCH` parcial con al
@@ -901,14 +902,16 @@ historial 2.83 y 2.84; `InvoiceWithholdingService`). Migración `000072`.
 
 ## 6.34 Identificación del taller
 
-Entrega T2, paso 2, de `docs/especificacion-aseguradoras.html` (§3.2; historial 2.80 y 2.93; middleware `IdentifyTenant`).
+Entrega T2, pasos 2 y 3, de `docs/especificacion-aseguradoras.html` (§3.2 y §3.3; historial 2.80, 2.93 y 2.95; middleware
+`IdentifyTenant` y `TenantRuntime`).
 Sin migración: usa la tabla `tenants` de la base central (paso 1, 2.90).
 
 * **Por el host:** todo request a `api/*`, también `POST /login` y `GET /branding`, busca su taller en `tenants.domain` con
   el host del request (en minúsculas y sin puerto) antes de autenticar. No hay cabecera `X-Tenant` (TD8). Quedan fuera
   `/up` y las rutas web.
-* **Orden:** buscar el taller; revisar su estado y su mantenimiento sin tocar su base; activarlo y comprobar que su base
-  responde. Un taller suspendido y en mantenimiento responde como suspendido.
+* **Orden:** buscar el taller; revisar su estado y su mantenimiento sin tocar su base; activarlo y prepararlo
+  (`TenantRuntime::ensureReady()`, historial 2.95): comprobar que su base responde y aplicar su configuración (6.32). Un taller suspendido y en
+  mantenimiento responde como suspendido.
 * **Errores:**
 
   | Caso | HTTP | `error_code` | Mensaje |
@@ -916,9 +919,10 @@ Sin migración: usa la tabla `tenants` de la base central (paso 1, 2.90).
   | Ningún taller con ese host | 404 | `TENANT_NOT_FOUND` | No se encontró el taller. |
   | Taller suspendido | 403 | `TENANT_SUSPENDED` | El taller está suspendido. |
   | Taller en mantenimiento (`tenants.maintenance`) | 503 | `TENANT_MAINTENANCE` | El taller está en mantenimiento. Intente más tarde. |
-  | La base del taller no responde | 503 | `TENANT_UNAVAILABLE` | El servicio del taller no está disponible. |
+  | La base del taller no responde o no se puede leer su configuración | 503 | `TENANT_UNAVAILABLE` | El servicio del taller no está disponible. |
 
-  El detalle de una base que no responde va al log, con el id del taller, y nunca a la respuesta.
+  El detalle de una base que no responde o de una configuración ilegible va al log, con el id del taller, y nunca a la
+  respuesta. En los dos casos el taller no queda activo.
 * **Con el taller activo**, la conexión por defecto es la del taller (`tenant`): modelos, reglas `exists`/`unique` y SQL
   crudo ven solo sus datos. Un token de otro taller no existe en este (401 `UNAUTHENTICATED`) y un id de otro taller
   responde 404.

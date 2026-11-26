@@ -782,6 +782,35 @@ Segundo paso de T2 según el plan de la sección 2.80. Reglas vigentes en [regla
 | Proxies | Sin proxies de confianza: se usa el `Host` del request. Se configuran con la infraestructura (T4) |
 | Tests | Todo test corre en un taller de prueba (`TestCase`, id 1000) registrado con el host de `APP_URL` y la base de siempre, activado antes de RefreshDatabase para que su transacción quede en `tenant`. La central se migra una vez por ejecución para toda la suite (reemplaza `UsesCentralDatabase`). Los tests con varios talleres usan bases extra (`UsesTenantDatabases`, `database/testing-tenant-{nombre}.sqlite`) y la transacción en la conexión fija `sqlite`, porque cambiar de taller reconecta `tenant`. `tests/Feature/Tenancy` pasa de 10 a 25 tests; cada uno se comprobó contra su protección quitada |
 
+### 2.94 Suspensión y baja de un taller: se mantiene P9 (2026-11-26)
+
+Decisión comercial que quedó pendiente con las respuestas de la contadora a V14 y G10 (2.83): conservar 5 años, garantizar
+acceso, exportación e integridad antes de borrar, y sugerencia de suspender por etapas (aviso, gracia, solo lectura). Se
+suma al plan de T5; no hay código antes. Detalle en la [especificación](../especificacion-aseguradoras.html), §3.9 y §10.
+
+| Tema | Decisión del usuario |
+|---|---|
+| Suspensión | Se mantiene el **bloqueo total y reversible** de P9: todas las rutas del taller, incluidos el login y el branding, responden `403 TENANT_SUSPENDED`. Sin etapas de aviso, gracia ni solo lectura, que salen de las alternativas futuras |
+| Acceso | Un taller suspendido o dado de baja no ingresa |
+| Motivo | La suspensión es la misma cualquiera sea el motivo |
+| Baja | Se entrega la exportación completa y la plataforma **conserva la base 5 años** antes de borrarla; la fila de `tenants` queda `cancelled` (TD5) |
+| Exportación | A pedido, mientras el taller está suspendido y durante los 5 años posteriores a la baja. La hace la plataforma con un procedimiento operativo (runbook de T5), no es una funcionalidad de la app. Así se cumple lo que pide V14: acceso, exportación e integridad antes de borrar |
+| Pendiente | La parte legal de V14 (datos personales durante la suspensión), con un asesor legal |
+
+### 2.95 T2, paso 3: preparar el taller (2026-11-26)
+
+Tercer y último paso de T2 según el plan de la sección 2.80. Reglas vigentes en [reglas de negocio](../reglas-de-negocio.md),
+6.32 y 6.34. La API no cambia: ninguna ruta, permiso ni `error_code` nuevo.
+
+| Tema | Decisión |
+|---|---|
+| Punto de entrada | `App\Multitenancy\TenantRuntime::ensureReady()`, la fase "preparar" de §3.3: con un taller activo comprueba que su base responde y aplica `system_settings` (T1). Cambiar de taller sigue sin E/S |
+| Dónde corre | Decisión del usuario: en los **cuatro** caminos desde ahora, no solo en HTTP: `IdentifyTenant` (después de `makeCurrent()`), `Queue::before`, el filtro `when()` del scheduler y el comando `notifications:send-reminders`. Eran cuatro, no tres como decía 2.80. Sin taller activo (consola y worker hasta T3) aplica la configuración sobre la conexión por defecto, como antes, y un error sigue su curso. En T3 el middleware del job y el recorrido de talleres del scheduler usan el mismo punto de entrada |
+| `ApplyWorkshopSettings` | Se borra: lo reemplaza `ensureReady()` dentro de `IdentifyTenant`. La comprobación de la base sale de `IdentifyTenant` y pasa a `TenantRuntime`. `remindersDue()` ya no aplica la configuración: la espera aplicada |
+| Configuración ilegible | Decisión del usuario: si la base conecta pero no se puede leer `system_settings` (por ejemplo, sin migrar), responde `503 TENANT_UNAVAILABLE` en vez de un 500, con el detalle en el log (`No se pudo aplicar la configuración del taller.`) y el taller sin activar. Mismo código y mensaje que una base que no responde |
+| Entre talleres | `WorkshopSettingService` sigue siendo un singleton: los valores originales que recuerda son los del `.env`, así que valen para cualquier taller y un valor guardado en uno no llega a otro que no lo tiene |
+| Tests | `tests/Feature/Tenancy` pasa de 25 a 30 (`TenantRuntimeTest`); cada uno se comprobó contra su protección quitada |
+
 ---
 
 ## 3. Frontend
