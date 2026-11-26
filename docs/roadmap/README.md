@@ -7,6 +7,7 @@ original y no se renumeran. El detalle por módulo está en [`modules/README.md`
 
 | Fecha | Backend | Frontend | Notas |
 |---|---|---|---|
+| 2026-11-26 | 562 tests en verde, 9267 aserciones (antes de T5, paso 2); Pint sin pendientes | Sin corrida: el cambio no tocó el frontend (la CI lo omite por rutas) | T5, paso 1 (historial 2.101). Corrida de la CI sobre `main` (`afacc66`), no local |
 | 2026-11-26 | Tests puntuales en verde (65, 382 aserciones): `tests/Feature/Tenancy` (con `TenantMigrateCommandTest`, 8 nuevos, cada protección comprobada quitándola) y `tests/Feature/Seeders`; Pint sin pendientes | ESLint (sin cambios en el frontend) | T5, paso 1 (historial 2.101). Corrida local en la rama `feature/t5-paso1-migrate`, sin la suite completa. Migración central aplicada en MySQL (`synctaller_central`); `tenants:migrate` con el taller #1: sin pendientes (código 0), `--failed` sin fallidos (código 0) y `--tenant=99` (código 1). Sin revisión en navegador: las pantallas no cambian |
 | 2026-11-26 | 554 tests en verde, 9201 aserciones (antes de T5); Pint sin pendientes | Sin corrida: el cambio no tocó el frontend (la CI lo omite por rutas) | Deuda #23 (historial 2.100). Corrida de la CI sobre `main` (`90f2ec8`), no local |
 | 2026-11-26 | Tests puntuales en verde (57 corridas de PHPUnit, 316 aserciones): `tests/Feature/Seeders` (con `SeedingTenantTest`, 5 nuevos, cada uno comprobado contra su protección quitada) y `tests/Feature/Tenancy`; Pint sin pendientes | ESLint (sin cambios en el frontend) | Deuda #23 (historial 2.100). Corrida local en la rama `fix/deuda-23-siembra`, sin la suite completa. Guía nueva probada sobre SQLite temporal: sin taller no siembra y lo indica; con el taller, siembra completa con los archivos en su carpeta, y repetida sin errores. Sin revisión en navegador: las pantallas no cambian |
@@ -42,7 +43,7 @@ Ninguna entrega empieza sin autorización del usuario. **El sistema no está lis
 
 | Orden | Tarea | Bloqueo |
 |---|---|---|
-| 1 | T5 | Plan en 5 pasos (historial 2.101), sobre el de la sección 2.80. Paso 1 (`tenants:migrate`) en la rama `feature/t5-paso1-migrate`, pendiente de PR y CI. Después: paso 2 (deuda #20), 3 (alta), 4 (suspensión, baja y pantalla del frontend) y 5 (restauración y runbooks). T5 incluye la suspensión y la baja decididas el 2026-11-26 (historial 2.94): bloqueo total, base conservada 5 años y exportación asistida a pedido |
+| 1 | T5 | Plan en 5 pasos (historial 2.101), sobre el de la sección 2.80. Sin bloqueo: el paso 1 (`tenants:migrate`) está en `main` con la CI en verde (`afacc66`). Después: paso 2 (deuda #20), 3 (alta), 4 (suspensión, baja y pantalla del frontend) y 5 (restauración y runbooks). T5 incluye la suspensión y la baja decididas el 2026-11-26 (historial 2.94): bloqueo total, base conservada 5 años y exportación asistida a pedido |
 | 2 | Tarea P8 (fotos y firmas a privado) | Sin bloqueo: T4 está en `main`. Usa el disco `tenant_private`; requisito antes del primer taller comercial |
 
 Las entregas de las respuestas de la contadora (sección 2.83 del historial) quedaron completas el 2026-11-25 con V16 y el
@@ -104,7 +105,7 @@ Frontend: FA0 a FA4, M10 y M12 completos ([detalle](../modules/aseguradoras.md))
 | T3: colas, cache, permisos y scheduler | COMPLETADO: diseño aprobado el 2026-11-26; paso 4 (colas por taller, cola y cache en la central) el 2026-11-26 (2.96); paso 5 (scheduler por taller y fallo cerrado) el 2026-11-26 (2.97) |
 | T4: storage | COMPLETADO el 2026-11-26 (2.98): diseño e implementación |
 | Tarea P8: fotos y firmas a privado | PENDIENTE |
-| T5: ciclo de vida | EN CURSO: plan en 5 pasos aprobado el 2026-11-26 (2.101); paso 1 (`tenants:migrate`) implementado el 2026-11-26, pendiente de la CI |
+| T5: ciclo de vida | EN CURSO: plan en 5 pasos aprobado el 2026-11-26 (2.101); paso 1 (`tenants:migrate`) el 2026-11-26, en `main` con la CI en verde |
 | T6: migrar la instalación actual | PENDIENTE |
 
 Los pasos 0 a 7 de la revisión del spike son internos de T2, T3 y T5, no fases nuevas (historial 2.80). El paso 0 está hecho y se repitió con 4.2.3 el 2026-11-25; los pasos 1 a 5 también (2.90, 2.93, 2.95, 2.96 y 2.97).
