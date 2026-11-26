@@ -960,3 +960,7 @@ migración central `2026_11_26_000001` (2.96).
   (`{esquema}://{dominio}:{puerto}/storage/tenants/{id}/…`).
 * **Registro:** `php artisan tenants:register {name} {domain} {database}` crea la fila del taller (activo, sin
   mantenimiento). El dominio es solo el host; dominio y base son únicos. No crea ni migra la base: eso es el alta de T5.
+* **Siembra de ejemplo** (deuda #23; historial 2.100; `Database\Seeders\SeedingTenant`): `DatabaseSeeder` corre en el
+  taller activo. Sin taller activo (`migrate --seed`, `db:seed`), activa el registrado con la base que se siembra (la de la
+  conexión por defecto; en SQLite se compara la ruta resuelta) y lo olvida al terminar, también si la siembra falla. Sin
+  ese taller, o sin la base central migrada, no siembra nada y el mensaje indica el comando que falta.

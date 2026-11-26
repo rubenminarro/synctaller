@@ -39,9 +39,9 @@ CREATE DATABASE synctaller_central CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode
 
 ```bash
 cd backend
-php artisan migrate --seed     # solo sobre una base vacía; tarda unos 15 s
-php artisan migrate --database=central --path=database/migrations/central   # base central (línea T)
+php artisan migrate --database=central --path=database/migrations/central   # base central (línea T): primero
 php artisan tenants:register "Taller principal" 127.0.0.1 synctaller   # el taller del host de VITE_API_URL
+php artisan migrate --seed     # solo sobre una base vacía; siembra en el taller registrado; tarda unos 15 s
 php artisan storage:link       # fotos, firmas y logo
 cd ..
 npm test                       # backend y frontend en verde
