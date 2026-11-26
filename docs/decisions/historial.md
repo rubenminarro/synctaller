@@ -875,6 +875,19 @@ Sin migraciones ni cambios en el frontend; ninguna ruta, permiso, `error_code` n
 | Alcance | Decisión del usuario: CORS con varios orígenes, `VITE_API_URL` por taller y proxies de confianza, que 2.93 dejaba para "T4", salen de T4. Dependen del hosting (V9) y quedan como deuda #22 |
 | Tests | Los que usan `Storage::fake` no cambian, salvo el nombre del disco privado (`ClaimDocumentTest`, `ClaimTestCase`, `DatabaseSeederTest`). `tests/Feature/Tenancy` pasa de 45 a 49 tests (51 corridas en PHPUnit, por el data provider) con `TenantStorageTest` (discos reales sobre una carpeta temporal): lo guardado con A no se ve desde B en los dos discos, fallo cerrado sin taller en los dos (también con el disco ya resuelto), URL con el host del taller y URL de las fotos de recepción. Cada test se comprobó quitándole su protección: la tarea, el fallo cerrado, el host del taller y el `url()` del disco en `ReceptionPhotoResource` |
 
+### 2.99 Skills de proceso y protecciones de Claude Code (2026-11-26)
+
+A pedido del usuario, después de analizar las skills del proyecto. No cambia código de la aplicación, rutas, permisos ni contratos. Todo
+vive en `.claude/`.
+
+| Tema | Decisión |
+|---|---|
+| Flujo de una entrega | Implementar → tests puntuales → `revisar-navegador` → `validar-docs` → `cerrar-entrega` → commit y PR → CI → merge → `registrar-ci` |
+| `registrar-ci` (nueva) | Registra en el roadmap la corrida de la CI sobre `main` después del merge, con las cifras sacadas del log por `gh` (script `ci-resumen.mjs`), y destraba las próximas tareas. Se mantiene un PR aparte por corrida, como hasta ahora: la fila habla de `main`, no de la rama. Se ejecuta solo a pedido del usuario |
+| `revisar-navegador` (nueva) | Reemplaza el procedimiento que se rearmaba en cada sesión. Usa un entorno aislado en el scratchpad: base SQLite del taller y central, taller `127.0.0.1` registrado, siembra por `tenants:artisan` (deuda #23) y `LARAVEL_STORAGE_PATH` propio, así que los archivos subidos y los logs no tocan `backend/storage`. La API se sirve con `serve --no-reload`, para que reciba las variables del proceso. Chrome headless por DevTools Protocol, sin dependencias, con un usuario por rol. Detecta páginas 403 y 404, respuestas de la API con status 400 o más, excepciones y errores de consola. `frontend/CLAUDE.md` pide una base MySQL temporal: la skill usa SQLite y avisa cuando el cambio depende del motor. Queda para decisión del usuario si se ajusta esa regla |
+| `cerrar-entrega` | Hace `git fetch` antes del diff, deduce la entrega de la rama y acepta los resultados de los tests como argumento. Define un formato breve para la fila local de **Última verificación** (el detalle va al historial) y termina proponiendo el mensaje de commit |
+| `.claude/settings.json` (nuevo) | Reglas `deny` para `migrate:fresh`, `migrate:refresh`, `migrate:reset`, `db:wipe`, `config:cache` y `npm install`, en Bash y PowerShell. Un hook `PreToolUse` (`.claude/hooks/proteger-main.mjs`) bloquea `git commit` y `git push` en `main`, y un push hacia `main` desde otra rama. Las reglas de `CLAUDE.md` pasan a ser obligatorias para Claude Code. Para el usuario no cambia nada |
+
 ---
 
 ## 3. Frontend

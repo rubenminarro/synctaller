@@ -10,7 +10,8 @@ un taller mecánico: una API Laravel (`backend/`) y una SPA React (`frontend/`),
 | `backend/` | API REST (PHP 8.3, Laravel 13, Sanctum, spatie/laravel-permission) | [`backend/CLAUDE.md`](backend/CLAUDE.md): convenciones, arquitectura, contrato y roles |
 | `frontend/` | SPA (React 19, TypeScript, Vite, Tabler) | [`frontend/CLAUDE.md`](frontend/CLAUDE.md): interfaz, integración con la API, permisos |
 | `docs/` | Documentación del producto | [`docs/README.md`](docs/README.md): dónde vive cada dato y qué actualizar |
-| `.claude/skills/` | Skills del proyecto: `retomar`, `validar-docs`, `cerrar-entrega` | — |
+| `.claude/skills/` | Skills del proyecto: `retomar`, `revisar-navegador`, `validar-docs`, `cerrar-entrega`, `registrar-ci` | Flujo de una entrega en "Metodología" |
+| `.claude/settings.json` | Reglas `deny` de los comandos prohibidos en "Entorno" y hook que bloquea commit y push en `main` (historial 2.99) | — |
 
 Las dos apps están desacopladas: cada una tiene sus dependencias, su lock y su `.env`. La raíz solo orquesta
 (`package.json`) y valida (`.github/workflows/ci.yml`).
@@ -70,6 +71,9 @@ Antes de implementar cualquier cambio:
 6. Verificar que no cambien contratos, permisos, `error_code` ni códigos HTTP existentes.
 7. Verificar en el navegador las pantallas tocadas, con un usuario de cada rol involucrado.
 8. Informar archivos modificados, comprobaciones ejecutadas y resultados. No declarar nada cerrado sin evidencia.
+
+Con las skills, una entrega sigue este flujo: implementar → tests puntuales → `/revisar-navegador` (paso 7) → `/validar-docs` →
+`/cerrar-entrega` → commit y PR → CI → merge del usuario → `/registrar-ci`.
 
 En fases nuevas: primero el diseño funcional y de datos, con las preguntas de negocio; después el código. Ninguna entrega
 empieza sin autorización del usuario.
