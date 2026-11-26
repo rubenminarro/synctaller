@@ -11,6 +11,7 @@ deciden antes de T6 (V9). Este documento reúne solo los requisitos ya identific
 | Zona horaria de MySQL fijada en `-03:00`, también al restaurar un respaldo | Handoff 2.79 |
 | `DB_DATABASE` vacío en producción, cuando exista la multitenancy | TD10 |
 | Base central creada y migrada (`DB_CENTRAL_DATABASE`, con `php artisan migrate --database=central --path=database/migrations/central`) antes de publicar el código | Historial 2.90 |
+| Orden de cada despliegue: migrar la central, después las bases de taller con `php artisan tenants:migrate` y recién entonces publicar el código. Las migraciones son compatibles hacia atrás (primero agregar, quitar en un despliegue posterior), porque los talleres siguen atendiendo mientras se migran | Especificación §3.8, historial 2.101 |
 | `max_connections` de MySQL con margen para la conexión persistente a la central: ocupa una conexión por proceso `php-cgi` | [Informe del spike](../spike-t0/informe.md), secciones 8 y 9 |
 | `.env` sin datos de un taller: serían el valor por defecto de todos | Revisión del spike, historial 2.80 |
 | `APP_DEBUG=false` y `MAIL_MAILER` real | Práctica de Laravel |
@@ -26,6 +27,7 @@ deciden antes de T6 (V9). Este documento reúne solo los requisitos ya identific
 | Situación | Qué hacer | Origen |
 |---|---|---|
 | Un taller no recibió hoy sus recordatorios | El scheduler los despacha en cuanto el taller está activo, sin mantenimiento y con su base disponible, después de su hora (`reminders_at`). Si sigue sin recibirlos, buscar en el log `La base del taller no responde.` o `No se pudieron despachar los recordatorios del taller.` con su `tenant_id`. Para forzarlos: `php artisan notifications:send-reminders --tenant={id}`, con `queue:work` corriendo. Correrlo de nuevo no repite avisos | Historial 2.97 |
+| `tenants:migrate` terminó con código 1 | Cada taller que falló quedó en mantenimiento (`503 TENANT_MAINTENANCE`); los demás se migraron. El error está en `tenant_migration_runs` de la central (la última fila del taller, `status = failed`) y en el log (`Falló la migración del taller.` con su `tenant_id`). Corregida la causa, `php artisan tenants:migrate --failed` repite solo esos talleres y les quita el mantenimiento. Si un taller figura "ya se está migrando en otra corrida", esperar a que termine (el lock vence en una hora si el proceso se cortó). Un mantenimiento puesto a mano no lo quita el comando | Historial 2.101 |
 | Un aviso a cliente lleva más de 6 horas `pending` | La base de su taller no respondió durante todo el plazo de reintentos y el job quedó en `failed_jobs` de la central. Con la base otra vez disponible: `php artisan queue:failed` para ubicarlo y `php artisan queue:retry {uuid}` (o `all`). Mientras siga `pending`, el taller no lo puede reenviar (`CLIENT_NOTIFICATION_PENDING`) | Historial 2.96 |
 
 ## Requisitos antes del primer taller comercial

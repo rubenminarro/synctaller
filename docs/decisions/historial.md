@@ -903,6 +903,37 @@ ninguna ruta, permiso, `error_code` ni código HTTP nuevo.
 | Alcance | Solo `DatabaseSeeder`. `db:seed --class=RolesAndPermissionsSeeder` (actualizar un equipo) sigue sin taller, como antes: no usa los discos. La skill `revisar-navegador` siembra ahora con `migrate --seed` |
 | Tests | `tests/Feature/Seeders/SeedingTenantTest` (5): sin taller activo siembra en el de la base y lo olvida después, lo encuentra con la ruta escrita de otra forma, lo olvida también si la siembra falla, sin taller para la base no siembra nada, y con taller activo siembra en ese y lo mantiene. Cada test se comprobó quitándole su protección |
 
+### 2.101 T5: plan en pasos y paso 1, `tenants:migrate` (2026-11-26)
+
+Diseño aprobado por el usuario el 2026-11-26, según §3.8 y §3.9 de la [especificación](../especificacion-aseguradoras.html)
+y la fila T5 de §9. Es el paso 6 del plan de 2.80. Regla vigente en [reglas de negocio](../reglas-de-negocio.md), 6.34.
+Agrega una migración central y no cambia el frontend. No agrega rutas, permisos, `error_code` ni códigos HTTP.
+
+**Plan de T5** (decisiones del usuario):
+
+| Paso | Contenido |
+|---|---|
+| 1 | `tenants:migrate` (esta sección) |
+| 2 | Quitar las tablas de cola y cache sin uso de las bases de taller (deuda #20), en un despliegue posterior al paso 1 (regla de §3.8: primero agregar, después quitar) |
+| 3 | Alta completa: `provisioning` → base → migraciones → roles → administrador inicial → `system_settings` → `active`. El administrador inicial se crea con nombre y email, y una contraseña aleatoria que se muestra una sola vez en la consola. No depende del correo |
+| 4 | Suspender, reactivar y dar de baja (`cancelled` → `404 TENANT_NOT_FOUND`, TD11), más la pantalla de taller suspendido del frontend (§7.3, P9) |
+| 5 | Restauración con un comando (cambio verificado de `tenants.database`) y fecha de baja guardada en la central. El backup (`mysqldump` y storage), el borrado de la base a los 5 años y la exportación asistida quedan como runbook, porque dependen del hosting (V9) |
+
+**Paso 1:**
+
+| Tema | Decisión |
+|---|---|
+| Alcance | Decisión del usuario: sin `--tenant`, migra los talleres `active` y `suspended`, con o sin mantenimiento. Un suspendido conserva el esquema al día para que funcione al reactivarlo y para la exportación asistida. Los estados de los pasos 3 y 4 (`provisioning` y `cancelled`) no se migran |
+| Bloqueo | Decisión del usuario: el taller se bloquea solo si la migración falla (§3.8). Mientras migra sigue atendiendo, porque las migraciones son compatibles hacia atrás: se migra y después se publica el código |
+| Mecanismo | `App\Console\Commands\MigrateTenants`. Por taller: toma un lock y activa el taller con `makeCurrent()`, sin `ensureReady()`, porque con el esquema viejo leer la configuración podría fallar. Después aplica las migraciones pendientes de `database/migrations` en la conexión `tenant` y olvida el taller |
+| `Migrator` y no `migrate` | El comando `migrate --force` crea la base si no existe (en SQLite el archivo y en MySQL un `CREATE DATABASE`). Un taller que apuntara a una base caída o mal escrita recibiría una vacía con todas las migraciones. El comando usa el `Migrator` y lee primero las migraciones ya aplicadas, lo que conecta con la base: una base que falta falla ahí y no se crea |
+| Lock | `tenants:migrate:{id}` en la cache de la central, por una hora. Se toma sin taller activo, porque con uno la clave llevaría su prefijo (`tenant:{id}:`) y otra corrida no la vería. El comando olvida el taller activo al empezar y después de cada taller, y al terminar deja el que estaba. Un taller con el lock tomado se informa como en curso, no se toca y el comando termina con código 1 |
+| Registro | Tabla central nueva `tenant_migration_runs` (migración `2026_11_26_000002`, modelo `TenantMigrationRun`, enum `TenantMigrationRunStatus`): una fila por taller y corrida con el estado (`running`, `succeeded`, `failed`), las migraciones aplicadas (también las que llegaron a aplicarse antes de una falla), el error, si la corrida puso el mantenimiento y las fechas. El detalle de la falla queda ahí y en el log (`Falló la migración del taller.`, con su `tenant_id`), nunca en una respuesta de la API |
+| Falla | El taller pasa a `maintenance = true` (`503 TENANT_MAINTENANCE`), los demás siguen y el comando termina con código 1 |
+| `--failed` | Repite los talleres cuya última corrida terminó `failed`. Una corrida que quedó `running` porque el proceso se cortó no cuenta: la corrida normal siguiente la cubre. Cuando una corrida sale bien después de una fallida que puso el mantenimiento, lo quita. Un mantenimiento puesto a mano (el taller ya lo tenía al fallar) no se quita nunca |
+| Tests | `tests/Feature/Tenancy/TenantMigrateCommandTest` (8), con bases SQLite vacías que el test crea y borra. Comprueba que migra activos y suspendidos y registra cada corrida, que el taller que falla queda en mantenimiento sin crear su base y los demás se migran, que una falla a mitad registra lo aplicado, que `--failed` repite solo los fallidos y les quita el mantenimiento, que no quita un mantenimiento manual, que el lock se respeta con un taller activo al empezar y después de migrar otro, que un id desconocido se informa y que se conserva el taller activo. Cada protección se comprobó quitándola: el mantenimiento al fallar, quitarlo solo si lo puso el comando, quitarlo al salir bien, el lock, olvidar el taller antes del lock y después de cada taller, el filtro de `--failed`, los suspendidos y el `migrate --force` sin la lectura previa. Una comprobación previa con `getPdo()` resultó redundante y se quitó |
+| MySQL | Migración central aplicada en `synctaller_central`. Con el taller #1, `tenants:migrate` responde "sin migraciones pendientes" (código 0), `--failed` "No hay talleres con la última corrida fallida." y `--tenant=99` código 1 |
+
 ---
 
 ## 3. Frontend
