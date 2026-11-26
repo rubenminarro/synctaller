@@ -2,16 +2,13 @@
 
 namespace Tests\Feature\Settings;
 
+use App\Jobs\SendClientNotification;
 use App\Mail\ClientNotificationMail;
 use App\Models\AuditLog;
 use App\Models\SystemSetting;
 use Illuminate\Console\Scheduling\Schedule;
-use Illuminate\Contracts\Queue\Job;
-use Illuminate\Queue\Events\JobProcessing;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\View;
-use Mockery;
 use Tests\Feature\Invoices\InvoiceTestCase;
 
 class WorkshopSettingsTest extends InvoiceTestCase
@@ -184,16 +181,15 @@ class WorkshopSettingsTest extends InvoiceTestCase
 
     public function test_a_queued_job_sees_the_current_settings_also_after_they_are_removed(): void
     {
+        // Cada job prepara su taller en su middleware (`PrepareTenant`, historial 2.96). Un aviso inexistente no envía nada.
         config(['mail.from.name' => 'Remitente del .env']);
-        $job = Mockery::mock(Job::class);
-        $job->shouldReceive('payload')->andReturn([]);
 
         SystemSetting::create(['key' => 'mail.from.name', 'value' => 'Taller Central']);
-        Event::dispatch(new JobProcessing('sync', $job));
+        SendClientNotification::dispatch(0);
         $this->assertSame('Taller Central', config('mail.from.name'));
 
         SystemSetting::where('key', 'mail.from.name')->first()->delete();
-        Event::dispatch(new JobProcessing('sync', $job));
+        SendClientNotification::dispatch(0);
         $this->assertSame('Remitente del .env', config('mail.from.name'));
     }
 

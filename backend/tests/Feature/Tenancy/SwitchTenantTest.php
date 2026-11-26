@@ -8,14 +8,15 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\Concerns\UsesTenantDatabases;
 use Tests\TestCase;
 
 /**
- * Tareas al activar un taller (T2, pasos 1 y 2; historial 2.90 y 2.93). Cada test falla si se quita la protección que
- * cubre: la tarea de base, la conexión por defecto, el prefijo con separador, la tarea de permisos o las colas por taller
- * apagadas.
+ * Tareas al activar un taller (T2, pasos 1 y 2, y T3, paso 4; historial 2.90, 2.93 y 2.96). Cada test falla si se quita
+ * la protección que cubre: la tarea de base, la conexión por defecto, el prefijo con separador, la tarea de permisos (la
+ * cache y la memoria) o que el job `sync` sea del taller del request.
  *
  * Estos tests cambian de taller, y cada cambio vuelve a conectar `tenant`. La transacción de RefreshDatabase y la cache
  * van entonces en la conexión fija `sqlite`, la misma base de los tests, que ningún cambio de taller toca.
@@ -128,27 +129,33 @@ class SwitchTenantTest extends TestCase
         $this->assertSame(['tenant:10:spatie.permission.cache', 'tenant:1:spatie.permission.cache'], $keys);
     }
 
-    public function test_a_job_dispatched_without_a_tenant_still_runs(): void
+    public function test_switching_tenants_drops_the_permissions_already_loaded(): void
     {
-        // Con las colas por taller encendidas, el paquete borraría este job por no traer un taller (hasta T3).
-        JobWithoutTenant::$handled = false;
+        // Un worker corre jobs de varios talleres en el mismo proceso (historial 2.96). `initializeCache()` no vacía la
+        // colección cargada: sin vaciarla, el taller B vería los permisos del A.
+        $registrar = app(PermissionRegistrar::class);
+        $tenantA = $this->tenant(1, $this->tenantDatabase('a'));
+        $tenantB = $this->tenant(10, $this->tenantDatabase('b'));
 
-        JobWithoutTenant::dispatch();
+        $tenantA->makeCurrent();
+        Permission::findOrCreate('solo-taller-a.view', 'api');
+        $this->assertTrue($registrar->getPermissions()->contains('name', 'solo-taller-a.view'));
 
-        $this->assertTrue(JobWithoutTenant::$handled);
+        $tenantB->makeCurrent();
+        $this->assertFalse($registrar->getPermissions()->contains('name', 'solo-taller-a.view'));
     }
 
     public function test_a_sync_job_runs_in_the_tenant_of_the_request_and_leaves_it_current(): void
     {
-        // Con los listeners de colas del paquete, el job olvidaba el taller y al terminar lo volvía a activar, lo que
-        // reconectaba `tenant`: el resto del request quedaba fuera de su conexión (historial 2.93).
+        // Antes de T3 el paquete olvidaba el taller para un job que no era del taller y al terminar lo volvía a activar,
+        // lo que reconectaba `tenant` (historial 2.93). Con todo job del taller (2.96), el del request ya es el activo.
         $tenant = Tenant::current();
         $connection = DB::connection();
 
-        JobWithoutTenant::dispatch();
+        SyncTenantJob::dispatch();
 
-        $this->assertSame($tenant->id, JobWithoutTenant::$tenantId);
-        $this->assertSame('tenant', JobWithoutTenant::$defaultConnection);
+        $this->assertSame($tenant->id, SyncTenantJob::$tenantId);
+        $this->assertSame('tenant', SyncTenantJob::$defaultConnection);
         $this->assertTrue(Tenant::current()->is($tenant));
         $this->assertSame($connection, DB::connection(), 'La conexión del request no se reconecta.');
     }
@@ -164,11 +171,9 @@ class SwitchTenantTest extends TestCase
     }
 }
 
-class JobWithoutTenant implements ShouldQueue
+class SyncTenantJob implements ShouldQueue
 {
     use Queueable;
-
-    public static bool $handled = false;
 
     public static ?int $tenantId = null;
 
@@ -176,7 +181,6 @@ class JobWithoutTenant implements ShouldQueue
 
     public function handle(): void
     {
-        self::$handled = true;
         self::$tenantId = Tenant::current()?->id;
         self::$defaultConnection = DB::getDefaultConnection();
     }

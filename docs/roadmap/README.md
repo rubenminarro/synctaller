@@ -7,6 +7,7 @@ original y no se renumeran. El detalle por módulo está en [`modules/README.md`
 
 | Fecha | Backend | Frontend | Notas |
 |---|---|---|---|
+| 2026-11-26 | Tests puntuales en verde (186, 1789 aserciones): `tests/Feature/Tenancy` (40; los 10 nuevos y el cambiado de `SwitchTenantTest`, comprobados contra su protección quitada) y las carpetas `Notifications`, `Settings`, `Http`, `Auth`, `Access`, `Seeders`, `Budgets` y `Receptions`; Pint sin pendientes | ESLint (sin cambios en el frontend) | T3, paso 4 (historial 2.96). Corrida local en la rama `feature/t3-paso4-colas`, sin la suite completa. Cola vieja de `synctaller` vaciada con el código de `main` (59 jobs, ninguno fallido) y migración central nueva aplicada en MySQL (`synctaller_central`). Probado con `php artisan serve`: `GET /api/branding` 200 en `127.0.0.1`, `404 TENANT_NOT_FOUND` en `localhost` y login inválido `401`; `queue:work` lee la cola de la central. Sin revisión en navegador: las pantallas no cambian |
 | 2026-11-26 | 528 tests en verde, 9085 aserciones (antes de T3); Pint sin pendientes | Sin corrida: el cambio no tocó el frontend (la CI lo omite por rutas) | T2, paso 3 y decisión sobre P9 (historial 2.94 y 2.95). Corrida de la CI sobre `main` (`87fea4e`), no local. T2 completo |
 | 2026-11-26 | Tests puntuales en verde: `tests/Feature/Tenancy` (30, 98 aserciones; los 5 nuevos de `TenantRuntimeTest` comprobados contra su protección quitada) y las carpetas `Settings`, `Notifications`, `Http`, `Auth`, `Access` y `Seeders` (84, 925 aserciones); Pint sin pendientes | Sin corrida: el cambio no tocó el frontend | T2, paso 3 (historial 2.95) y decisión sobre P9 (2.94). Corrida local en la rama `feature/t2-paso3-preparar-taller`, sin la suite completa; `Tenancy` y Pint se repitieron después del último cambio de código (un import sin uso y comentarios). Probado con `php artisan serve` sobre la base de desarrollo: `GET /api/branding` 200 en `127.0.0.1`, `404 TENANT_NOT_FOUND` en `localhost` y el login con credenciales inválidas `401`. Sin revisión en navegador: las pantallas no cambian |
 | 2026-11-25 | 523 tests en verde, 9070 aserciones (antes de T2, paso 3); Pint sin pendientes | Sin corrida: el cambio no tocó el frontend (la CI lo omite por rutas) | T2, paso 2 (historial 2.93). Corrida de la CI sobre `main` (`3932a32`), no local. Primera corrida completa con el taller de prueba |
@@ -33,7 +34,7 @@ Ninguna entrega empieza sin autorización del usuario. **El sistema no está lis
 
 | Orden | Tarea | Bloqueo |
 |---|---|---|
-| 1 | **T3:** colas, cache, permisos y scheduler por taller (pasos 4 y 5 de la revisión del spike) | Tras T2 (historial 2.95). Empieza con el diseño, según el plan de la sección 2.80 del [historial](../decisions/historial.md) |
+| 1 | **T3, paso 5:** el scheduler por taller (hora de cada taller y un job de recordatorios por taller, TD6) y el fallo cerrado de TD10 | Diseño aprobado el 2026-11-26 (historial 2.96). Tras el paso 4 en `main` y su corrida de la CI |
 | 2 | T4 y T5 | Según el plan de la sección 2.80. T5 incluye la suspensión y la baja decididas el 2026-11-26 (historial 2.94): bloqueo total, base conservada 5 años y exportación asistida a pedido |
 | 3 | Tarea P8 (fotos y firmas a privado) | Después de T4; requisito antes del primer taller comercial |
 
@@ -93,13 +94,13 @@ Frontend: FA0 a FA4, M10 y M12 completos ([detalle](../modules/aseguradoras.md))
 | T0: spike | COMPLETADO |
 | T1: configuración en la base | COMPLETADO |
 | T2: central e identificación | COMPLETADO: pasos 1 (central, paquete y modelo `Tenant`) y 2 (identificación por host) el 2026-11-25; paso 3 (preparar el taller, `TenantRuntime`) el 2026-11-26 |
-| T3: colas, cache, permisos y scheduler | PENDIENTE |
+| T3: colas, cache, permisos y scheduler | EN DESARROLLO: diseño aprobado el 2026-11-26; paso 4 (colas por taller, cola y cache en la central) el 2026-11-26 (2.96). Falta el paso 5 |
 | T4: storage | PENDIENTE |
 | Tarea P8: fotos y firmas a privado | PENDIENTE |
 | T5: ciclo de vida | PENDIENTE |
 | T6: migrar la instalación actual | PENDIENTE |
 
-Los pasos 0 a 7 de la revisión del spike son internos de T2, T3 y T5, no fases nuevas (historial 2.80). El paso 0 está hecho y se repitió con 4.2.3 el 2026-11-25; los pasos 1, 2 y 3 también (2.90, 2.93 y 2.95).
+Los pasos 0 a 7 de la revisión del spike son internos de T2, T3 y T5, no fases nuevas (historial 2.80). El paso 0 está hecho y se repitió con 4.2.3 el 2026-11-25; los pasos 1, 2, 3 y 4 también (2.90, 2.93, 2.95 y 2.96).
 
 ## Pendiente sin fase
 

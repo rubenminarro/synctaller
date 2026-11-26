@@ -30,6 +30,8 @@ use Throwable;
  */
 class ClientNotificationService
 {
+    public const SUSPENDED_TENANT_ERROR = 'Taller suspendido.';
+
     public function __construct(
         protected DocumentPdfService $documentPdfService
     ) {}
@@ -139,6 +141,24 @@ class ClientNotificationService
                 'error' => Str::limit($e->getMessage(), 500),
             ]);
         }
+    }
+
+    /**
+     * El aviso en cola de un taller suspendido no se envía (§3.5 de la especificación; historial 2.96): queda failed
+     * con el motivo, nunca pending, para que se pueda reenviar al reactivar el taller. No cuenta como intento.
+     */
+    public function failForSuspendedTenant(int $clientNotificationId): void
+    {
+        $notification = ClientNotification::find($clientNotificationId);
+
+        if ($notification === null || $notification->status !== ClientNotificationStatus::PENDING) {
+            return;
+        }
+
+        $notification->update([
+            'status' => ClientNotificationStatus::FAILED,
+            'error' => self::SUSPENDED_TENANT_ERROR,
+        ]);
     }
 
     /**

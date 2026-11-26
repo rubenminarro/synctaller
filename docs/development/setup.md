@@ -62,6 +62,11 @@ php artisan db:seed --class=RolesAndPermissionsSeeder   # si la entrega agregó 
 cd ../frontend && npm ci
 ```
 
+**Al pasar a T3, paso 4** (historial 2.96), una sola vez: la cola y la cache pasan de `synctaller` a la central. **Antes**
+del `git pull`, con el código anterior, vaciar la cola vieja (`php artisan queue:work --stop-when-empty`): el código
+nuevo ya no la lee, y el paquete borraría sus jobs porque no traen taller. Después, el `migrate --database=central` de
+arriba crea las tablas nuevas. El historial de `failed_jobs` queda en `synctaller`.
+
 | No usar | Motivo |
 |---|---|
 | `npm install` dentro de `frontend/` | Reescribe `package-lock.json` y separa los equipos: usar `npm ci` |
@@ -100,6 +105,6 @@ En desarrollo, `MAIL_MAILER=log` escribe los emails en `storage/logs/laravel.log
 |---|---|
 | `php artisan test` | Todos en verde |
 | `php artisan migrate:status` | Todas las migraciones en `Ran` |
-| `php artisan migrate:status --database=central --path=database/migrations/central` | La de `tenants` en `Ran` |
+| `php artisan migrate:status --database=central --path=database/migrations/central` | Las de `tenants` y de la cola y la cache en `Ran` |
 | `GET /api/branding` | 200 (`404 TENANT_NOT_FOUND` si falta registrar el taller del host) |
 | Login en el frontend | Entra con un usuario sembrado |

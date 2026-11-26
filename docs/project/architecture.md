@@ -53,10 +53,11 @@ Contado el 2026-11-01 en `main`.
 
 ## Arquitectura objetivo: SaaS
 
-**En construcción (T2).** Desde el paso 1 de T2 (historial 2.90) existen la base central con la tabla `tenants`, el
+**En construcción (T3).** Desde el paso 1 de T2 (historial 2.90) existen la base central con la tabla `tenants`, el
 paquete y las tareas que cambian de taller. Desde el paso 2 (2.93) cada request a `api/*` identifica su taller por el host
-(`IdentifyTenant`, reglas de negocio 6.34) y usa su base como conexión por defecto; la consola, el worker y el scheduler
-siguen con `DB_CONNECTION` hasta T3. El diseño aprobado es una base central con el
+(`IdentifyTenant`, reglas de negocio 6.34) y usa su base como conexión por defecto. Desde el paso 4 (T3, 2.96) la cola y
+la cache están en la central y cada job corre en el taller que lo despachó; el filtro de hora del scheduler sigue con
+`DB_CONNECTION` hasta el paso 5. El diseño aprobado es una base central con el
 registro de talleres, una base por taller y una única cola central, con la multitenencia aislada en infraestructura. Ver §3 de la
 [especificación](../especificacion-aseguradoras.html), la [evaluación del paquete](../spike-t0/informe.md) y las decisiones TD1–TD11
 en [`decisions/README.md`](../decisions/README.md).

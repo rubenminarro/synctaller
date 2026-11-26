@@ -361,6 +361,10 @@ Cada cambio de regla actualiza este documento en la misma rama.
     sin espacios, en mayúsculas y sin el dígito verificador (CI y RUC de la misma persona coinciden); sin documento del
     cliente, se avisa como siempre. El reenvío manual sigue permitido.
   * Un fallo de envío queda `failed` sin romper la operación que lo originó. No hay reintentos automáticos.
+  * El envío corre en el taller que registró el aviso (T3, historial 2.96). Si la base del taller no responde o está en
+    mantenimiento, el envío se reintenta solo, con espera, hasta 6 horas desde el registro; si vence, el aviso sigue
+    `pending` hasta que la plataforma lo reencola (`queue:retry`). Con el taller suspendido no se envía: queda `failed`
+    con el motivo `Taller suspendido.`, sin sumar intento, y se puede reenviar después de reactivar el taller.
   * Los avisos automáticos no se repiten gracias a `dedupe_key` (único).
 * **Reenvío** (`POST client-notifications/{id}/resend`): crea otro registro (`resent_from_id`, `created_by`) con el
   contenido actual del documento. Errores:
@@ -378,7 +382,8 @@ Cada cambio de regla actualiza este documento en la misma rama.
 
   El administrador no recibe avisos internos salvo que se agregue su rol a la configuración.
 * **Tarea diaria:** `notifications:send-reminders` (facturas, mantenimientos y cuentas por pagar) se puede correr más de
-  una vez por día sin repetir avisos.
+  una vez por día sin repetir avisos. Corre en cada taller activo y sin mantenimiento, o en los de `--tenant={id}`; un
+  taller que falla queda en el log y no frena a los demás (6.34).
 * **Permisos:** `client-notifications.index|show|resend`. La bandeja interna `me/notifications` (filtros `unread`,
   `type`; `meta.unread_count`), `PATCH me/notifications/{id}/read` y `POST me/notifications/read-all` no usan permisos;
   un aviso ajeno responde 404.
@@ -846,9 +851,10 @@ Entrega T1 de `docs/especificacion-aseguradoras.html` (decisiones del 2026-11-01
   demás sale del `.env` o del archivo de config, y un campo en `null` borra lo guardado y vuelve a ese valor.
 * **Cómo se aplica:** sobre `config()`, así que el código sigue leyendo `config()`. Lo aplica `TenantRuntime::ensureReady()`
   (preparar el taller, 6.34; desde T2, paso 3, historial 2.95) en cuatro caminos: al identificar el taller en cada request,
-  en `Queue::before` (un worker vive más que un cambio), en el filtro del scheduler y en el comando de recordatorios.
-  Cualquier proceso nuevo que lea estos datos fuera de esos caminos debe llamar a `ensureReady()`. Es un singleton:
-  recuerda el valor original de lo que reemplazó, también entre talleres.
+  en el middleware de cada job (`PrepareTenant`, desde T3, 2.96: un worker vive más que un cambio), en el filtro del
+  scheduler y en el comando de recordatorios, por cada taller. Cualquier proceso nuevo que lea estos datos fuera de esos
+  caminos debe llamar a `ensureReady()`. Es un singleton: recuerda el valor original de lo que reemplazó, también entre
+  talleres, y lo restaura al olvidar el taller (`RestoreWorkshopSettingsTask`, 2.96).
 * **Remitente:** `ClientNotificationMail` lo pone en su `Envelope`, porque el mailer guarda el global al crearse. Un
   mailable nuevo debe hacer lo mismo.
 * **API:** `GET|PATCH system-settings/workshop` con `system-settings.update` (solo administrador). `PATCH` parcial con al
@@ -902,9 +908,10 @@ historial 2.83 y 2.84; `InvoiceWithholdingService`). Migración `000072`.
 
 ## 6.34 Identificación del taller
 
-Entrega T2, pasos 2 y 3, de `docs/especificacion-aseguradoras.html` (§3.2 y §3.3; historial 2.80, 2.93 y 2.95; middleware
-`IdentifyTenant` y `TenantRuntime`).
-Sin migración: usa la tabla `tenants` de la base central (paso 1, 2.90).
+Entregas T2, pasos 2 y 3, y T3, paso 4, de `docs/especificacion-aseguradoras.html` (§3.2, §3.3 y §3.5; historial 2.80,
+2.93, 2.95 y 2.96; middleware `IdentifyTenant`, `TenantRuntime` y el middleware de jobs `PrepareTenant`).
+Usa la tabla `tenants` de la base central (paso 1, 2.90); la cola y la cache, también en la central, se crean con la
+migración central `2026_11_26_000001` (2.96).
 
 * **Por el host:** todo request a `api/*`, también `POST /login` y `GET /branding`, busca su taller en `tenants.domain` con
   el host del request (en minúsculas y sin puerto) antes de autenticar. No hay cabecera `X-Tenant` (TD8). Quedan fuera
@@ -926,7 +933,13 @@ Sin migración: usa la tabla `tenants` de la base central (paso 1, 2.90).
 * **Con el taller activo**, la conexión por defecto es la del taller (`tenant`): modelos, reglas `exists`/`unique` y SQL
   crudo ven solo sus datos. Un token de otro taller no existe en este (401 `UNAUTHENTICATED`) y un id de otro taller
   responde 404.
-* **Fuera de HTTP** todavía no hay taller: la consola, el worker y el scheduler usan `DB_CONNECTION` hasta T3, y los jobs
-  corren donde se procesan (un job `sync`, en el taller del request).
+* **Jobs** (desde T3, paso 4; historial 2.96): todo job es del taller. Lleva el id del taller activo al despacharlo y el
+  worker lo activa antes de correrlo; despacharlo sin taller activo falla en ese momento. La cola, sus fallidos y la cache
+  están en la base central, para todos los talleres. Antes de `handle`, el middleware `PrepareTenant`:
+  * taller en mantenimiento, o base que no responde o configuración ilegible → libera el job con espera (30 s, 2, 5 y
+    15 min) durante 6 horas desde el despacho; después queda en `failed_jobs` de la central;
+  * taller suspendido → descarta el job (un aviso queda `failed` con el motivo, 6.17).
+* **Consola y scheduler:** `notifications:send-reminders` activa y prepara cada taller (6.17). El filtro de hora del
+  scheduler todavía corre sin taller, sobre `DB_CONNECTION`, hasta T3, paso 5.
 * **Registro:** `php artisan tenants:register {name} {domain} {database}` crea la fila del taller (activo, sin
   mantenimiento). El dominio es solo el host; dominio y base son únicos. No crea ni migra la base: eso es el alta de T5.

@@ -37,7 +37,8 @@ return [
 
         'database' => [
             'driver' => 'database',
-            'connection' => env('DB_QUEUE_CONNECTION'),
+            // Una sola cola para todos los talleres, en la base central (§3.1; historial 2.96). El taller viaja en el payload.
+            'connection' => 'central',
             'table' => env('DB_QUEUE_TABLE', 'jobs'),
             'queue' => env('DB_QUEUE', 'default'),
             'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 90),
@@ -102,8 +103,9 @@ return [
     |
     */
 
+    // En la central, como la cola (historial 2.96).
     'batching' => [
-        'database' => env('DB_CONNECTION', 'sqlite'),
+        'database' => 'central',
         'table' => 'job_batches',
     ],
 
@@ -122,7 +124,8 @@ return [
 
     'failed' => [
         'driver' => env('QUEUE_FAILED_DRIVER', 'database-uuids'),
-        'database' => env('DB_CONNECTION', 'sqlite'),
+        // En la central, como la cola (historial 2.96).
+        'database' => 'central',
         'table' => 'failed_jobs',
     ],
 

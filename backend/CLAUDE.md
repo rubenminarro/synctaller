@@ -93,9 +93,10 @@ Si una regla contradice al código, **el código manda**: registrar la discrepan
   * Un estado nuevo en un enum necesita su escenario y su verificación en `DatabaseSeederTest`.
   * Los usuarios nuevos usan `TEST_PASSWORD`; el administrador principal, `ADMIN_PASSWORD`.
   * No envían emails reales: `NotificationSeeder` usa el mailer `array`.
-* Notificaciones: los emails salen por cola (`QUEUE_CONNECTION=database`) y los recordatorios por el scheduler; sin
-  `php artisan queue:work` y `php artisan schedule:run` (cada minuto) los avisos quedan `pending` o no se generan.
-  En los tests la cola es `sync` y el mail `array` (`Mail::fake()` para verificar envíos).
+* Notificaciones: los emails salen por cola (`QUEUE_CONNECTION=database`, en la base central desde T3, paso 4) y los
+  recordatorios por el scheduler; sin `php artisan queue:work` y `php artisan schedule:run` (cada minuto) los avisos
+  quedan `pending` o no se generan. En los tests la cola es `sync` y el mail `array` (`Mail::fake()` para verificar
+  envíos); para probar el worker, la cola `database` de la central y `queue:work --once` (`TenantQueueTest`).
 
 ---
 
@@ -116,7 +117,8 @@ Controller (HasMiddleware) → Form Request → Service → Model/Eloquent → A
 | `app/Enums` | Estados y tipos |
 | `app/Exceptions` | `AppException` y una subclase por módulo |
 | `app/Support/Decimal.php` | Redondeo BCMath |
-| `app/Multitenancy/Tasks` | Tareas propias al activar un taller (línea T, historial 2.90 y 2.93). La config está en `config/multitenancy.php` y la base central, en `database/migrations/central`. El taller se identifica por el host en `IdentifyTenant` (reglas 6.34) y se prepara (su base y su configuración) con `TenantRuntime::ensureReady()` (`app/Multitenancy`) (2.95); se registra con `tenants:register` |
+| `app/Multitenancy/Tasks` | Tareas propias al activar un taller (línea T, historial 2.90, 2.93 y 2.96). La config está en `config/multitenancy.php` y la base central (talleres, cola y cache), en `database/migrations/central`. El taller se identifica por el host en `IdentifyTenant` (reglas 6.34) y se prepara (su base y su configuración) con `TenantRuntime::ensureReady()` (`app/Multitenancy`) (2.95); se registra con `tenants:register` |
+| `app/Multitenancy/Jobs` | Todo job es del taller (2.96): un job nuevo usa el trait `RunsInTenant` (middleware `PrepareTenant`, `retryUntil` de 6 horas, `maxExceptions = 1`) y, si deja registro en el taller al descartarse por suspensión, `DiscardsForSuspendedTenant`. Despacharlo sin taller activo lanza una excepción (`RequireTenantForQueuedJobs`) |
 | `app/Traits/ApiResponse.php` | `successResponse` / `errorResponse` |
 | `app/Traits/FileResponse.php` | Descarga de archivos generados (PDF, CSV) y de documentos subidos (`storedFileResponse`: adjunto y `nosniff`) |
 | `app/Traits/Auditable.php` | Registro automático de cambios en `audit_logs` |

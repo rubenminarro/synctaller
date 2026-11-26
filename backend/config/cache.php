@@ -41,9 +41,11 @@ return [
 
         'database' => [
             'driver' => 'database',
-            'connection' => env('DB_CACHE_CONNECTION'),
+            // En la central, para todos los talleres: cada uno escribe con su prefijo (`tenant:{id}:`, §3.6) y la
+            // infraestructura (reinicio de workers, excepciones de jobs, mutex del scheduler), sin prefijo (historial 2.96).
+            'connection' => 'central',
             'table' => env('DB_CACHE_TABLE', 'cache'),
-            'lock_connection' => env('DB_CACHE_LOCK_CONNECTION'),
+            'lock_connection' => 'central',
             'lock_table' => env('DB_CACHE_LOCK_TABLE'),
         ],
 

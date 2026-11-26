@@ -17,6 +17,13 @@ deciden antes de T6 (V9). Este documento reúne solo los requisitos ya identific
 | Remitente autorizado en el servidor de correo | Handoff 2.78 |
 | `INSURER_DEDUCTIBLE_NET_MODE` encendido (por defecto desde V16) salvo decisión contraria | `reglas-de-negocio.md` 6.31 |
 | Sin `config:cache` en desarrollo | `backend/CLAUDE.md` |
+| Antes de publicar T3, paso 4: vaciar la cola vieja con el código anterior (`queue:work --stop-when-empty`) y migrar la central, que suma la cola y la cache. Un job viejo, sin taller, el paquete lo borraría | Historial 2.96 |
+
+## Runbook (procedimientos operativos)
+
+| Situación | Qué hacer | Origen |
+|---|---|---|
+| Un aviso a cliente lleva más de 6 horas `pending` | La base de su taller no respondió durante todo el plazo de reintentos y el job quedó en `failed_jobs` de la central. Con la base otra vez disponible: `php artisan queue:failed` para ubicarlo y `php artisan queue:retry {uuid}` (o `all`). Mientras siga `pending`, el taller no lo puede reenviar (`CLIENT_NOTIFICATION_PENDING`) | Historial 2.96 |
 
 ## Requisitos antes del primer taller comercial
 

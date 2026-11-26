@@ -39,6 +39,19 @@ class WorkshopSettingService
     }
 
     /**
+     * Vuelve al .env todo lo que reemplazó `apply()`. Sin consultar la base: corre al olvidar el taller
+     * (`RestoreWorkshopSettingsTask`, historial 2.96).
+     */
+    public function restore(): void
+    {
+        foreach ($this->originals as $key => $value) {
+            config()->set($key, $value);
+        }
+
+        $this->originals = [];
+    }
+
+    /**
      * Valores vigentes, por campo.
      *
      * @return array<string, mixed>

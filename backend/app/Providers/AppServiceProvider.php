@@ -11,7 +11,7 @@ use App\Models\WorkOrder;
 use App\Models\WorkOrderAllocation;
 use App\Models\WorkOrderItem;
 use App\Models\WorkOrderPart;
-use App\Multitenancy\TenantRuntime;
+use App\Multitenancy\RequireTenantForQueuedJobs;
 use App\Services\WorkshopSettingService;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Gate;
@@ -49,8 +49,9 @@ class AppServiceProvider extends ServiceProvider
             'vehicle_maintenance' => VehicleMaintenance::class,
         ]);
 
-        // Un worker vive más que un cambio de configuración: se vuelve a preparar antes de cada job. En T3, ya con su taller.
-        Queue::before(fn () => $this->app->make(TenantRuntime::class)->ensureReady());
+        // Todo job es del taller: no se despacha sin uno activo (historial 2.96). Cada job prepara su taller en su
+        // middleware (`PrepareTenant`), donde puede liberarse si la base no responde: en `Queue::before` no podía.
+        Queue::createPayloadUsing(new RequireTenantForQueuedJobs);
 
         // Bypass implícito para el rol 'administrador'
         Gate::before(function ($user, $ability) {

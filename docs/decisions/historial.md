@@ -811,6 +811,30 @@ Tercer y último paso de T2 según el plan de la sección 2.80. Reglas vigentes 
 | Entre talleres | `WorkshopSettingService` sigue siendo un singleton: los valores originales que recuerda son los del `.env`, así que valen para cualquier taller y un valor guardado en uno no llega a otro que no lo tiene |
 | Tests | `tests/Feature/Tenancy` pasa de 25 a 30 (`TenantRuntimeTest`); cada uno se comprobó contra su protección quitada |
 
+### 2.96 T3, paso 4: colas por taller (2026-11-26)
+
+Primer paso de T3 según el plan de la sección 2.80 (pasos 4 y 5 de la revisión del spike). Diseño aprobado por el usuario
+el 2026-11-26, en dos entregas: este paso (la infraestructura en la central y los jobs con su taller) y el paso 5 (el
+scheduler por taller y el fallo cerrado de TD10). Reglas vigentes en [reglas de negocio](../reglas-de-negocio.md), 6.17,
+6.32 y 6.34. La API no cambia: ninguna ruta, permiso, `error_code` ni código HTTP nuevo.
+
+| Tema | Decisión |
+|---|---|
+| Hallazgo: la cola en la base del taller | La cola, la cache, `failed_jobs` y `job_batches` no nombraban conexión: en HTTP iban a la conexión por defecto, `tenant`, y el worker leía `DB_CONNECTION`. Con un solo taller son la misma base; con dos, los avisos del segundo no se enviarían nunca. §3.1 ya las ubicaba en la central |
+| Infraestructura en la central | Migración nueva en `database/migrations/central` con `jobs`, `job_batches`, `failed_jobs`, `cache` y `cache_locks`, y las cinco conexiones fijadas en `central` (`config/queue.php` y `config/cache.php`), sin variable de entorno. Las tablas iguales de las bases de taller no se borran (§3.8: primero se agrega, después se quita): quedan sin uso hasta `tenants:migrate` (T5), deuda técnica #20 |
+| Jobs con su taller | Vuelve la acción de colas del paquete (se borra `DeferQueueTenancyAction`) y `queues_are_tenant_aware_by_default = true`: todo job lleva el id del taller activo al despacharlo (en el Context de Laravel) y el worker lo activa antes de correrlo |
+| Despacho sin taller | `RequireTenantForQueuedJobs` (`Queue::createPayloadUsing`): despachar un job del taller sin taller activo lanza una excepción en ese momento. Sin esto, el paquete lo borraría al procesarlo sin dejarlo en `failed_jobs` (hallazgo de 2.80). Un job que implementa `NotTenantAware` se despacha igual |
+| Middleware del job | `PrepareTenant` reemplaza a `Queue::before`, que corría en `JobProcessing` y no podía liberar el job: con el taller en mantenimiento, o si `ensureReady()` falla, libera el job con espera (30 s, 2, 5 y 15 min, §3.11). Liberarlo no cuenta como excepción |
+| Taller suspendido | Decisión del usuario: se descarta ya en T3, como dice §3.5, y no en T5. El middleware borra el job; si es un aviso (`DiscardsForSuspendedTenant`), antes lo deja `failed` con el motivo `Taller suspendido.`, sin sumar intento, y se puede reenviar después de reactivar el taller. Si el taller además está en mantenimiento, primero espera |
+| `SendClientNotification` | Trait `RunsInTenant`: el middleware, `retryUntil` de 6 horas desde el despacho (TD7) y `maxExceptions = 1` en vez de `$tries = 1`. Una excepción dentro de `handle` sigue sin reintentarse, porque podría duplicar el email |
+| Vence `retryUntil` con la base caída | Decisión del usuario: se acepta. El job queda en `failed_jobs` de la central y el aviso, `pending` en el taller (no se puede escribir en una base caída): no se puede reenviar (`CLIENT_NOTIFICATION_PENDING`) hasta que la plataforma corra `queue:retry`. Va en el runbook ([despliegue](../development/deployment.md)); la regla de reenvío no cambia |
+| Permisos en memoria | Hallazgo: `initializeCache()` de Spatie no vacía los permisos ya cargados. En un worker, el taller B usaba la colección del A. `SwitchTenantPermissionsCacheTask` llama también a `clearPermissionsCollection()`, que no consulta la base ni la cache |
+| Configuración al olvidar el taller | Hallazgo: `WorkshopSettingService` no la restauraba, y un worker se quedaba con el remitente y los datos de empresa del último taller. Tarea nueva `RestoreWorkshopSettingsTask` (`restore()`, sin consultas) |
+| Comando de recordatorios | Ajuste de alcance necesario: con el despacho sin taller rechazado, el comando dejaría de funcionar en la consola hasta el paso 5. Se adelanta del paso 5: `notifications:send-reminders` recorre los talleres activos y sin mantenimiento (o los de `--tenant`), activa y prepara cada uno, y un taller que falla queda en el log y no frena a los demás (código 1). Al terminar deja el taller que estaba activo. El filtro de hora del scheduler sigue sin taller hasta el paso 5 |
+| Paquete | Decisión del usuario: sigue 4.2.3. La 4.3.1 (2026-11-04) solo evita deserializar jobs para decidir si son del taller. La 4.3.2 (2026-11-26) mantiene el prefijo de cache en los stores ya resueltos (como el `RateLimiter`), que nuestra tarea de prefijo tampoco actualiza: se revisa desde el 2026-12-10, antes del límite de intentos del login (2.80) |
+| Desarrollo | Antes de usar esta versión: vaciar la cola vieja de `synctaller` con el código anterior y migrar la central. El historial de `failed_jobs` queda en `synctaller` ([setup](../development/setup.md)) |
+| Tests | `tests/Feature/Tenancy` pasa de 30 a 40: `TenantQueueTest` (7, con la cola `database` de la central y un worker en el mismo proceso), `ReminderCommandTest` (3) y uno nuevo en `SwitchTenantTest` (los permisos en memoria, en lugar del job sin taller, que ya no aplica). Cada uno se comprobó contra su protección quitada. Los tests que simulaban `Queue::before` con un `JobProcessing` falso pasan por el middleware real |
+
 ---
 
 ## 3. Frontend
