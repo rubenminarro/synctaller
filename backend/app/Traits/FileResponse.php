@@ -35,4 +35,20 @@ trait FileResponse
             'X-Content-Type-Options' => 'nosniff',
         ]);
     }
+
+    /**
+     * Imagen privada que la pantalla muestra (firma de entrega, P8, historial 2.106): en línea, sin que el navegador
+     * adivine el tipo y sin guardarla en caches intermedias ni en la del navegador.
+     *
+     * @param  array{content: string, mime: string}  $file
+     */
+    protected function privateImageResponse(array $file): Response
+    {
+        return response($file['content'], 200, [
+            'Content-Type' => $file['mime'],
+            'Content-Disposition' => 'inline',
+            'X-Content-Type-Options' => 'nosniff',
+            'Cache-Control' => 'private, no-store',
+        ]);
+    }
 }

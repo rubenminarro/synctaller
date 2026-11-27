@@ -284,6 +284,10 @@ Cada cambio de regla actualiza este documento en la misma rama.
 * Una entrega vigente por recepción (`DELIVERY_ALREADY_REGISTERED`, 409). Ninguna OT abierta, al menos una completada,
   cada completada con factura emitida y, si es al contado, sin saldo.
 * Km final ≥ km de la recepción; conformidad obligatoria; firma opcional (imagen). Comprobante `ENT-000001`.
+* **Firma privada** (P8, historial 2.106): se guarda en el disco `tenant_private`, sin URL pública. La sirve
+  `GET vehicle-deliveries/{delivery}/signature` (permiso `vehicle-deliveries.show`), en línea y sin cache, y cada vista queda
+  en la auditoría (`downloaded`). `signature_url` trae la URL de esa ruta (exige el token) o `null`. Sin firma o sin
+  archivo: `DELIVERY_SIGNATURE_NOT_FOUND` (404). El PDF de entrega la incluye sin registrar una vista.
 * La recepción pasa a `delivered`; `vehicles.mileage` solo avanza; la OT sigue `completed`. Anular con motivo devuelve
   la recepción a su estado anterior; si eso la reabre y el vehículo ya tiene otra recepción abierta, se rechaza
   (`DELIVERY_VEHICLE_HAS_OPEN_RECEPTION`, 409).

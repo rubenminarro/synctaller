@@ -1023,6 +1023,36 @@ Con este paso, T5 queda completo.
 | Tests | `tests/Feature/Tenancy/RestoreTenantCommandTest` (14), con copias de una base de taller migrada que el test borra. Cada protección se comprobó quitándola: el RUC, la confirmación, la migración, el administrador, la cache de permisos, el lock, la misma base, la central y la conexión por defecto, la base de otro taller, la base vacía, el estado, la base borrada y el taller activo releído al terminar. La relectura con la fila bloqueada no tiene test: no se puede intercalar otro cambio dentro de un comando de consola |
 | MySQL | Migración central aplicada en `synctaller_central`. Con un taller temporal (`tenants:create`, `synctaller_prueba_restore`): `mysqldump` importado en `synctaller_prueba_restore_r` sin el registro de la `000074`; rechazos de la misma base, `synctaller`, `synctaller_central`, una base que no existe y un nombre con comilla invertida (código 1); la restauración aplicó la `000074` y cambió el puntero (código 0), y con `php artisan serve`, `GET /api/branding` por el host del taller respondió 200. La fila y las dos bases se borraron al terminar |
 
+### 2.106 Tarea P8: fotos y firmas a privado, diseño y paso 1 (firma) (2026-11-26)
+
+Diseño aprobado por el usuario el 2026-11-26. Resuelve la deuda #15 según P8 (§3.7 de la
+[especificación](../especificacion-aseguradoras.html)): después de T4, primero la firma y después las fotos. Hasta
+ahora, la firma de entrega, las fotos de recepción y las de diagnóstico se guardaban en el disco `public`, con URL
+permanente y sin permiso ni auditoría. Regla vigente en [reglas de negocio](../reglas-de-negocio.md), 6.12.
+
+**Diseño (los tres pasos):**
+
+| Tema | Decisión |
+|---|---|
+| Disco | Firma, fotos de recepción y fotos de diagnóstico pasan a `tenant_private` (T4, 2.98) con las mismas rutas relativas (`deliveries/…`, `receptions/…`, `diagnostic-items/{id}/…`). Sin migración de base: `path` y `signature_path` no cambian. En `public` queda solo el branding |
+| Rutas | Una ruta de la API por tipo: `GET vehicle-deliveries/{delivery}/signature` (paso 1), `GET receptions/{reception}/photos/{photo}/file` y `GET diagnostic-items/{item}/photos/{photo}/file` (paso 2). Responden la imagen en línea, con `nosniff` y `Cache-Control: private, no-store`. Sin archivo, `404` con un `error_code` propio |
+| Permisos | Decisión del usuario: se reusan los de la pantalla (`vehicle-deliveries.show`, `receptions-photos.index`, `diagnostic-item-photos.index`). La matriz de roles no cambia |
+| Auditoría | Decisión del usuario: solo la firma. Cada vista registra `downloaded` sobre la entrega (`vehicle_delivery`). Las fotos no, porque cada miniatura de una galería dejaría un registro. El PDF de entrega (que lleva la firma) tampoco: sigue como estaba |
+| Contrato | Decisión del usuario: `signature_url` y `url` conservan el nombre, pero traen la URL absoluta de la ruta de la API (con el host del taller), que exige el token: ya no sirve para un `<img src>` directo. El `path` interno que exponía `DiagnosticItemPhotoResource` se quita (paso 2) |
+| Frontend | La imagen se baja con el cliente de la API (con el token) y se muestra como URL `blob:`: `getBlob` (`services/api.ts`), `usePrivateImage` (`lib/`) y `PrivateImage` (`components/ui/`). La consulta no se repite al volver a la pantalla (`staleTime: Infinity`, cada vista de la firma se audita) y `queryClient` libera la URL `blob:` cuando la caché descarta la consulta, también al cerrar sesión. Así no hace falta `setState` en un efecto |
+| Existentes | Decisión del usuario: un comando idempotente (`tenants:privatize-files --tenant=`) mueve los archivos de `public` a `tenant_private` y saltea los que ya están (paso 3). Lo usará T6. En desarrollo no hay archivos que mover (2.98) |
+| Pasos | 1: firma (disco, ruta, auditoría, PDF, `signature_url` y pantalla de entrega). 2: fotos (controladores, recursos, borrado en cascada del diagnóstico, seeder y `PhotoGallery`). 3: el comando. Cada paso en su rama, con backend y frontend juntos |
+| Fuera de alcance | Borrar una foto sigue eliminando el archivo (en los siniestros la baja es lógica). No cambian roles ni reglas de edición |
+
+**Paso 1 (firma):**
+
+| Tema | Decisión |
+|---|---|
+| Backend | `VehicleDeliveryService::SIGNATURE_DISK` (`tenant_private`) para guardar, borrar si el alta falla y leer en el PDF (`DocumentPdfService`). `VehicleDeliveryService::signature()` audita y devuelve el contenido; sin firma o sin archivo, `404 DELIVERY_SIGNATURE_NOT_FOUND` (`VehicleDeliveryException`). `FileResponse::privateImageResponse()` arma la respuesta en línea. `VehicleDelivery::signatureUrl()` devuelve `route('vehicle-deliveries.signature')` |
+| Frontend | `DeliveryDetailPage` muestra la firma con `PrivateImage` ("Cargando imagen…" mientras baja y "No se pudo cargar la imagen." si falla) |
+| Tests | `VehicleDeliveryTest` (3 nuevos y uno ajustado): la firma queda solo en el disco privado, la sirve la ruta con sus headers y deja un registro con el usuario (el PDF no), el mecánico recibe `403` y sin sesión `401`, y sin firma o sin archivo `404` sin registro. `DocumentPdfTest` simula el disco privado. Cada protección se comprobó quitándola: el permiso, el disco, la auditoría y `no-store`. Frontend: `PrivateImage.test.tsx` (4): baja con el cliente de la API, no repite la descarga al volver a montar, libera la URL al vaciar la caché y avisa del error sin reintentar |
+| Revisión | En el navegador, en el entorno aislado (SQLite), con una firma de prueba en la entrega `ENT-000001`: administrador, recepcionista y cajero la ven; una entrega sin firma muestra "No se cargó la firma."; el mecánico recibe la pantalla 403. Por curl: `signature_url` apunta a la API, la ruta responde `image/png` en línea con `nosniff` y `no-store`, y sin token `401`. La auditoría quedó con un `downloaded` por vista y usuario. El entorno no aísla el storage de la API (deuda #25): con autorización del usuario, la firma se copió a `backend/storage` durante la revisión y se borró al terminar |
+
 ---
 
 ## 3. Frontend

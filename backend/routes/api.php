@@ -267,6 +267,8 @@ Route::middleware('auth:sanctum')->scopeBindings()->group(function () {
 
     Route::get('vehicle-deliveries/{delivery}/pdf', [VehicleDeliveryController::class, 'pdf'])->name('vehicle-deliveries.pdf');
 
+    Route::get('vehicle-deliveries/{delivery}/signature', [VehicleDeliveryController::class, 'signature'])->name('vehicle-deliveries.signature');
+
     Route::post('vehicle-deliveries/{delivery}/cancel', [VehicleDeliveryController::class, 'cancel'])->name('vehicle-deliveries.cancel');
 
     Route::get('vehicles/{vehicle}/history', [VehicleHistoryController::class, 'show'])->name('vehicles.history.show');

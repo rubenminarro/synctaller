@@ -48,7 +48,7 @@ la pantalla del módulo y que su suite pasa, no cada flujo.
 | **Aseguradoras y siniestros** | M1–M12, P10 | **EN DESARROLLO** | 6.22–6.31, 6.33 | [Aseguradoras](aseguradoras.md) |
 | **Infraestructura SaaS** | T0–T6 | **EN DESARROLLO** | Especificación §3 | [Infraestructura SaaS](infraestructura-saas.md) |
 | Notificaciones por WhatsApp | Sin fase | PENDIENTE | — | [Postventa y reportes](postventa-y-reportes.md) |
-| Fotos y firmas privadas | Tarea P8 | PENDIENTE | Deuda #15 | [Infraestructura SaaS](infraestructura-saas.md) |
+| Fotos y firmas privadas | Tarea P8 | EN DESARROLLO | 6.12, deuda #15 | [Infraestructura SaaS](infraestructura-saas.md) |
 
 ## Fuera de alcance por decisión
 

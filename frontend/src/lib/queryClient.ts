@@ -45,3 +45,14 @@ export const queryClient = new QueryClient({
     },
   }),
 })
+
+/** Prefijo de las consultas de imágenes privadas (`usePrivateImage`): su dato es una URL `blob:`. */
+export const PRIVATE_IMAGE_KEY = 'private-image'
+
+// La URL `blob:` retiene la imagen en memoria hasta liberarla: se libera cuando la caché descarta la consulta (al dejar
+// de usarse, pasado el `gcTime`, o al cerrar sesión con `queryClient.clear()`).
+queryClient.getQueryCache().subscribe((event) => {
+  if (event.type !== 'removed' || event.query.queryKey[0] !== PRIVATE_IMAGE_KEY) return
+  const url = event.query.state.data
+  if (typeof url === 'string') URL.revokeObjectURL(url)
+})

@@ -179,6 +179,15 @@ export async function downloadFile(url: string, fallbackName: string, params?: L
   setTimeout(() => URL.revokeObjectURL(href), 1000)
 }
 
+/**
+ * Archivo privado como `Blob`, con el token (P8): un `<img src>` no envía el header `Authorization`. `url` es la que
+ * manda la API (absoluta) o una ruta relativa a la base.
+ */
+export async function getBlob(url: string): Promise<Blob> {
+  const { data } = await api.get<Blob>(url, { responseType: 'blob' })
+  return data
+}
+
 function fileNameFrom(response: AxiosResponse): string | null {
   const header = response.headers['content-disposition']
   if (typeof header !== 'string') return null

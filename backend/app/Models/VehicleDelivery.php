@@ -8,7 +8,6 @@ use App\Exceptions\VehicleDeliveryException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * Entrega del vehículo al cliente. Es un comprobante: no se edita ni se
@@ -84,9 +83,13 @@ class VehicleDelivery extends Model
         return $query->where('status', VehicleDeliveryStatus::DELIVERED);
     }
 
+    /**
+     * Ruta de la API que sirve la firma con el token (P8, historial 2.106): el archivo está en el disco privado y no
+     * tiene URL pública.
+     */
     public function signatureUrl(): ?string
     {
-        return $this->signature_path ? Storage::disk('public')->url($this->signature_path) : null;
+        return $this->signature_path ? route('vehicle-deliveries.signature', $this) : null;
     }
 
     public function reception(): BelongsTo

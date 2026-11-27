@@ -218,16 +218,18 @@ class DocumentPdfService
     }
 
     /**
-     * Firma como data URI: dompdf no lee del disco público por URL.
+     * Firma como data URI: está en el disco privado (P8, historial 2.106) y dompdf no la lee por URL.
      */
     private function signature(?string $path): ?string
     {
-        if ($path === null || ! Storage::disk('public')->exists($path)) {
+        $disk = Storage::disk(VehicleDeliveryService::SIGNATURE_DISK);
+
+        if ($path === null || ! $disk->exists($path)) {
             return null;
         }
 
-        $mime = Storage::disk('public')->mimeType($path) ?: 'image/png';
+        $mime = $disk->mimeType($path) ?: 'image/png';
 
-        return "data:{$mime};base64,".base64_encode(Storage::disk('public')->get($path));
+        return "data:{$mime};base64,".base64_encode($disk->get($path));
     }
 }

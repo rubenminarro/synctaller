@@ -14,6 +14,7 @@ use App\Services\DocumentPdfService;
 use App\Services\VehicleDeliveryService;
 use App\Traits\ApiResponse;
 use App\Traits\FileResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
@@ -29,7 +30,7 @@ class VehicleDeliveryController extends Controller implements HasMiddleware
     {
         return [
             new Middleware('permission:vehicle-deliveries.index', only: ['index']),
-            new Middleware('permission:vehicle-deliveries.show', only: ['show', 'pdf']),
+            new Middleware('permission:vehicle-deliveries.show', only: ['show', 'pdf', 'signature']),
             new Middleware('permission:vehicle-deliveries.store', only: ['store']),
             new Middleware('permission:vehicle-deliveries.cancel', only: ['cancel']),
         ];
@@ -85,6 +86,11 @@ class VehicleDeliveryController extends Controller implements HasMiddleware
     public function pdf(VehicleDelivery $delivery, DocumentPdfService $documentPdfService)
     {
         return $this->fileResponse($documentPdfService->delivery($delivery), 'application/pdf');
+    }
+
+    public function signature(Request $request, VehicleDelivery $delivery)
+    {
+        return $this->privateImageResponse($this->deliveryService->signature($delivery, $request->user()));
     }
 
     public function store(StoreVehicleDeliveryRequest $request, Reception $reception)

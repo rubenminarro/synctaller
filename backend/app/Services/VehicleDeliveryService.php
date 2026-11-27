@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\AuditEvent;
 use App\Enums\InvoiceCondition;
 use App\Enums\InvoiceStatus;
 use App\Enums\ReceptionStatus;
@@ -25,6 +26,11 @@ use Illuminate\Support\Facades\Storage;
  */
 class VehicleDeliveryService
 {
+    /**
+     * La firma es privada (P8, historial 2.106): sin URL pública, se sirve solo por la API y cada vista queda auditada.
+     */
+    public const SIGNATURE_DISK = 'tenant_private';
+
     private const OPEN_WORK_ORDER_STATUSES = [
         WorkOrderStatus::PENDING,
         WorkOrderStatus::IN_PROGRESS,
@@ -34,7 +40,8 @@ class VehicleDeliveryService
     public function __construct(
         protected ClaimStatusService $claimStatusService,
         protected OwnerShareService $ownerShare,
-        protected AllocationBillingService $allocationBilling
+        protected AllocationBillingService $allocationBilling,
+        protected AuditLogger $auditLogger
     ) {}
 
     public function deliver(Reception $reception, array $data, ?UploadedFile $signature, User $user): VehicleDelivery
@@ -77,7 +84,7 @@ class VehicleDeliveryService
                 $sequence = (int) VehicleDelivery::lockForUpdate()->max('delivery_sequence') + 1;
 
                 if ($signature) {
-                    $storedPath = $signature->store('deliveries', 'public');
+                    $storedPath = $signature->store('deliveries', self::SIGNATURE_DISK);
                 }
 
                 $delivery = VehicleDelivery::create([
@@ -113,11 +120,39 @@ class VehicleDeliveryService
             });
         } catch (\Throwable $e) {
             if ($storedPath) {
-                Storage::disk('public')->delete($storedPath);
+                Storage::disk(self::SIGNATURE_DISK)->delete($storedPath);
             }
 
             throw $e;
         }
+    }
+
+    /**
+     * Contenido de la firma para mostrarla. Deja el registro `downloaded` en la auditoría (P8, historial 2.106).
+     *
+     * @return array{content: string, mime: string}
+     */
+    public function signature(VehicleDelivery $delivery, User $user): array
+    {
+        $disk = Storage::disk(self::SIGNATURE_DISK);
+
+        if ($delivery->signature_path === null || ! $disk->exists($delivery->signature_path)) {
+            throw new VehicleDeliveryException(
+                'La entrega no tiene una firma disponible.',
+                404,
+                'DELIVERY_SIGNATURE_NOT_FOUND'
+            );
+        }
+
+        $this->auditLogger->record(AuditEvent::DOWNLOADED, $delivery, null, [
+            'file' => 'signature',
+            'delivery_number' => $delivery->delivery_number,
+        ], $user);
+
+        return [
+            'content' => $disk->get($delivery->signature_path),
+            'mime' => $disk->mimeType($delivery->signature_path) ?: 'application/octet-stream',
+        ];
     }
 
     /**
