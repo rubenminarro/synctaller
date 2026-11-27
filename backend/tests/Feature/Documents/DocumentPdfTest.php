@@ -21,6 +21,7 @@ class DocumentPdfTest extends InvoiceTestCase
 
         Mail::fake();
         Storage::fake('public');
+        Storage::fake('tenant_private');
 
         config(['company.legal_name' => 'Taller Ejemplo S.A.', 'company.tax_id' => '80000001-1']);
     }

@@ -7,6 +7,7 @@ original y no se renumeran. El detalle por módulo está en [`modules/README.md`
 
 | Fecha | Backend | Frontend | Notas |
 |---|---|---|---|
+| 2026-11-26 | Tests puntuales en verde (24, 611 aserciones): `tests/Feature/Deliveries` (con 3 nuevos en `VehicleDeliveryTest`, cada protección comprobada quitándola) y `tests/Feature/Documents`; `tests/Feature/Access` (19); Pint sin pendientes | Vitest (`src/components/ui/PrivateImage.test.tsx`, 4 nuevos), ESLint y build | Tarea P8, paso 1 (historial 2.106). Corrida local en la rama `feature/p8-paso1-firma`, sin la suite completa. Revisión en navegador con administrador, recepcionista, cajero y mecánico (403), en el entorno aislado (SQLite) |
 | 2026-11-26 | 607 tests en verde, 9573 aserciones (antes de la tarea P8); Pint sin pendientes | Sin corrida: el cambio no tocó el frontend (la CI lo omite por rutas) | T5, paso 5 (historial 2.105). Corrida de la CI sobre `main` (`4543403`), no local. T5 completo |
 | 2026-11-26 | Tests puntuales en verde: `tests/Feature/Tenancy` (104, 571 aserciones, con `RestoreTenantCommandTest`, 14 nuevos, cada protección comprobada quitándola); Pint sin pendientes | ESLint (sin cambios en el frontend) | T5, paso 5 (historial 2.105). Corrida local en la rama `feature/t5-paso5-restauracion`, sin la suite completa. Migración central `000005` aplicada en MySQL (`synctaller_central`); restauración probada con un taller temporal y un `mysqldump` importado en otra base (rechazos con código 1, restauración con la `000074` pendiente con código 0, `GET /api/branding` 200 por su host), ya borrados. Sin revisión en navegador: las pantallas no cambian |
 | 2026-11-26 | 593 tests en verde, 9499 aserciones (antes de T5, paso 5); Pint sin pendientes | Vitest en verde (57), ESLint y build | T5, paso 4 (historial 2.104). Corrida de la CI sobre `main` (`f7025fb`), no local |
@@ -51,7 +52,7 @@ Ninguna entrega empieza sin autorización del usuario. **El sistema no está lis
 
 | Orden | Tarea | Bloqueo |
 |---|---|---|
-| 1 | Tarea P8 (fotos y firmas a privado) | Sin bloqueo: T4 está en `main`. Usa el disco `tenant_private`; requisito antes del primer taller comercial |
+| 1 | Tarea P8 (fotos y firmas a privado) | En curso (2.106): paso 1 (firma) hecho; siguen el paso 2 (fotos) y el 3 (comando para los archivos existentes). Requisito antes del primer taller comercial |
 | 2 | T6 (migrar la instalación actual) | Bloqueada: requiere P8 y decidir el hosting (V9) |
 
 Las entregas de las respuestas de la contadora (sección 2.83 del historial) quedaron completas el 2026-11-25 con V16 y el
@@ -112,7 +113,7 @@ Frontend: FA0 a FA4, M10 y M12 completos ([detalle](../modules/aseguradoras.md))
 | T2: central e identificación | COMPLETADO: pasos 1 (central, paquete y modelo `Tenant`) y 2 (identificación por host) el 2026-11-25; paso 3 (preparar el taller, `TenantRuntime`) el 2026-11-26 |
 | T3: colas, cache, permisos y scheduler | COMPLETADO: diseño aprobado el 2026-11-26; paso 4 (colas por taller, cola y cache en la central) el 2026-11-26 (2.96); paso 5 (scheduler por taller y fallo cerrado) el 2026-11-26 (2.97) |
 | T4: storage | COMPLETADO el 2026-11-26 (2.98): diseño e implementación |
-| Tarea P8: fotos y firmas a privado | PENDIENTE |
+| Tarea P8: fotos y firmas a privado | EN DESARROLLO: diseño en 3 pasos aprobado el 2026-11-26 (2.106); paso 1 (firma privada) el 2026-11-26 |
 | T5: ciclo de vida | COMPLETADO: plan en 5 pasos aprobado el 2026-11-26 (2.101); paso 1 (`tenants:migrate`) el 2026-11-26, en `main` con la CI en verde; paso 2 (sin tablas de cola y cache en las bases de taller, deuda #20) el 2026-11-26 (2.102), en `main` con la CI en verde; paso 3 (alta completa, `tenants:create` y `tenants:discard`) el 2026-11-26 (2.103), en `main` con la CI en verde; paso 4 (suspensión, reactivación y baja, con la pantalla del frontend) el 2026-11-26 (2.104), en `main` con la CI en verde; paso 5 (restauración y runbooks) el 2026-11-26 (2.105), en `main` con la CI en verde |
 | T6: migrar la instalación actual | PENDIENTE |
 

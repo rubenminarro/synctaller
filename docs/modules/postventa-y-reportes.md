@@ -9,10 +9,10 @@
 |---|---|
 | Objetivo | Registrar la entrega con conformidad |
 | Implementado | Comprobante, kilometraje, firma, anulación, controles de factura y deducible |
-| Pendiente | Firma en almacenamiento privado (tarea P8) |
+| Pendiente | — (la firma es privada desde P8, paso 1; historial 2.106) |
 | Reglas | `reglas-de-negocio.md` 6.12 y 6.29 |
 | Depende de | OT, facturación, pagos, siniestros |
-| Tests | `VehicleDelivery` 10 |
+| Tests | `VehicleDelivery` 13 |
 
 ## Historial del vehículo (FASE 18)
 

@@ -5,6 +5,7 @@ import { IconArrowLeft, IconBan } from '@tabler/icons-react'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { DownloadButton } from '@/components/ui/DownloadButton'
 import { PageBody, PageHeader } from '@/components/ui/Page'
+import { PrivateImage } from '@/components/ui/PrivateImage'
 import { ErrorState, LoadingState } from '@/components/ui/States'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { useAuth } from '@/features/auth/useAuth'
@@ -145,7 +146,7 @@ function DeliveryDetail({ delivery }: { delivery: Delivery }) {
               </div>
               <div className="card-body">
                 {delivery.signature_url ? (
-                  <img src={delivery.signature_url} alt={`Firma de ${delivery.received_by.name}`} className="img-fluid border rounded" />
+                  <PrivateImage url={delivery.signature_url} alt={`Firma de ${delivery.received_by.name}`} className="img-fluid border rounded" />
                 ) : (
                   <span className="text-secondary">No se cargó la firma.</span>
                 )}

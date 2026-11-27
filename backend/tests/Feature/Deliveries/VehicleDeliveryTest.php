@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Deliveries;
 
+use App\Models\AuditLog;
 use App\Models\Budget;
 use App\Models\Reception;
 use App\Models\Vehicle;
@@ -17,6 +18,7 @@ class VehicleDeliveryTest extends InvoiceTestCase
         parent::setUp();
 
         Storage::fake('public');
+        Storage::fake('tenant_private');
 
         $this->actingAsAdmin();
         $this->createStamp()->assertCreated();
@@ -86,8 +88,8 @@ class VehicleDeliveryTest extends InvoiceTestCase
             ->assertJsonPath('data.vehicle.mileage', 46000)
             ->json('data');
 
-        $this->assertNotNull($delivery['signature_url']);
-        Storage::disk('public')->assertExists(VehicleDelivery::findOrFail($delivery['id'])->signature_path);
+        $this->assertSame(route('vehicle-deliveries.signature', $delivery['id']), $delivery['signature_url']);
+        Storage::disk('tenant_private')->assertExists(VehicleDelivery::findOrFail($delivery['id'])->signature_path);
 
         $this->getJson("/api/vehicle-deliveries/{$delivery['id']}")->assertOk()->assertJsonPath('data.client.id', $reception->client_id);
         $this->getJson("/api/vehicle-deliveries?reception_id={$receptionId}")
@@ -99,6 +101,76 @@ class VehicleDeliveryTest extends InvoiceTestCase
         $this->deliver($receptionId)
             ->assertStatus(409)
             ->assertJsonPath('error_code', 'DELIVERY_ALREADY_REGISTERED');
+    }
+
+    public function test_signature_is_private_and_served_by_the_api_with_audit(): void
+    {
+        ['reception_id' => $receptionId] = $this->invoicedReception();
+        $file = UploadedFile::fake()->image('firma.png', 200, 80);
+
+        $delivery = $this->deliver($receptionId, ['signature' => $file])->assertCreated()->json('data');
+        $path = VehicleDelivery::findOrFail($delivery['id'])->signature_path;
+
+        // Sin copia en el disco público ni URL pública (P8).
+        $this->assertSame([], Storage::disk('public')->allFiles());
+        $this->assertStringNotContainsString('/storage/', $delivery['signature_url']);
+
+        $user = $this->actingAsRole('recepcionista');
+
+        $response = $this->get("/api/vehicle-deliveries/{$delivery['id']}/signature")->assertOk();
+        $this->assertSame(Storage::disk('tenant_private')->get($path), $response->getContent());
+        $this->assertSame('image/png', $response->headers->get('Content-Type'));
+        $this->assertSame('inline', $response->headers->get('Content-Disposition'));
+        $this->assertSame('nosniff', $response->headers->get('X-Content-Type-Options'));
+        $this->assertStringContainsString('no-store', $response->headers->get('Cache-Control'));
+
+        $log = AuditLog::where('event', 'downloaded')->sole();
+        $this->assertSame('vehicle_delivery', $log->auditable_type);
+        $this->assertSame($delivery['id'], $log->auditable_id);
+        $this->assertSame($user->id, $log->user_id);
+        $this->assertSame(['file' => 'signature', 'delivery_number' => 'ENT-000001'], $log->new_values);
+
+        // El PDF lleva la firma sin dejar registro de vista.
+        $this->get("/api/vehicle-deliveries/{$delivery['id']}/pdf")->assertOk();
+        $this->assertSame(1, AuditLog::where('event', 'downloaded')->count());
+    }
+
+    public function test_signature_requires_the_delivery_show_permission(): void
+    {
+        ['reception_id' => $receptionId] = $this->invoicedReception();
+        $delivery = $this->deliver($receptionId, ['signature' => UploadedFile::fake()->image('firma.png')])->assertCreated()->json('data');
+
+        $this->actingAsMechanic();
+        $this->getJson("/api/vehicle-deliveries/{$delivery['id']}/signature")
+            ->assertForbidden()
+            ->assertJsonPath('error_code', 'FORBIDDEN');
+
+        $this->app['auth']->forgetGuards();
+        $this->withHeader('Authorization', '')->getJson("/api/vehicle-deliveries/{$delivery['id']}/signature")
+            ->assertUnauthorized();
+
+        $this->assertSame(0, AuditLog::where('event', 'downloaded')->count());
+    }
+
+    public function test_signature_not_found_without_signature_or_file(): void
+    {
+        ['reception_id' => $receptionId] = $this->invoicedReception();
+        $withoutSignature = $this->deliver($receptionId)->assertCreated()->json('data');
+
+        $this->assertNull($withoutSignature['signature_url']);
+        $this->getJson("/api/vehicle-deliveries/{$withoutSignature['id']}/signature")
+            ->assertNotFound()
+            ->assertJsonPath('error_code', 'DELIVERY_SIGNATURE_NOT_FOUND');
+
+        ['reception_id' => $otherReceptionId] = $this->invoicedReception();
+        $delivery = $this->deliver($otherReceptionId, ['signature' => UploadedFile::fake()->image('firma.png')])->assertCreated()->json('data');
+        Storage::disk('tenant_private')->delete(VehicleDelivery::findOrFail($delivery['id'])->signature_path);
+
+        $this->getJson("/api/vehicle-deliveries/{$delivery['id']}/signature")
+            ->assertNotFound()
+            ->assertJsonPath('error_code', 'DELIVERY_SIGNATURE_NOT_FOUND');
+
+        $this->assertSame(0, AuditLog::where('event', 'downloaded')->count());
     }
 
     public function test_cash_invoice_must_be_fully_paid(): void
