@@ -42,8 +42,8 @@ su carpeta.
 
 ## Cobertura por carpeta
 
-Contado el 2026-11-26: 608 tests (sin el `ExampleTest` de la plantilla, que se quitó al crear el monorepo). Las cifras
-son métodos de test: PHPUnit informa 610 corridas, porque un test con data provider corre una vez por caso
+Contado el 2026-11-26: 611 tests (sin el `ExampleTest` de la plantilla, que se quitó al crear el monorepo). Las cifras
+son métodos de test: PHPUnit informa 613 corridas, porque un test con data provider corre una vez por caso
 (`TenantStorageTest`, desde T4). La relación con cada módulo está en [`modules/README.md`](../modules/README.md).
 
 | Carpeta | Tests | Carpeta | Tests |
@@ -55,14 +55,14 @@ son métodos de test: PHPUnit informa 610 corridas, porque un test con data prov
 | `Claims` | 54 | `Payments` | 11 |
 | `Clients` | 16 | `Preferences` | 7 |
 | `Deliveries` | 13 | `Purchases` | 16 |
-| `Documents` | 11 | `Receptions` | 39 |
+| `Documents` | 11 | `Receptions` | 43 |
 | `Http` | 6 | `Reports` | 11 |
 | `Insurers` | 7 | `Roles` | 2 |
 | `Inventory` | 25 | `Seeders` | 6 |
 | `Invoices` | 27 | `Services` | 23 |
 | `Settings` | 32 | `Vehicles` | 6 |
 | `WorkOrderParts` | 33 | `WorkOrders` | 19 |
-| `Tenancy` | 102 | `Unit` | 1 |
+| `Tenancy` | 101 | `Unit` | 1 |
 
 ## Criterios para tests nuevos
 

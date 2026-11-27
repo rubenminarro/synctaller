@@ -4,7 +4,6 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 
 class ReceptionPhotoResource extends JsonResource
 {
@@ -15,7 +14,7 @@ class ReceptionPhotoResource extends JsonResource
             'reception_id' => $this->reception_id,
             'original_name' => $this->original_name,
             'description' => $this->description,
-            'url' => $this->path ? Storage::disk('public')->url($this->path) : null,
+            'url' => $this->fileUrl(),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

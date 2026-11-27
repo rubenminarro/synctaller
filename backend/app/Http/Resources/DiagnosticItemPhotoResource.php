@@ -4,7 +4,6 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 
 class DiagnosticItemPhotoResource extends JsonResource
 {
@@ -13,8 +12,7 @@ class DiagnosticItemPhotoResource extends JsonResource
         return [
             'id' => $this->id,
             'diagnostic_item_id' => $this->diagnostic_item_id,
-            'path' => $this->path,
-            'url' => Storage::disk('public')->url($this->path),
+            'url' => $this->fileUrl(),
             'original_name' => $this->original_name,
             'description' => $this->description,
             'created_at' => $this->created_at,

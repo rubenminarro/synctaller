@@ -11,6 +11,7 @@ use App\Models\Diagnostic;
 use App\Models\DiagnosticItem;
 use App\Services\DiagnosticItemTemplateService;
 use App\Services\DiagnosticService;
+use App\Services\PhotoFileService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -167,8 +168,8 @@ class DiagnosticItemController extends Controller implements HasMiddleware
 
         foreach ($diagnosticItem->photos as $photo) {
 
-            if ($photo->path && Storage::disk('public')->exists($photo->path)) {
-                Storage::disk('public')->delete($photo->path);
+            if ($photo->path && Storage::disk(PhotoFileService::DISK)->exists($photo->path)) {
+                Storage::disk(PhotoFileService::DISK)->delete($photo->path);
             }
 
             $photo->delete();

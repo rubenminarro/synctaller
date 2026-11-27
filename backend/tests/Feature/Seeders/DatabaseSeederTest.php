@@ -134,6 +134,10 @@ class DatabaseSeederTest extends TestCase
         $this->assertSame(['cash', 'credit'], $byAllocation->map(fn (Invoice $invoice) => $invoice->condition->value)->sort()->values()->all());
         $this->assertSame(['paid', 'partial'], $byAllocation->map(fn (Invoice $invoice) => $invoice->paymentStatus()->value)->sort()->values()->all());
         DB::table('claim_documents')->pluck('path')->each(fn (string $path) => Storage::disk('tenant_private')->assertExists($path));
+        // Fotos de diagnóstico en el disco privado (P8, historial 2.106).
+        $this->assertGreaterThan(0, DB::table('diagnostic_item_photos')->count());
+        DB::table('diagnostic_item_photos')->pluck('path')->each(fn (string $path) => Storage::disk('tenant_private')->assertExists($path));
+        $this->assertSame([], Storage::disk('public')->allFiles('diagnostic-items'));
         $this->assertTrue((bool) Vehicle::where('chassis', VehiclesSeeder::WITHOUT_PLATE_CHASSIS)->value('no_plate'));
         $this->assertGreaterThanOrEqual(30, Client::count());
         $this->assertGreaterThanOrEqual(45, Vehicle::count());

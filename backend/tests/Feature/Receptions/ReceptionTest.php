@@ -3,6 +3,7 @@
 namespace Tests\Feature\Receptions;
 
 use App\Enums\ReceptionStatus;
+use App\Models\AuditLog;
 use App\Models\Reception;
 use App\Models\ReceptionCheckList;
 use App\Models\ReceptionPhoto;
@@ -246,6 +247,7 @@ class ReceptionTest extends ReceptionTestCase
     public function test_reception_photos(): void
     {
         Storage::fake('public');
+        Storage::fake('tenant_private');
 
         $reception = $this->createReception();
         $url = "/api/receptions/{$reception['id']}/photos";
@@ -262,7 +264,8 @@ class ReceptionTest extends ReceptionTestCase
             ->json('data.0');
 
         $path = ReceptionPhoto::findOrFail($photo['id'])->path;
-        Storage::disk('public')->assertExists($path);
+        Storage::disk('tenant_private')->assertExists($path);
+        $this->assertSame([], Storage::disk('public')->allFiles());
 
         $this->getJson($url)->assertOk()->assertJsonCount(1, 'data');
 
@@ -275,7 +278,63 @@ class ReceptionTest extends ReceptionTestCase
         $this->deleteJson("/api/receptions/{$other['id']}/photos/{$photo['id']}")->assertNotFound();
 
         $this->deleteJson("{$url}/{$photo['id']}")->assertOk();
-        Storage::disk('public')->assertMissing($path);
+        Storage::disk('tenant_private')->assertMissing($path);
+    }
+
+    public function test_reception_photo_is_private_and_served_by_the_api(): void
+    {
+        Storage::fake('public');
+        Storage::fake('tenant_private');
+
+        $reception = $this->createReception();
+        $file = UploadedFile::fake()->image('frente.png', 120, 90);
+        $photo = $this->postJson("/api/receptions/{$reception['id']}/photos", ['photos' => [['file' => $file]]])
+            ->assertCreated()
+            ->json('data.0');
+        $path = ReceptionPhoto::findOrFail($photo['id'])->path;
+
+        // La URL es la de la API, no la del disco público (P8).
+        $fileUrl = "/api/receptions/{$reception['id']}/photos/{$photo['id']}/file";
+        $this->assertStringEndsWith($fileUrl, $photo['url']);
+        $this->assertStringNotContainsString('/storage/', $photo['url']);
+        $this->assertSame($photo['url'], $this->getJson("/api/receptions/{$reception['id']}/photos")->json('data.0.url'));
+
+        $this->actingAsRole('recepcionista');
+        $response = $this->get($fileUrl)->assertOk();
+        $this->assertSame(Storage::disk('tenant_private')->get($path), $response->getContent());
+        $this->assertSame('image/png', $response->headers->get('Content-Type'));
+        $this->assertSame('inline', $response->headers->get('Content-Disposition'));
+        $this->assertSame('nosniff', $response->headers->get('X-Content-Type-Options'));
+        $this->assertStringContainsString('no-store', $response->headers->get('Cache-Control'));
+
+        // Las vistas de fotos no se auditan.
+        $this->assertSame(0, AuditLog::where('event', 'downloaded')->count());
+
+        // Foto de otra recepción en la URL.
+        $other = $this->createReception(['vehicle_id' => $this->makeVehicle($this->client, 'QAR777')->id]);
+        $this->getJson("/api/receptions/{$other['id']}/photos/{$photo['id']}/file")->assertNotFound();
+
+        // Sin el permiso de la pantalla, 403; sin sesión, 401.
+        $this->actingAsRole('cajero');
+        $this->getJson($fileUrl)->assertForbidden()->assertJsonPath('error_code', 'FORBIDDEN');
+
+        $this->app['auth']->forgetGuards();
+        $this->withHeader('Authorization', '')->getJson($fileUrl)->assertUnauthorized();
+    }
+
+    public function test_reception_photo_file_not_found(): void
+    {
+        Storage::fake('tenant_private');
+
+        $reception = $this->createReception();
+        $photo = $this->postJson("/api/receptions/{$reception['id']}/photos", ['photos' => [['file' => UploadedFile::fake()->image('frente.jpg')]]])
+            ->assertCreated()
+            ->json('data.0');
+        Storage::disk('tenant_private')->delete(ReceptionPhoto::findOrFail($photo['id'])->path);
+
+        $this->getJson("/api/receptions/{$reception['id']}/photos/{$photo['id']}/file")
+            ->assertNotFound()
+            ->assertJsonPath('error_code', 'RECEPTION_PHOTO_FILE_NOT_FOUND');
     }
 
     public function test_mechanic_permissions_on_receptions(): void

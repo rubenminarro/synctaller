@@ -122,11 +122,15 @@ Route::middleware('auth:sanctum')->scopeBindings()->group(function () {
 
     Route::apiResource('receptions.photos', ReceptionPhotoController::class)->except(['show']);
 
+    Route::get('receptions/{reception}/photos/{photo}/file', [ReceptionPhotoController::class, 'file'])->name('receptions.photos.file');
+
     Route::apiResource('diagnostics', DiagnosticController::class);
 
     Route::apiResource('diagnostic-items', DiagnosticItemController::class);
 
     Route::apiResource('diagnostic-items.photos', DiagnosticItemPhotoController::class)->except(['show']);
+
+    Route::get('diagnostic-items/{diagnostic_item}/photos/{photo}/file', [DiagnosticItemPhotoController::class, 'file'])->name('diagnostic-items.photos.file');
 
     Route::apiResource('diagnostic-item-templates', DiagnosticItemTemplateController::class)->except(['update']);
 

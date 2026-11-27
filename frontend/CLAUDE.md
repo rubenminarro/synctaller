@@ -125,9 +125,10 @@ Base: `/api`. Todas las respuestas son JSON (el backend fuerza `Accept: applicat
   `vehicle-deliveries/{id}/pdf` y los reportes con `?format=csv|pdf` responden el archivo
   (`Content-Disposition: attachment`, expuesto por CORS). Usar `downloadFile` de `src/services/api.ts`: pide un blob,
   toma el nombre del header y, si falla, lee el `error_code` del JSON que viene dentro del blob.
-* **Imágenes privadas** (P8, historial 2.106): `signature_url` de la entrega es una ruta de la API que exige el token, así
-  que un `<img src>` directo no funciona. Mostrarlas con `PrivateImage` (`src/components/ui`), que las baja con `getBlob`
-  y las muestra como URL `blob:` (`usePrivateImage`, liberada por `queryClient` al descartar la consulta).
+* **Imágenes privadas** (P8, historial 2.106): `signature_url` de la entrega y `url` de las fotos de recepción y de
+  diagnóstico son rutas de la API que exigen el token, así que un `<img src>` directo no funciona. Mostrarlas con
+  `PrivateImage` (`src/components/ui`) o, en una galería, con `PhotoGallery`: las bajan con `getBlob` y las muestran como
+  URL `blob:` (`usePrivateImage`, liberada por `queryClient` al descartar la consulta).
 
 ### Autenticación
 

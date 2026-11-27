@@ -71,7 +71,10 @@ Cada cambio de regla actualiza este documento en la misma rama.
 * Recepción cerrada (`delivered|cancelled`): no admite diagnósticos, presupuestos ni OT nuevos, y nada de lo existente
   se modifica: datos y fotos de la recepción, diagnósticos (con sus ítems y fotos) ni presupuestos (salvo cancelarlos):
   `RECEPTION_CLOSED` (`ReceptionStatusService::ensureEditable()`; decisión del 2026-10-22).
-* Fotos en el disco `public` (`receptions/`), con scoped binding a la recepción.
+* **Fotos privadas** (P8, paso 2, historial 2.106): en el disco `tenant_private` (`receptions/`), sin URL pública, con
+  scoped binding a la recepción. Las sirve `GET receptions/{reception}/photos/{photo}/file` (permiso
+  `receptions-photos.index`), en línea y sin cache; las vistas no se auditan. `url` trae la URL de esa ruta (exige el
+  token). Sin archivo: `RECEPTION_PHOTO_FILE_NOT_FOUND` (404).
 * `approved_by` se eliminó (D3, 2026-10-30): nunca se asignaba; el detalle ya no la trae ni la búsqueda la usa.
 * Contrato: fechas `Y-m-d` y `mileage` entero (sin formatear); el detalle trae `check_list` (`id`, `status`) para
   `reception-check-lists/{id}`, y el vehículo con `chassis`, `brand`, `model` y `color` (`value`/`label`).
@@ -81,7 +84,9 @@ Cada cambio de regla actualiza este documento en la misma rama.
 
 * `mechanic_id` referencia `mechanics` (no `users`). Nace `pending`.
 * Ítems con `severity` y `status` por enum; fotos en `diagnostic-items/{id}`; eliminar el ítem elimina sus fotos.
-* Fotos de diagnóstico con permisos `diagnostic-item-photos.*`.
+* Fotos de diagnóstico con permisos `diagnostic-item-photos.*`, privadas como las de recepción (P8, paso 2, historial
+  2.106): disco `tenant_private`, `GET diagnostic-items/{item}/photos/{photo}/file` (permiso `diagnostic-item-photos.index`)
+  y `url` con esa ruta; el recurso ya no expone `path`. Sin archivo: `DIAGNOSTIC_ITEM_PHOTO_FILE_NOT_FOUND` (404).
 * Editar vacía `mechanic_id`, `customer_complaint`, `diagnosis` y `recommendation` con `null`. `priority` (diagnóstico)
   y `severity`/`status` (ítem) son opcionales pero no vacíos (columnas `NOT NULL` con default): `null` → 422.
 * Diagnóstico `completed|cancelled`: no se agregan, editan ni eliminan ítems ni fotos (`DIAGNOSTIC_NOT_EDITABLE`); el

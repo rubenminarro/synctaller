@@ -48,7 +48,7 @@ la pantalla del módulo y que su suite pasa, no cada flujo.
 | **Aseguradoras y siniestros** | M1–M12, P10 | **EN DESARROLLO** | 6.22–6.31, 6.33 | [Aseguradoras](aseguradoras.md) |
 | **Infraestructura SaaS** | T0–T6 | **EN DESARROLLO** | Especificación §3 | [Infraestructura SaaS](infraestructura-saas.md) |
 | Notificaciones por WhatsApp | Sin fase | PENDIENTE | — | [Postventa y reportes](postventa-y-reportes.md) |
-| Fotos y firmas privadas | Tarea P8 | EN DESARROLLO | 6.12, deuda #15 | [Infraestructura SaaS](infraestructura-saas.md) |
+| Fotos y firmas privadas | Tarea P8 | EN DESARROLLO | 6.2, 6.3, 6.12, deuda #15 | [Infraestructura SaaS](infraestructura-saas.md) |
 
 ## Fuera de alcance por decisión
 
@@ -66,5 +66,5 @@ Lo que no se pudo comprobar en esta auditoría.
 | Instalación desde cero | Esta auditoría no repitió el procedimiento en un equipo limpio |
 | `composer setup` | No se ejecutó |
 | Modalidad neta del deducible con el interruptor encendido | Probada en tests y en una base temporal, nunca en producción |
-| Cada flujo del frontend | Solo hay 51 tests del frontend. Las revisiones en navegador cubrieron partes |
+| Cada flujo del frontend | Los tests de Vitest cubren componentes y servicios puntuales, no flujos completos. Las revisiones en navegador cubrieron partes |
 | Reinicio completo de MySQL con conexión persistente | Solo se probó cortar la conexión |

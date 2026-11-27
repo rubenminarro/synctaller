@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\DiagnosticException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateDiagnosticItemPhotoRequest;
 use App\Http\Requests\UploadDiagnosticItemPhotosRequest;
@@ -9,7 +10,9 @@ use App\Http\Resources\DiagnosticItemPhotoResource;
 use App\Models\DiagnosticItem;
 use App\Models\DiagnosticItemPhoto;
 use App\Services\DiagnosticService;
+use App\Services\PhotoFileService;
 use App\Traits\ApiResponse;
+use App\Traits\FileResponse;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
@@ -17,12 +20,12 @@ use Illuminate\Support\Facades\Storage;
 
 class DiagnosticItemPhotoController extends Controller implements HasMiddleware
 {
-    use ApiResponse;
+    use ApiResponse, FileResponse;
 
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:diagnostic-item-photos.index', only: ['index']),
+            new Middleware('permission:diagnostic-item-photos.index', only: ['index', 'file']),
             new Middleware('permission:diagnostic-item-photos.store', only: ['store']),
             new Middleware('permission:diagnostic-item-photos.update', only: ['update']),
             new Middleware('permission:diagnostic-item-photos.destroy', only: ['destroy']),
@@ -41,6 +44,15 @@ class DiagnosticItemPhotoController extends Controller implements HasMiddleware
             'Fotos obtenidas correctamente.',
             DiagnosticItemPhotoResource::collection($photos)
         );
+    }
+
+    /** Archivo de la foto, en línea (P8, paso 2, historial 2.106). */
+    public function file(DiagnosticItem $diagnosticItem, DiagnosticItemPhoto $photo, PhotoFileService $photoFileService)
+    {
+        return $this->privateImageResponse($photoFileService->image(
+            $photo->path,
+            new DiagnosticException('La foto no tiene un archivo disponible.', 404, 'DIAGNOSTIC_ITEM_PHOTO_FILE_NOT_FOUND')
+        ));
     }
 
     public function store(UploadDiagnosticItemPhotosRequest $request, DiagnosticItem $diagnosticItem, DiagnosticService $diagnosticService)
@@ -64,7 +76,7 @@ class DiagnosticItemPhotoController extends Controller implements HasMiddleware
 
                     $path = $file->store(
                         "diagnostic-items/{$diagnosticItem->id}",
-                        'public'
+                        PhotoFileService::DISK
                     );
 
                     $storedPaths[] = $path;
@@ -79,7 +91,7 @@ class DiagnosticItemPhotoController extends Controller implements HasMiddleware
             });
         } catch (\Throwable $e) {
             foreach ($storedPaths as $path) {
-                Storage::disk('public')->delete($path);
+                Storage::disk(PhotoFileService::DISK)->delete($path);
             }
 
             throw $e;
@@ -126,7 +138,7 @@ class DiagnosticItemPhotoController extends Controller implements HasMiddleware
 
                     $newPath = $file->store(
                         "diagnostic-items/{$diagnosticItem->id}",
-                        'public'
+                        PhotoFileService::DISK
                     );
 
                     $photo->path = $newPath;
@@ -145,7 +157,7 @@ class DiagnosticItemPhotoController extends Controller implements HasMiddleware
         } catch (\Throwable $e) {
 
             if ($newPath) {
-                Storage::disk('public')->delete($newPath);
+                Storage::disk(PhotoFileService::DISK)->delete($newPath);
             }
 
             throw $e;
@@ -156,7 +168,7 @@ class DiagnosticItemPhotoController extends Controller implements HasMiddleware
             $oldPath &&
             $oldPath !== $newPath
         ) {
-            Storage::disk('public')->delete($oldPath);
+            Storage::disk(PhotoFileService::DISK)->delete($oldPath);
         }
 
         return $this->successResponse(
@@ -174,7 +186,7 @@ class DiagnosticItemPhotoController extends Controller implements HasMiddleware
         $path = $photo->path;
 
         if ($path) {
-            Storage::disk('public')->delete($path);
+            Storage::disk(PhotoFileService::DISK)->delete($path);
         }
 
         $photo->delete();

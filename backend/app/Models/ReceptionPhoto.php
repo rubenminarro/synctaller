@@ -14,6 +14,12 @@ class ReceptionPhoto extends Model
         'description',
     ];
 
+    /** URL de la API que sirve el archivo (P8, historial 2.106): exige el token, no sirve para un `<img src>` directo. */
+    public function fileUrl(): ?string
+    {
+        return $this->path ? route('receptions.photos.file', [$this->reception_id, $this->id]) : null;
+    }
+
     public function reception(): BelongsTo
     {
         return $this->belongsTo(Reception::class);

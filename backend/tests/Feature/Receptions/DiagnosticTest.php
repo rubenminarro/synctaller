@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Receptions;
 
+use App\Models\AuditLog;
 use App\Models\Diagnostic;
 use App\Models\DiagnosticItemPhoto;
 use App\Models\DiagnosticItemTemplate;
@@ -217,6 +218,7 @@ class DiagnosticTest extends ReceptionTestCase
     public function test_diagnostic_item_photos(): void
     {
         Storage::fake('public');
+        Storage::fake('tenant_private');
 
         $diagnostic = $this->postJson('/api/diagnostics', $this->diagnosticPayload())->json('data');
         $item = $this->postJson('/api/diagnostic-items', $this->itemPayload($diagnostic['id']))->json('data');
@@ -231,7 +233,9 @@ class DiagnosticTest extends ReceptionTestCase
             ->json('data.0');
 
         $path = DiagnosticItemPhoto::findOrFail($photo['id'])->path;
-        Storage::disk('public')->assertExists($path);
+        Storage::disk('tenant_private')->assertExists($path);
+        $this->assertSame([], Storage::disk('public')->allFiles());
+        $this->assertArrayNotHasKey('path', $photo);
 
         $this->getJson($url)->assertOk()->assertJsonCount(1, 'data');
 
@@ -248,12 +252,70 @@ class DiagnosticTest extends ReceptionTestCase
 
         // Eliminar el ítem borra sus fotos.
         $this->deleteJson("/api/diagnostic-items/{$item['id']}")->assertOk();
-        Storage::disk('public')->assertMissing($path);
+        Storage::disk('tenant_private')->assertMissing($path);
+    }
+
+    public function test_diagnostic_item_photo_is_private_and_served_by_the_api(): void
+    {
+        Storage::fake('public');
+        Storage::fake('tenant_private');
+
+        $diagnostic = $this->postJson('/api/diagnostics', $this->diagnosticPayload())->json('data');
+        $item = $this->postJson('/api/diagnostic-items', $this->itemPayload($diagnostic['id']))->json('data');
+        $photo = $this->postJson("/api/diagnostic-items/{$item['id']}/photos", ['photos' => [
+            ['file' => UploadedFile::fake()->image('pastilla.png', 120, 90), 'description' => 'Pastilla gastada'],
+        ]])
+            ->assertCreated()
+            ->json('data.0');
+        $path = DiagnosticItemPhoto::findOrFail($photo['id'])->path;
+
+        // La URL es la de la API, también en el detalle del ítem (P8).
+        $fileUrl = "/api/diagnostic-items/{$item['id']}/photos/{$photo['id']}/file";
+        $this->assertStringEndsWith($fileUrl, $photo['url']);
+        $this->assertStringNotContainsString('/storage/', $photo['url']);
+        $this->assertSame($photo['url'], $this->getJson("/api/diagnostic-items/{$item['id']}")->json('data.photos.0.url'));
+
+        $this->actingAsMechanic();
+        $response = $this->get($fileUrl)->assertOk();
+        $this->assertSame(Storage::disk('tenant_private')->get($path), $response->getContent());
+        $this->assertSame('image/png', $response->headers->get('Content-Type'));
+        $this->assertSame('inline', $response->headers->get('Content-Disposition'));
+        $this->assertSame('nosniff', $response->headers->get('X-Content-Type-Options'));
+        $this->assertStringContainsString('no-store', $response->headers->get('Cache-Control'));
+        $this->assertSame(0, AuditLog::where('event', 'downloaded')->count());
+
+        // Foto de otro ítem en la URL.
+        $this->actingAsAdmin();
+        $other = $this->postJson('/api/diagnostic-items', $this->itemPayload($diagnostic['id'], ['title' => 'Discos']))->json('data');
+        $this->getJson("/api/diagnostic-items/{$other['id']}/photos/{$photo['id']}/file")->assertNotFound();
+
+        // Sin el permiso de la pantalla, 403; sin sesión, 401.
+        $this->actingAsRole('cajero');
+        $this->getJson($fileUrl)->assertForbidden()->assertJsonPath('error_code', 'FORBIDDEN');
+
+        $this->app['auth']->forgetGuards();
+        $this->withHeader('Authorization', '')->getJson($fileUrl)->assertUnauthorized();
+    }
+
+    public function test_diagnostic_item_photo_file_not_found(): void
+    {
+        Storage::fake('tenant_private');
+
+        $diagnostic = $this->postJson('/api/diagnostics', $this->diagnosticPayload())->json('data');
+        $item = $this->postJson('/api/diagnostic-items', $this->itemPayload($diagnostic['id']))->json('data');
+        $photo = $this->postJson("/api/diagnostic-items/{$item['id']}/photos", ['photos' => [
+            ['file' => UploadedFile::fake()->image('pastilla.jpg'), 'description' => 'Pastilla gastada'],
+        ]])->assertCreated()->json('data.0');
+        Storage::disk('tenant_private')->delete(DiagnosticItemPhoto::findOrFail($photo['id'])->path);
+
+        $this->getJson("/api/diagnostic-items/{$item['id']}/photos/{$photo['id']}/file")
+            ->assertNotFound()
+            ->assertJsonPath('error_code', 'DIAGNOSTIC_ITEM_PHOTO_FILE_NOT_FOUND');
     }
 
     public function test_closed_diagnostics_freeze_items_and_photos(): void
     {
-        Storage::fake('public');
+        Storage::fake('tenant_private');
 
         $diagnostic = $this->postJson('/api/diagnostics', $this->diagnosticPayload())->json('data');
         $item = $this->postJson('/api/diagnostic-items', $this->itemPayload($diagnostic['id']))->assertCreated()->json('data');

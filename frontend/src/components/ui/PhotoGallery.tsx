@@ -8,6 +8,7 @@ import { IconButton } from '@/components/ui/IconButton'
 import { TextField } from '@/components/ui/FormField'
 import { nullIfEmpty } from '@/lib/forms'
 import { useApiMutation } from '@/lib/useApiMutation'
+import { usePrivateImage } from '@/lib/usePrivateImage'
 import { validationErrors } from '@/services/api'
 
 export interface GalleryPhoto {
@@ -60,19 +61,7 @@ export function PhotoGallery({
           {photos.map((photo) => (
             <div key={photo.id} className="col-6 col-md-4 col-xl-3">
               <div className="card card-sm h-100">
-                {photo.url ? (
-                  <a href={photo.url} target="_blank" rel="noreferrer" className="d-block">
-                    <img
-                      src={photo.url}
-                      alt={photo.description ?? photo.original_name}
-                      className="card-img-top"
-                      style={{ aspectRatio: '4 / 3', objectFit: 'cover' }}
-                      loading="lazy"
-                    />
-                  </a>
-                ) : (
-                  <div className="card-img-top bg-secondary-lt" style={{ aspectRatio: '4 / 3' }} />
-                )}
+                <GalleryImage photo={photo} />
                 <div className="card-body d-flex align-items-start gap-1">
                   <div className="flex-fill small text-break">{photo.description ?? <span className="text-secondary">Sin descripción</span>}</div>
                   {onUpdate && <IconButton label="Editar descripción" icon={IconPencil} onClick={() => setEditing(photo)} />}
@@ -105,6 +94,35 @@ export function PhotoGallery({
         />
       )}
     </>
+  )
+}
+
+const IMAGE_BOX = { aspectRatio: '4 / 3' } as const
+
+/**
+ * Miniatura de una foto privada (P8, historial 2.106): `url` es una ruta de la API que exige el token, así que se baja
+ * con `usePrivateImage` y se muestra como URL `blob:`. El enlace abre esa misma copia en otra pestaña.
+ */
+function GalleryImage({ photo }: { photo: GalleryPhoto }) {
+  const { src, isError } = usePrivateImage(photo.url)
+
+  if (!src) {
+    return (
+      <div className="card-img-top bg-secondary-lt d-flex align-items-center justify-content-center small text-secondary" style={IMAGE_BOX}>
+        {photo.url === null ? null : isError ? 'No se pudo cargar la imagen.' : 'Cargando imagen…'}
+      </div>
+    )
+  }
+
+  return (
+    <a href={src} target="_blank" rel="noreferrer" className="d-block">
+      <img
+        src={src}
+        alt={photo.description ?? photo.original_name}
+        className="card-img-top"
+        style={{ ...IMAGE_BOX, objectFit: 'cover' }}
+      />
+    </a>
   )
 }
 
