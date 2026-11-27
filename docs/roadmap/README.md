@@ -7,6 +7,7 @@ original y no se renumeran. El detalle por módulo está en [`modules/README.md`
 
 | Fecha | Backend | Frontend | Notas |
 |---|---|---|---|
+| 2026-11-27 | Tests puntuales en verde: `tests/Feature/Tenancy` (109, 621 aserciones, con `PrivatizeTenantFilesCommandTest`, 6 nuevos, cada protección comprobada quitándola) y `ReceptionTest`, `DiagnosticTest` y `VehicleDeliveryTest` (41, 756 aserciones); Pint sin pendientes | ESLint (sin cambios en el frontend) | Tarea P8, paso 3 (historial 2.106). Corrida local en la rama `feature/p8-paso3-comando`, sin la suite completa. Comando probado en MySQL con el taller #1, solo lectura. Sin revisión en navegador: las pantallas no cambian. P8 completa |
 | 2026-11-26 | 613 tests en verde, 9770 aserciones (antes de la tarea P8, paso 3); Pint sin pendientes | Vitest en verde (64), ESLint y build | Tarea P8, paso 2 (historial 2.106). Corrida de la CI sobre `main` (`a1542e9`), no local |
 | 2026-11-26 | Tests puntuales en verde (86, 1317 aserciones): `tests/Feature/Receptions` (con 2 nuevos en `ReceptionTest` y 2 en `DiagnosticTest`, cada protección comprobada quitándola), `tests/Feature/Deliveries`, `tests/Feature/Seeders`, `tests/Feature/Access` y `TenantStorageTest`; Pint sin pendientes | Vitest (`PhotoGallery.test.tsx`, 3 nuevos, y `PrivateImage.test.tsx`), ESLint y build | Tarea P8, paso 2 (historial 2.106). Corrida local en la rama `feature/p8-paso2-fotos`, sin la suite completa. Revisión en navegador con administrador, recepcionista, jefe de taller, mecánico y cajero (403), en el entorno aislado (SQLite), ya con el storage aislado (deuda #25 resuelta), repetida al cerrar con los mismos resultados. Deudas #26 y #27 registradas, anteriores a P8 |
 | 2026-11-26 | 610 tests en verde, 9688 aserciones (antes de la tarea P8, paso 2); Pint sin pendientes | Vitest en verde (61), ESLint y build | Tarea P8, paso 1 (historial 2.106). Corrida de la CI sobre `main` (`4fa99a5`), no local |
@@ -55,8 +56,7 @@ Ninguna entrega empieza sin autorización del usuario. **El sistema no está lis
 
 | Orden | Tarea | Bloqueo |
 |---|---|---|
-| 1 | Tarea P8 (fotos y firmas a privado) | En curso (2.106): pasos 1 (firma) y 2 (fotos) hechos; sigue el 3 (comando para los archivos existentes). Requisito antes del primer taller comercial |
-| 2 | T6 (migrar la instalación actual) | Bloqueada: requiere P8 y decidir el hosting (V9) |
+| 1 | T6 (migrar la instalación actual) | Bloqueada: requiere decidir el hosting (V9). P8 quedó completa el 2026-11-27 (2.106); T6 pasa los archivos existentes con `tenants:privatize-files` |
 
 Las entregas de las respuestas de la contadora (sección 2.83 del historial) quedaron completas el 2026-11-25 con V16 y el
 encendido de M10 (2.89).
@@ -116,7 +116,7 @@ Frontend: FA0 a FA4, M10 y M12 completos ([detalle](../modules/aseguradoras.md))
 | T2: central e identificación | COMPLETADO: pasos 1 (central, paquete y modelo `Tenant`) y 2 (identificación por host) el 2026-11-25; paso 3 (preparar el taller, `TenantRuntime`) el 2026-11-26 |
 | T3: colas, cache, permisos y scheduler | COMPLETADO: diseño aprobado el 2026-11-26; paso 4 (colas por taller, cola y cache en la central) el 2026-11-26 (2.96); paso 5 (scheduler por taller y fallo cerrado) el 2026-11-26 (2.97) |
 | T4: storage | COMPLETADO el 2026-11-26 (2.98): diseño e implementación |
-| Tarea P8: fotos y firmas a privado | EN DESARROLLO: diseño en 3 pasos aprobado el 2026-11-26 (2.106); paso 1 (firma privada) el 2026-11-26, en `main` con la CI en verde; paso 2 (fotos de recepción y de diagnóstico privadas) el 2026-11-26, en `main` con la CI en verde |
+| Tarea P8: fotos y firmas a privado | COMPLETADO el 2026-11-27: diseño en 3 pasos aprobado el 2026-11-26 (2.106); paso 1 (firma privada) el 2026-11-26, en `main` con la CI en verde; paso 2 (fotos de recepción y de diagnóstico privadas) el 2026-11-26, en `main` con la CI en verde; paso 3 (`tenants:privatize-files` para los archivos existentes) el 2026-11-27 |
 | T5: ciclo de vida | COMPLETADO: plan en 5 pasos aprobado el 2026-11-26 (2.101); paso 1 (`tenants:migrate`) el 2026-11-26, en `main` con la CI en verde; paso 2 (sin tablas de cola y cache en las bases de taller, deuda #20) el 2026-11-26 (2.102), en `main` con la CI en verde; paso 3 (alta completa, `tenants:create` y `tenants:discard`) el 2026-11-26 (2.103), en `main` con la CI en verde; paso 4 (suspensión, reactivación y baja, con la pantalla del frontend) el 2026-11-26 (2.104), en `main` con la CI en verde; paso 5 (restauración y runbooks) el 2026-11-26 (2.105), en `main` con la CI en verde |
 | T6: migrar la instalación actual | PENDIENTE |
 
