@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Enums\Severity;
 use App\Models\DiagnosticItem;
 use App\Models\DiagnosticItemPhoto;
+use App\Services\PhotoFileService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
@@ -45,7 +46,7 @@ class DiagnosticItemPhotoSeeder extends Seeder
                     .'/'
                     .$image['file'];
 
-                Storage::disk('public')->put(
+                Storage::disk(PhotoFileService::DISK)->put(
                     $destinationPath,
                     File::get($sourcePath)
                 );

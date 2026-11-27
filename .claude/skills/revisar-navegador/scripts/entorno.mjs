@@ -56,7 +56,7 @@ function extraDe(args) {
   return Object.fromEntries(args.filter((v) => /^[A-Z][A-Z0-9_]*=/.test(v)).map((v) => [v.slice(0, v.indexOf('=')), v.slice(v.indexOf('=') + 1)]))
 }
 
-// Detiene la API de este entorno con su árbol de procesos (`artisan serve` y el `php -S` que lanza).
+// Detiene la API de este entorno (el `php -S`) con su árbol de procesos.
 function detener() {
   const archivo = join(carpeta, 'api.pid')
   if (!existsSync(archivo)) return console.log('No hay API registrada en este entorno.')
@@ -103,10 +103,13 @@ if (accion === 'preparar') {
     salir('El puerto 8000 está ocupado: puede ser la API de desarrollo contra `synctaller`. Detenerla antes de revisar.')
   }
 
-  // --no-reload: así el servidor hijo recibe las variables del proceso tal cual. Sin él, `serve` solo le pasa las de su
-  // lista (ServeCommand::$passthroughVariables) y el hijo podría leer la base de backend/.env.
-  const api = spawn('php', ['artisan', 'serve', '--no-reload', '--host=127.0.0.1', '--port=8000'], {
-    cwd: backend,
+  // El servidor de PHP directo, con el mismo router que `artisan serve`, en lugar de `artisan serve`: Laravel lee
+  // LARAVEL_STORAGE_PATH solo de $_ENV o $_SERVER (Application::storagePath()), y el `php -S` que lanza `serve` no carga el
+  // entorno en $_ENV (variables_order sin `E`), así que usaba backend/storage (deuda #25). Con `variables_order=EGPCS`
+  // el storage, el log y los archivos quedan en la carpeta temporal. El router toma `public` del directorio actual.
+  const router = join(backend, 'vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php')
+  const api = spawn('php', ['-d', 'variables_order=EGPCS', '-S', '127.0.0.1:8000', router], {
+    cwd: join(backend, 'public'),
     env: variables(extraDe(resto)),
     stdio: 'inherit',
   })

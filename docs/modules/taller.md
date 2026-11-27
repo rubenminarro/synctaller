@@ -43,10 +43,10 @@ Flujo central, desde el cliente hasta la orden de trabajo. Las reglas vigentes e
 |---|---|
 | Objetivo | Registrar el ingreso del vehículo |
 | Implementado | Categorías de servicio, checklist generado, fotos, estado derivado del flujo, cancelación con motivo |
-| Pendiente | Fotos en almacenamiento privado (tarea P8) |
+| Pendiente | — (las fotos son privadas desde P8, paso 2; historial 2.106) |
 | Reglas | `reglas-de-negocio.md` 6.2 |
 | Depende de | Clientes, vehículos |
-| Tests | `Reception` 13, `ReceptionStatus` 9, `CheckListItem` 3 |
+| Tests | `Reception` 15, `ReceptionStatus` 9, `CheckListItem` 3 |
 
 ## Diagnóstico y su catálogo
 
@@ -54,10 +54,10 @@ Flujo central, desde el cliente hasta la orden de trabajo. Las reglas vigentes e
 |---|---|
 | Objetivo | Registrar la revisión técnica |
 | Implementado | Diagnóstico con ítems y fotos; catálogo reutilizable, del que sale siempre cada ítem |
-| Pendiente | Fotos en almacenamiento privado (tarea P8) |
+| Pendiente | — (las fotos son privadas desde P8, paso 2; historial 2.106) |
 | Reglas | `reglas-de-negocio.md` 6.3 |
 | Depende de | Recepción, mecánicos |
-| Tests | `Diagnostic` 11, `DiagnosticItemTemplate` 6 |
+| Tests | `Diagnostic` 13, `DiagnosticItemTemplate` 6 |
 | Observaciones | Fotos con permisos `diagnostic-item-photos.*` |
 
 ## Presupuestos

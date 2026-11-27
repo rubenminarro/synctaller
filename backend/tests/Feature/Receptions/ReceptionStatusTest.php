@@ -191,7 +191,7 @@ class ReceptionStatusTest extends WorkOrderPartsTestCase
         $this->patchJson("/api/receptions/{$reception->id}", ['observations' => 'Nota posterior'])
             ->assertStatus(422)
             ->assertJsonPath('error_code', 'RECEPTION_CLOSED');
-        Storage::fake('public');
+        Storage::fake('tenant_private');
         $this->postJson("/api/receptions/{$reception->id}/photos", ['photos' => [['file' => UploadedFile::fake()->image('frente.jpg')]]])
             ->assertStatus(422)
             ->assertJsonPath('error_code', 'RECEPTION_CLOSED');

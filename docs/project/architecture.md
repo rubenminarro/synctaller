@@ -47,7 +47,7 @@ Contado el 2026-11-01 en `main`.
 | Códigos internos | `DocumentSequenceService`, con bloqueo, nunca `max(id) + 1` |
 | Auditoría | Trait `Auditable` y `AuditLogger`, en `audit_logs` inmutable |
 | Avisos | Registro en la transacción del evento, envío por cola con `afterCommit` |
-| Archivos | Disco `public` (fotos, firmas, branding) y disco privado `tenant_private`, sin URL. Los dos con la raíz del taller activo (`TenantStorage`, T4) |
+| Archivos | Disco `public` (solo branding) y disco privado `tenant_private`, sin URL (documentos de siniestros, firmas y fotos, que sirve la API; P8, 2.106). Los dos con la raíz del taller activo (`TenantStorage`, T4) |
 | Configuración del taller | `system_settings`, aplicada sobre `config()`; el `.env` es el valor por defecto |
 | Zona horaria | `America/Asuncion` en la aplicación; la API envía las fechas con hora en UTC |
 

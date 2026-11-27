@@ -111,7 +111,7 @@ Controller (HasMiddleware) → Form Request → Service → Model/Eloquent → A
 |---|---|
 | `app/Http/Controllers/Api` | 59 controllers |
 | `app/Http/Requests` | Validación (mensajes en español) |
-| `app/Services` | Reglas de negocio (48 services, incluido `AuditLogger`) |
+| `app/Services` | Reglas de negocio (49 services, incluido `AuditLogger`) |
 | `app/Jobs`, `app/Mail`, `app/Notifications`, `app/Console/Commands` | Envío de avisos (FASE 23) |
 | `app/Models` | Modelos Eloquent (muchos con `SoftDeletes`) |
 | `app/Http/Resources` | Contrato JSON |
@@ -121,7 +121,7 @@ Controller (HasMiddleware) → Form Request → Service → Model/Eloquent → A
 | `app/Multitenancy/Tasks` | Tareas propias al activar un taller (línea T, historial 2.90, 2.93 y 2.96). La config está en `config/multitenancy.php` y la base central (talleres, cola y cache), en `database/migrations/central`. El taller se identifica por el host en `IdentifyTenant` (reglas 6.34) y se prepara (su base y su configuración) con `TenantRuntime::ensureReady()` (`app/Multitenancy`) (2.95); se registra con `tenants:register`, se da de alta completo con `tenants:create` (o se descarta un alta sin terminar con `tenants:discard`; T5, paso 3, 2.103), se suspende, se reactiva o se da de baja con `tenants:suspend`, `tenants:reactivate` y `tenants:cancel` (T5, paso 4, 2.104), se pasa a una base restaurada con `tenants:restore` (T5, paso 5, 2.105) y su base se migra con `tenants:migrate` (T5, paso 1, 2.101). Los discos `public` y `tenant_private` usan la raíz del taller activo (driver `tenant_local`, `TenantStorage`, T4, 2.98) y sin taller fallan: un archivo nuevo va a uno de ellos, nunca a `local` |
 | `app/Multitenancy/Jobs` | Todo job es del taller (2.96): un job nuevo usa el trait `RunsInTenant` (middleware `PrepareTenant`, `retryUntil` de 6 horas, `maxExceptions = 1`) y, si deja registro en el taller al descartarse por suspensión o baja, `DiscardsForSuspendedTenant`. Despacharlo sin taller activo lanza una excepción (`RequireTenantForQueuedJobs`) |
 | `app/Traits/ApiResponse.php` | `successResponse` / `errorResponse` |
-| `app/Traits/FileResponse.php` | Descarga de archivos generados (PDF, CSV), de documentos subidos (`storedFileResponse`: adjunto y `nosniff`) y de imágenes privadas que la pantalla muestra (`privateImageResponse`: en línea, `nosniff` y `no-store`; P8, 2.106) |
+| `app/Traits/FileResponse.php` | Descarga de archivos generados (PDF, CSV), de documentos subidos (`storedFileResponse`: adjunto y `nosniff`) y de imágenes privadas que la pantalla muestra (`privateImageResponse`: en línea, `nosniff` y `no-store`; firma y fotos, P8, 2.106) |
 | `app/Traits/Auditable.php` | Registro automático de cambios en `audit_logs` |
 | `bootstrap/app.php` | Mapeo de excepciones a JSON |
 | `config/invoice.php`, `maintenance.php`, `notifications.php`, `company.php`, `insurer.php` | Parámetros de negocio (`invoice.default_tax_rate` es el IVA de presupuestos y facturas; `invoice.vat_withholding_percentage`, el porcentaje del IVA que se sugiere como retención, 6.33; `company` son los datos del taller para los PDF; `insurer.deductible_net_mode` habilita la modalidad neta del deducible, 6.31) |

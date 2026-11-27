@@ -2,8 +2,6 @@
 
 namespace Tests\Feature\Tenancy;
 
-use App\Http\Resources\ReceptionPhotoResource;
-use App\Models\ReceptionPhoto;
 use App\Models\Tenant;
 use App\Multitenancy\TenantStorage;
 use Illuminate\Filesystem\Filesystem;
@@ -14,8 +12,8 @@ use Tests\TestCase;
 
 /**
  * Discos por taller (T4; historial 2.98). Cada test falla si se quita la protección que cubre: la raíz por taller y la
- * tarea que olvida los discos al cambiar de taller, el fallo cerrado sin taller, la URL con el host del taller y la URL
- * de las fotos de recepción armada por el disco.
+ * tarea que olvida los discos al cambiar de taller, el fallo cerrado sin taller y la URL con el host del taller. Las fotos
+ * de recepción ya no usan la URL del disco público: las sirve la API desde el disco privado (P8, historial 2.106).
  *
  * Usan los discos reales sobre una carpeta temporal, no `Storage::fake`, que reemplaza el disco y no conoce el taller.
  * No guardan nada en la base del taller: cambiar de taller no abre conexión.
@@ -103,17 +101,6 @@ class TenantStorageTest extends TestCase
             'https://t10.localhost:8443/storage/tenants/10/receptions/foto.jpg',
             Storage::disk('public')->url('receptions/foto.jpg')
         );
-    }
-
-    public function test_the_reception_photo_url_comes_from_the_tenant_disk(): void
-    {
-        $this->tenant(10)->makeCurrent();
-
-        $photo = new ReceptionPhoto(['path' => 'receptions/foto.jpg']);
-        $url = (new ReceptionPhotoResource($photo))->toArray(request())['url'];
-
-        $this->assertStringStartsWith('http://t10.localhost', $url);
-        $this->assertStringEndsWith('/storage/tenants/10/receptions/foto.jpg', $url);
     }
 
     private function tenant(int $id): Tenant
