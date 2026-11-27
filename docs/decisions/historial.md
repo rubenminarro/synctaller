@@ -1023,7 +1023,7 @@ Con este paso, T5 queda completo.
 | Tests | `tests/Feature/Tenancy/RestoreTenantCommandTest` (14), con copias de una base de taller migrada que el test borra. Cada protección se comprobó quitándola: el RUC, la confirmación, la migración, el administrador, la cache de permisos, el lock, la misma base, la central y la conexión por defecto, la base de otro taller, la base vacía, el estado, la base borrada y el taller activo releído al terminar. La relectura con la fila bloqueada no tiene test: no se puede intercalar otro cambio dentro de un comando de consola |
 | MySQL | Migración central aplicada en `synctaller_central`. Con un taller temporal (`tenants:create`, `synctaller_prueba_restore`): `mysqldump` importado en `synctaller_prueba_restore_r` sin el registro de la `000074`; rechazos de la misma base, `synctaller`, `synctaller_central`, una base que no existe y un nombre con comilla invertida (código 1); la restauración aplicó la `000074` y cambió el puntero (código 0), y con `php artisan serve`, `GET /api/branding` por el host del taller respondió 200. La fila y las dos bases se borraron al terminar |
 
-### 2.106 Tarea P8: fotos y firmas a privado, diseño, paso 1 (firma) y paso 2 (fotos) (2026-11-26)
+### 2.106 Tarea P8: fotos y firmas a privado, diseño, paso 1 (firma), paso 2 (fotos) y paso 3 (comando) (2026-11-26)
 
 Diseño aprobado por el usuario el 2026-11-26. Resuelve la deuda #15 según P8 (§3.7 de la
 [especificación](../especificacion-aseguradoras.html)): después de T4, primero la firma y después las fotos. Hasta
@@ -1064,6 +1064,17 @@ permanente y sin permiso ni auditoría. Regla vigente en [reglas de negocio](../
 | Revisión | En el navegador, en el entorno aislado (SQLite) con el storage ya aislado: administrador, recepcionista, jefe de taller y mecánico ven la foto de recepción subida y las sembradas del diagnóstico (el recepcionista, con subir, editar y eliminar en una recepción pendiente); el cajero recibe la pantalla 403 en las dos. Por curl: la ruta responde `image/jpeg` en línea con `nosniff` y `no-store` a esos roles, `403` al cajero, `401` sin token y `404` con la foto de otra recepción |
 | Revisión al cerrar | Repetida el 2026-11-26 en otra sesión, en un entorno aislado nuevo (SQLite): una foto subida por la API como recepcionista a la recepción #33 y la galería del ítem "Amortiguador delantero" del diagnóstico #10 (2 fotos sembradas). Mismos resultados por rol en la pantalla y por curl; el archivo quedó en `tenant_private` de la carpeta temporal y `backend/storage` no cambió |
 | Hallazgos | Dos problemas anteriores a P8, registrados sin corregir: el alta de fotos de recepción puede dejar una foto sin archivo (deuda #26) y un texto que no es UTF-8 se guarda y después rompe las respuestas (deuda #27) |
+
+**Paso 3 (comando), 2026-11-27:**
+
+| Tema | Decisión |
+|---|---|
+| Comando | `php artisan tenants:privatize-files --tenant={id}` (`PrivatizeTenantFiles`). Activa el taller, recorre las rutas de su base (`vehicle_deliveries.signature_path`, `reception_photos.path` y `diagnostic_item_photos.path`) y mueve cada archivo de `public` a `tenant_private` con la misma ruta: primero lo escribe en privado y después lo borra del público, así un corte deja dos copias y no ninguna. Lo que no está en la base (el branding) no se toca. Acepta un taller en cualquier estado. Al terminar deja el taller que estaba activo |
+| Ya en privado | Decisión del usuario (2026-11-27): se saltea sin sobrescribirlo y, si sigue en público, esa copia se deja y se informa. La existencia se mira con `fileExists` (no `exists`, que también es verdadero para una carpeta) |
+| Faltantes | Decisión del usuario (2026-11-27): un archivo que no está en ningún disco solo se informa; no cambia el código de salida |
+| Errores | Un archivo que no se puede mover se informa (el detalle va al log, `No se pudo pasar el archivo al disco privado.`), conserva su copia pública y los demás siguen. El comando termina con código 1 si hubo alguno, si falta `--tenant` o si el taller no existe. La salida cierra con el resumen: movidos, ya en privado (con copia en público), faltantes y con error |
+| Tests | `PrivatizeTenantFilesCommandTest` (6, en `tests/Feature/Tenancy`, con los discos reales en una carpeta temporal): mueve los tres tipos y deja el branding, la segunda corrida no cambia nada, no sobrescribe lo ya privado y deja su copia pública, informa los faltantes con código 0, un archivo que no se puede mover conserva su copia y los demás siguen (código 1), y rechaza la falta de `--tenant` o un taller inexistente. Cada protección se comprobó quitándola: el borrado de la copia pública, el salteo de lo ya privado, los faltantes sin error, el `catch` por archivo, el reinicio de los contadores en cada corrida y `fileExists` |
+| Prueba en MySQL | Con el taller #1 de desarrollo, sin archivos en ningún disco (2.98): 38 faltantes informados, nada movido y código 0; `--tenant=99` y sin `--tenant`, código 1. No escribió nada |
 
 ---
 
