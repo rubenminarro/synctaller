@@ -46,7 +46,7 @@ Flujo central, desde el cliente hasta la orden de trabajo. Las reglas vigentes e
 | Pendiente | — (las fotos son privadas desde P8, paso 2; historial 2.106) |
 | Reglas | `reglas-de-negocio.md` 6.2 |
 | Depende de | Clientes, vehículos |
-| Tests | `Reception` 15, `ReceptionStatus` 9, `CheckListItem` 3 |
+| Tests | `Reception` 17, `ReceptionStatus` 9, `CheckListItem` 3 |
 
 ## Diagnóstico y su catálogo
 

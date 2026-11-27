@@ -1076,6 +1076,18 @@ permanente y sin permiso ni auditoría. Regla vigente en [reglas de negocio](../
 | Tests | `PrivatizeTenantFilesCommandTest` (6, en `tests/Feature/Tenancy`, con los discos reales en una carpeta temporal): mueve los tres tipos y deja el branding, la segunda corrida no cambia nada, no sobrescribe lo ya privado y deja su copia pública, informa los faltantes con código 0, un archivo que no se puede mover conserva su copia y los demás siguen (código 1), y rechaza la falta de `--tenant` o un taller inexistente. Cada protección se comprobó quitándola: el borrado de la copia pública, el salteo de lo ya privado, los faltantes sin error, el `catch` por archivo, el reinicio de los contadores en cada corrida y `fileExists` |
 | Prueba en MySQL | Con el taller #1 de desarrollo, sin archivos en ningún disco (2.98): 38 faltantes informados, nada movido y código 0; `--tenant=99` y sin `--tenant`, código 1. No escribió nada |
 
+### 2.107 Deuda #26: la subida de fotos de recepción no deja fotos sin archivo (2026-11-27)
+
+Decisión del usuario: corregir la deuda #26. Sin migraciones ni cambios en el frontend; ninguna ruta, permiso, `error_code`
+ni código HTTP nuevo, y la respuesta de `POST receptions/{reception}/photos` no cambia.
+
+| Tema | Decisión |
+|---|---|
+| Problema | `ReceptionPhotoController::store` hacía `DB::commit()` y armaba la respuesta dentro del mismo `try`. Si la respuesta fallaba después del commit, el `catch` borraba los archivos y llamaba a `DB::rollBack()`, ya sin efecto sobre la subida: las filas de `reception_photos` quedaban sin archivo (`404 RECEPTION_PHOTO_FILE_NOT_FOUND`). Ese `rollBack()` fuera de lugar además deshace una transacción exterior si la hay: en los tests deshacía la que envuelve a cada test |
+| Corrección | Igual que `DiagnosticItemPhotoController::store`: el guardado de archivos y filas va en `DB::transaction` dentro del `try`, y el `catch` solo borra los archivos ya subidos. La respuesta se arma después, fuera del `try`. Si falla al responder, la subida queda completa (filas y archivos) y el cliente recibe `500`; al recargar, las fotos aparecen |
+| Fotos ya afectadas | No se corrigen: los datos de desarrollo son descartables y no hay instalación en producción |
+| Tests | En `ReceptionTest` (2): si la respuesta falla después de guardar (la URL de la foto, con el generador de URLs envuelto), las dos fotos conservan su archivo; si falla el guardado de la segunda foto, no queda ninguna fila ni ningún archivo de la subida. El primero falla con el código anterior y el segundo se comprobó quitando el borrado de archivos del `catch` |
+
 ---
 
 ## 3. Frontend
