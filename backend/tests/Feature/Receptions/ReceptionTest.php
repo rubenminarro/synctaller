@@ -9,6 +9,7 @@ use App\Models\ReceptionCheckList;
 use App\Models\ReceptionPhoto;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 
 class ReceptionTest extends ReceptionTestCase
 {
@@ -335,6 +336,60 @@ class ReceptionTest extends ReceptionTestCase
         $this->getJson("/api/receptions/{$reception['id']}/photos/{$photo['id']}/file")
             ->assertNotFound()
             ->assertJsonPath('error_code', 'RECEPTION_PHOTO_FILE_NOT_FOUND');
+    }
+
+    /** Deuda #26: si la respuesta falla después de guardar, cada foto guardada conserva su archivo. */
+    public function test_reception_photo_keeps_its_file_when_the_response_fails_after_saving(): void
+    {
+        Storage::fake('tenant_private');
+
+        $reception = $this->createReception();
+
+        // La URL de la foto se arma al responder, ya con las filas guardadas.
+        $urls = $this->app['url'];
+        $failing = \Mockery::mock($urls);
+        $failing->shouldReceive('route')->andReturnUsing(function (string $name, ...$arguments) use ($urls) {
+            if ($name === 'receptions.photos.file') {
+                throw new \RuntimeException('Falla al armar la respuesta.');
+            }
+
+            return $urls->route($name, ...$arguments);
+        });
+        URL::swap($failing);
+
+        $this->postJson("/api/receptions/{$reception['id']}/photos", ['photos' => [
+            ['file' => UploadedFile::fake()->image('frente.jpg')],
+            ['file' => UploadedFile::fake()->image('lateral.jpg')],
+        ]])->assertStatus(500);
+
+        $photos = ReceptionPhoto::where('reception_id', $reception['id'])->get();
+        $this->assertCount(2, $photos);
+        foreach ($photos as $photo) {
+            Storage::disk('tenant_private')->assertExists($photo->path);
+        }
+    }
+
+    /** Si falla el guardado de una foto, no queda ninguna fila ni ningún archivo de esa subida. */
+    public function test_reception_photo_upload_failing_while_saving_leaves_nothing(): void
+    {
+        Storage::fake('tenant_private');
+
+        $reception = $this->createReception();
+
+        $created = 0;
+        ReceptionPhoto::creating(function () use (&$created) {
+            if (++$created === 2) {
+                throw new \RuntimeException('Falla al guardar la segunda foto.');
+            }
+        });
+
+        $this->postJson("/api/receptions/{$reception['id']}/photos", ['photos' => [
+            ['file' => UploadedFile::fake()->image('frente.jpg')],
+            ['file' => UploadedFile::fake()->image('lateral.jpg')],
+        ]])->assertStatus(500);
+
+        $this->assertSame(0, ReceptionPhoto::where('reception_id', $reception['id'])->count());
+        $this->assertSame([], Storage::disk('tenant_private')->allFiles());
     }
 
     public function test_mechanic_permissions_on_receptions(): void

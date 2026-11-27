@@ -58,41 +58,36 @@ class ReceptionPhotoController extends Controller implements HasMiddleware
         $uploadedFiles = [];
         $photos = [];
 
-        DB::beginTransaction();
-
+        // Solo el guardado va dentro del try: si falla la respuesta, las filas ya
+        // guardadas conservan sus archivos (deuda #26).
         try {
-            foreach ($data['photos'] as $photoData) {
-                $file = $photoData['file'];
+            DB::transaction(function () use ($data, $reception, &$uploadedFiles, &$photos) {
+                foreach ($data['photos'] as $photoData) {
+                    $file = $photoData['file'];
 
-                $path = $file->store('receptions', PhotoFileService::DISK);
-                $uploadedFiles[] = $path;
+                    $path = $file->store('receptions', PhotoFileService::DISK);
+                    $uploadedFiles[] = $path;
 
-                $photo = $reception->photos()->create([
-                    'path' => $path,
-                    'original_name' => $file->getClientOriginalName(),
-                    'description' => $photoData['description'] ?? null,
-                ]);
-
-                $photos[] = $photo;
-            }
-
-            DB::commit();
-
-            return $this->successResponse(
-                'Fotos cargadas correctamente.',
-                ReceptionPhotoResource::collection(collect($photos)),
-                201
-            );
-
+                    $photos[] = $reception->photos()->create([
+                        'path' => $path,
+                        'original_name' => $file->getClientOriginalName(),
+                        'description' => $photoData['description'] ?? null,
+                    ]);
+                }
+            });
         } catch (\Throwable $e) {
-            DB::rollBack();
-
             foreach ($uploadedFiles as $path) {
                 Storage::disk(PhotoFileService::DISK)->delete($path);
             }
 
             throw $e;
         }
+
+        return $this->successResponse(
+            'Fotos cargadas correctamente.',
+            ReceptionPhotoResource::collection(collect($photos)),
+            201
+        );
     }
 
     public function update(UpdateReceptionPhotoRequest $request, Reception $reception, ReceptionPhoto $photo, ReceptionStatusService $receptionStatusService)
